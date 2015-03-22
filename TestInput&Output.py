@@ -5,6 +5,8 @@ location = None
 event = None
 value = None
 
-deviceChanged(device, state)
-userLocationChanged(user, location)
-eventOccurred(event, value)
+decisionSystem = DecisionSystem()
+
+decisionSystem.deviceChanged(device, state)
+decisionSystem.userLocationChanged(user, location)
+decisionSystem.eventOccurred(event, value)
