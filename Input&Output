@@ -1,0 +1,27 @@
+#device state has changed
+    #if device is critical,
+    #do CriticalLearningAlgorithm
+    #else
+    #
+def deviceChanged(device, state):
+    if isCritical(device):
+        criticalAlgorithm(device)
+    else:
+        generalAlgorithm(device)
+
+#Current room user is in        
+def userLocationChanged(user, location):
+    pass
+
+#When an outside stimilus changes (e.g. weather)
+def eventOccurred(event, value):
+    pass
+
+#get learned behavior from previous room details given by user
+def suggestedRoomChanges(room):
+    pass
+
+#get learned behavior from previous time blocks 
+def suggestedTimeChanges(TimeOfDay):
+    pass
+
