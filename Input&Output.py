@@ -21,7 +21,7 @@ class DecisionSystem:
         if location not in self.stateList:
         pass
     
-    #When an outside stimilus changes (e.g. weather)
+    #When an outside stimulus changes (e.g. weather)
     def eventOccurred(self, event, value):
         pass
     # Checks if device type is in list of critical devices
