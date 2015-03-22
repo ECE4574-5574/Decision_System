@@ -9,6 +9,18 @@ def deviceChanged(device, state):
     else:
         generalAlgorithm(device)
 
+# Checks if device type is in list of critical devices
+def isCritical(device):
+    pass
+
+# Does specific behaviors for device types that function
+# in sepecific ways (e.g. thermostats) or need oversight (e.g. door locks)
+def criticalAlgorithm(device, state):
+    pass
+# Runs general learning algorithm
+def generalAlgorithm(device, state):
+    pass
+
 #Current room user is in        
 def userLocationChanged(user, location):
     pass
