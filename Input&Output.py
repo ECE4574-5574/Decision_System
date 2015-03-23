@@ -1,6 +1,6 @@
 #1)Change stateList to a map
 #2)When a user enters a room add that room to the map with a corresponding list (map with room as key and list as data)
-#3)When user leaves room call a funciton that analyses the list that maps to that room, then remove that key from list
+#3)When user leaves room call a function that analyses the list that maps to that room, then remove that key from list
 
 
 
@@ -8,9 +8,9 @@
 class DecisionSystem:
     def __init__(self):
         self.stateList = {}
-    # Called when a device state change notification is recieved
+    # Called when a device state change notification is received
     def deviceChanged(self, device, state):
-        # Run specialty algorithm
+        # Run speciality algorithm
         if isCritical(device):
             criticalAlgorithm(device)
         # Run general learning
@@ -47,8 +47,8 @@ class DecisionSystem:
     def isCritical(self, device):
         pass
     
-    # Does specific behaviors for device types that function
-    # in sepecific ways (e.g. thermostats) or need oversight (e.g. door locks)
+    # Does specific behaviours for device types that function
+    # in specific ways (e.g. thermostats) or need oversight (e.g. door locks)
     def criticalAlgorithm(self, device, state):
         pass
     # Saves a snapshot of the device states in a room
@@ -56,13 +56,13 @@ class DecisionSystem:
         self.stateList[room] = getFromCache(room)
     
     
-    #get learned behavior from previous room details given by user
+    #get learned behaviour from previous room details given by user
     def suggestedRoomChanges(self, room):
         pass
     
-    #get learned behavior from previous time blocks 
+    #get learned behaviour from previous time blocks 
     def suggestedTimeChanges(self, TimeOfDay):
         pass
-# Returns the states of the devices in a room with timestamp
+# Returns the states of the devices in a room with time stamp
 getFromCache(room):
     pass
