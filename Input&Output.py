@@ -52,8 +52,8 @@ class DecisionSystem:
     def criticalAlgorithm(self, device, state):
         pass
     # Saves a snapshot of the device states in a room
-    def takeSnapshot(room):
-        self.stateList[room].append(getFromCache(room))
+    def takeSnapshot(self, room):
+        self.stateList[room] = getFromCache(room)
     
     
     #get learned behavior from previous room details given by user
