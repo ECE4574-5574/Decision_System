@@ -7,7 +7,7 @@
 #Graham Cantor-Cooke
 class DecisionSystem:
     def __init__(self):
-        self.stateList = [] 
+        self.stateList = {}
     # Called when a device state change notification is recieved
     def deviceChanged(self, device, state):
         # Run specialty algorithm
@@ -18,9 +18,28 @@ class DecisionSystem:
             takeSnapshot(room)
             
     def userLocationChanged(self, user, location):
-        if location not in self.stateList:
-        pass
-    
+        #for the new room. Add/updates that rooms state data.
+        
+        self.stateList[location] = getRoomData(user, location)
+		
+        try:
+            self.previousRoom    #This is in case the previous room has not been defined yet.
+        except NameError:
+		    self.previousRoom = location
+        else:
+		    if isempty(previousRoom):
+			    emptyRoom(location)
+        #it doesn't make sense to delete the previous room from the dictionary.			
+	#Checks to see if this room is empty.
+	def isempty(self, prevRoom):
+	    pass
+	#Sets the specified room to its empty state.
+	def emptyRoom(self, location):
+	    pass
+	#Gets the room data.
+	def getRoomData(self, user, location):
+	    #Return the rooms data as a list.
+		pass
     #When an outside stimulus changes (e.g. weather)
     def eventOccurred(self, event, value):
         pass
