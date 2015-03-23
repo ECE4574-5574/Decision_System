@@ -11,6 +11,14 @@ import os
 restful_webapi.run_server()
 
 # post data from the decision algorithm to the Device API
+service = 'http://localhost:8080'
+
+created = None
+data = json.dumps(#Learned Behaviour)
+#if new state
+r = requests.post(service, data=data)
+#else
+r = requests.patch(service, data=data)
 
 # Stop the server and quit
 os._exit(0)
