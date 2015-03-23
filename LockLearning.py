@@ -10,9 +10,9 @@ def __init__(self):
 	#When doors are unlocked get learned behavior from previous time blocks based on previous information. And lock door based from user
 	#returns the deviceID and state 
     def LockDoor(self, state, device)
-		pass
+	pass
 		
 	##When doors are locked get learned behavior from previous time blocks based on previous information. Then unlocks door based on user
 	#returns deviceID & state 	
-	def UnlockDoor(self, state, device)
-		pass
+    def UnlockDoor(self, state, device)
+	pass
