@@ -14,7 +14,7 @@ restful_webapi.run_server()
 service = 'http://localhost:8080'
 
 created = None
-data = json.dumps(#Learned Behaviour)
+data = json.dumps(DeviceID, DeviceStatus)
 #if new state
 r = requests.post(service, data=data)
 #else
