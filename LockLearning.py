@@ -1,6 +1,11 @@
 class Locks:
-def __init__(self):
-        self.stateList = [] 
+	 #Pull from cache File
+def __init__(self,funct):
+        self.funct=funct
+        self.cache = json.load(open("cache.txt"))
+      except:
+      	self.cache = {}
+
 	#checks to verify the device ID refers to a specific lock
 	#Checks to see if the door is locked or unlocked from Cache
 	#return status	
