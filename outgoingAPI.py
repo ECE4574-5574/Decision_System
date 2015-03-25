@@ -2,7 +2,7 @@
 API for the devices
 Assignment 5 Team 3
 
-Revision 1 - 03/25/2015 - Jigar Patel (jigar#=@vt.edu)
+Revision 1 - 03/25/2015 - Jigar Patel (jigar@@vt.edu)
 ============================================================================
 
 
