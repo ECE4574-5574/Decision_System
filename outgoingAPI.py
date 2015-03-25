@@ -1,3 +1,11 @@
+============================================================================
+API for the devices
+Assignment 5 Team 3
+
+Revision 1 - 03/25/2015 - Jigar Patel (jigar#=@vt.edu)
+============================================================================
+
+
 import requests
 import json
 import restful_webapi
@@ -15,6 +23,11 @@ service = 'http://localhost:8080'
 
 created = None
 data = json.dumps(DeviceID, DeviceStatus)
+params = urllib.urlencode({
+  'Device ID': '',
+  'Status': ''
+})
+
 #if new state
 r = requests.post(service, data=data)
 #else
@@ -22,3 +35,4 @@ r = requests.patch(service, data=data)
 
 # Stop the server and quit
 os._exit(0)
+
