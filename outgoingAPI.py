@@ -1,16 +1,15 @@
-============================================================================
-API for the devices
-Assignment 5 Team 3
+#============================================================================
+#API for the devices
+#Assignment 5 Team 3
 
-Revision 1 - 03/25/2015 - Jigar Patel (jigar@vt.edu)
+#Revision 1 - 03/25/2015 - Jigar Patel (jigar@vt.edu)
 
-This API runs on the server hosted by Devices (Team 2)
-We will be using GET/POST/PUT/DELETE HTTP methods to modify the data
-============================================================================
+#This API runs on the server hosted by Devices (Team 2)
+#We will be using GET/POST/PUT/DELETE HTTP methods to modify the data
+#============================================================================
 
 import requests
 import json
-import restful_webapi
 import os
 
 # Run the URL hosted by server API teams
