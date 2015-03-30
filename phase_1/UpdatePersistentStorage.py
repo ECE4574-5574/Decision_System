@@ -1,4 +1,4 @@
-#Prerana Rane
+#Contributor : Prerana Rane
 #Learned behaviours will be stored in the Persistent Storage in the form of Device States
 #This will be called after the user's preferences are decided.
 
