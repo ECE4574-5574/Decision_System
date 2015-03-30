@@ -1,6 +1,7 @@
 import BaseHTTPServer
 import SocketServer
 import json
+import decisions
 
 class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
   def do_POST(self):
@@ -11,6 +12,7 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
       print "The weather condition is " + str(message["condition"])
       print "The temperature is " + str(message["temperature"])
       print "Timestamp of WeatherUpdate " + str(message["WeatherTimeStamp"])
+      decisions.randomDecision()
       self.send_response(200)
     elif self.path == "/DeviceState":
         print "The Device ID is " + str(message["deviceID"])
@@ -19,6 +21,7 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         print "The SpaceID is " + str(message["spaceID"])
         print "The state is " + str(message["stateDevice"])
         print "Timestamp of DeviceState Action " + str(message["DeviceStateTimeStamp"])
+        decisions.randomDecision()
         self.send_response(200)
     elif self.path == "/LocationChange":
         print "The UserID that changed location is " + str(message["usersID"])
@@ -26,6 +29,7 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         print "The Longitude is  " + str(message["longitude"])
         print "The Altitude is " + str(message["altitude"])
         print "Timestamp of LocationChange " + str(message["locationTimeStamp"])
+        decisions.randomDecision()
         self.send_response(200)
     elif self.path == "/CommandsFromApp":
         print "For User " + str(message["commandUserID"])
@@ -35,6 +39,7 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         print "The SpaceID is " + str(message["commandspaceID"])
         print "The state is " + str(message["commandstateDevice"])
         print "Timestamp of Command " + str(message["CommandTimeStamp"])
+        decisions.randomDecision()
         self.send_response(200)
     elif self.path == "/LocalTime":
         print "You may choose to perform a action based on time/date, so the time/date is now" + str(message["localTime"])
