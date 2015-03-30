@@ -1,5 +1,5 @@
 #Contributor : Prerana Rane
-
+#Post function will send the device, house, room and user data 
 import BaseHTTPServer
 import SocketServer
 import json
@@ -51,7 +51,7 @@ PORT = 8080
 
 Handler = PersistentInfoHandler
 SocketServer.ThreadingTCPServer.allow_reuse_address = True
-httpd = SocketServer.TCPServer(("54.152.190.217", PORT), Handler)
+httpd = SocketServer.TCPServer(("localhost", PORT), Handler)
 print "Serving at port: ", PORT
 
 httpd.serve_forever()
