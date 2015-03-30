@@ -8,7 +8,7 @@
 import requests
 import json
 import httplib
-
+import decisions
 #COnnection to the server is established
 #URL provided by Persistent Storage team 
 conn = httplib.HTTPConnection('54.152.190.217', 8080)
@@ -98,7 +98,7 @@ d1 = r1.read()
 print json.loads(d1)
 
 """ PROCESSING OF DATA """
-
+decisions.randomDecision()
 """ OUTGOING CALL TO PERSISTENT STORAGE """
 
 #Method to post information about devices
@@ -116,15 +116,3 @@ conn.getresponse();
 #Method to post information about users
 print conn.request('POST','U/USERID/')
 conn.getresponse();
-
-
-
-"""
-resp = conn.request('GET', 'HD/HOUSEID/')
-data = resp.read()
-print resp
-print data
-
-data1 = json.loads(data)
-print data1
-"""
