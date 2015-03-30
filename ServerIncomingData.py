@@ -6,10 +6,7 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
   def do_POST(self):
     length = int(self.headers.getheader('content-length', 0))
     data = self.rfile.read(length)
-    print data
     message = json.loads(data)
-    print message
-    print self.path
     if self.path == "/Weather":
       print "The weather condition is " + str(message["condition"])
       print "The temperature is " + str(message["temperature"])
