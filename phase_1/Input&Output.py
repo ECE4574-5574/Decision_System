@@ -1,10 +1,8 @@
+#Contributors : Graham Cantor-Cooke, Luke Lapham
 #1)Change stateList to a map
 #2)When a user enters a room add that room to the map with a corresponding list (map with room as key and list as data)
 #3)When user leaves room call a function that analyses the list that maps to that room, then remove that key from list
 
-
-
-#Graham Cantor-Cooke
 class DecisionSystem:
     def __init__(self):
         self.stateList = {}
