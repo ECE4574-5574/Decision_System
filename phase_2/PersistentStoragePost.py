@@ -47,11 +47,11 @@ class PersistentInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.end_headers()
 
 
-PORT = 8081
+PORT = 8080
 
 Handler = PersistentInfoHandler
 SocketServer.ThreadingTCPServer.allow_reuse_address = True
-httpd = SocketServer.TCPServer(("localhost", PORT), Handler)
-print "serving at port: ", PORT
+httpd = SocketServer.TCPServer(("54.152.190.217", PORT), Handler)
+print "Serving at port: ", PORT
 
 httpd.serve_forever()
