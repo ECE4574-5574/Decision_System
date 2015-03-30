@@ -26,8 +26,14 @@ class PersistentInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         if not InputPath[0] in POST_FUNCTION_RANGE:
             return False 
         elif InputPath[0] == 'D':
-        	#send Device data
-
+        	#send Device Data
+        elif InputPath[0] == 'R':
+            #send Room Data
+        elif InputPath[0] == 'H':
+            #send House Data
+        elif InputPath[0] == 'U':
+            #send User Data
+            
     def ResponseOK(self):
         self.send_response(200)
         self.end_headers()
