@@ -13,7 +13,7 @@ commandsfromApp = {"commandUserID":4,"commanddeviceID":1, "commanddeviceName":"B
 time = {"localTime":str(datetime.datetime.now())}
 
 
-connection.request('POST', '/Weather1', json.dumps(weather))
+connection.request('POST', '/Weather', json.dumps(weather))
 res =  connection.getresponse()
 connection.request('POST', '/DeviceState', json.dumps(deviceState))
 res =  connection.getresponse()
