@@ -27,5 +27,23 @@ class PersistentStorageFunctionsTest(unittest.TestCase):
         resp = self.API.getUserInformationUserID()
         self.assertEqual(resp.status, STATUS_CODES['OK'])
 		
+        resp = self.API.getAllLogEntries()
+        self.assertEqual(resp.status, STATUS_CODES['OK'])
+		
+        resp = self.API.getAllLogEntriesDeviceType()
+        self.assertEqual(resp.status, STATUS_CODES['OK'])
+		
+        resp = self.API.getAllLogEntriesDeviceID()
+        self.assertEqual(resp.status, STATUS_CODES['OK'])
+		
+        resp = self.API.getAllComputerByLocation()
+        self.assertEqual(resp.status, STATUS_CODES['OK'])
+		
+        resp = self.API.getAllComputerByType()
+        self.assertEqual(resp.status, STATUS_CODES['OK'])
+		
+        resp = self.API.getComputerbyDeviceID()
+        self.assertEqual(resp.status, STATUS_CODES['OK'])
+		
 if __name__ == '__main__':
     unittest.main()
