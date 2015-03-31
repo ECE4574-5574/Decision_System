@@ -25,19 +25,19 @@ class PersistentInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             return False 
         elif InputPath[0] == 'D':
         	#send Device Data
-        	resp = PSF.postDevice()
+        	resp = PSF.postDevice(self, houseID, version,roomID, deviceID)
         	self.send_response(200)
         elif InputPath[0] == 'R':
             #send Room Data
-            resp = PSF.postRoom()
+            resp = PSF.postRoom(self, houseID, version,roomID)
             self.send_response(200)
         elif InputPath[0] == 'H':
             #send House Data
-            resp = PSF.postHouse()
+            resp = PSF.postHouse(self, houseID)
             self.send_response(200)
         elif InputPath[0] == 'U':
             #send User Data
-            resp = PSF.postUser()
+            resp = PSF.postUser(self, userID)
             self.send_response(200)
         else:
         	print " Command not supported"
