@@ -1,3 +1,8 @@
+#Tests the functions for PersistentStorageFunctions
+#Contributors : Luke Lapham
+#Date : 3/30/2015
+#
+#Note: This test assumes that you have a persistent storage server running on your desktop.
 import unittest
 import PersistentStorageFunctions as PSF
 
