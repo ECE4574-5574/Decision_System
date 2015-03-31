@@ -1,20 +1,18 @@
 #Contributor : Prerana Rane
-#Post function will send the device, house, room and user data 
+#Post function will send the device, house, room and user data to the localhost, port 8080 
+
 import BaseHTTPServer
 import SocketServer
 import json
 import sys
-import decisions
+import PersistentStorageFunctions as PSF
 
 POST_FUNCTION_RANGE = {'D': '6', 'R': '4', 'H': '2', 'U': '2'}
 
 class PersistentInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def do_POST(self):
         try:
-            if self.PostRequest(self.path):
-                self.ResponseOK()
-            else:
-                self.ResponseBadReq()
+            self.PostRequest(self.path)
         except:
             error = sys.exc_info()
             print error
@@ -27,21 +25,23 @@ class PersistentInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             return False 
         elif InputPath[0] == 'D':
         	#send Device Data
+        	resp = PSF.postDevice()
+        	self.send_response(200)
         elif InputPath[0] == 'R':
             #send Room Data
+            resp = PSF.postRoom()
+            self.send_response(200)
         elif InputPath[0] == 'H':
             #send House Data
+            resp = PSF.postHouse()
+            self.send_response(200)
         elif InputPath[0] == 'U':
             #send User Data
-            
-    def ResponseOK(self):
-        self.send_response(200)
-        self.end_headers()
-
-    def ResponseBadReq(self):
-        self.send_response(400)
-        self.end_headers()
-
+            resp = PSF.postUser()
+            self.send_response(200)
+        else:
+        	print " Command not supported"
+     
     def ResponseInternalErr(self):
         self.send_response(500)
         self.end_headers()
