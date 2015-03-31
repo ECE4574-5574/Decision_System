@@ -45,5 +45,18 @@ class PersistentStorageFunctionsTest(unittest.TestCase):
         resp = self.API.getComputerbyDeviceID()
         self.assertEqual(resp.status, STATUS_CODES['OK'])
 		
+    def testPostFunctionsDefaults(self):
+        resp = self.API.postDevice()
+        self.assertEqual(resp.status, STATUS_CODES['OK'])
+		
+        resp = self.API.postRoom()
+        self.assertEqual(resp.status, STATUS_CODES['OK'])
+		
+        resp = self.API.postHouse()
+        self.assertEqual(resp.status, STATUS_CODES['OK'])
+		
+        resp = self.API.postUser()
+        self.assertEqual(resp.status, STATUS_CODES['OK'])
+		
 if __name__ == '__main__':
     unittest.main()
