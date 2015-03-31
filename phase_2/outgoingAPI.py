@@ -11,53 +11,54 @@
 import requests
 import json
 import os
+def runOutgoingAPI():
+    # Run the URL hosted by server API teams
+    url = 'http://5574serverapi.azurewebsites.net/api/devicemgr/state/'
 
-# Run the URL hosted by server API teams
-url = 'http://5574serverapi.azurewebsites.net/api/devicemgr/state/'
+    # Header for JSON data objects
+    headers = {'Content-type': 'application/json'}
 
-# Header for JSON data objects
-headers = {'Content-type': 'application/json'}
+    # Append the device id to the URL to modify state for that particular deviceId
+    device1_url = url + '1'
+    device2_url = url + '2'
+    device3_url = url + '3'
 
-# Append the device id to the URL to modify state for that particular deviceId
-device1_url = url + '1'
-device2_url = url + '2'
-device3_url = url + '3'
+    # Modify the state for the deviceId based on decision made by the Decision Making algorithm
+    data1_json= {
+                    "deviceId": 1,
+                    "deviceName": "LIGHT:1",
+                    "deviceType": 5,
+                    "spaceId": 4,
+                    "state": 1
+                }
 
-# Modify the state for the deviceId based on decision made by the Decision Making algorithm
-data1_json= {
-                "deviceId": 1,
-                "deviceName": "LIGHT:1",
-                "deviceType": 5,
-                "spaceId": 4,
-                "state": 1
-            }
+    data2_json= {
+                    "deviceId": 2,
+                    "deviceName": "THERMOSTAT:1",
+                    "deviceType": 6,
+                    "spaceId": 5,
+                    "state": 1
+                }
 
-data2_json= {
-                "deviceId": 2,
-                "deviceName": "THERMOSTAT:1",
-                "deviceType": 6,
-                "spaceId": 5,
-                "state": 1
-            }
-
-data3_json= {
-                "deviceId": 2,
-                "deviceName": "SPRINKLER:1",
-                "deviceType": 7,
-                "spaceId": 4,
-                "state": 0
-            }
-
-
-# POST method to send over data to Device API via the server API
-response1 = requests.post(device1_url, data=data1_json, headers=headers)
-response2 = requests.post(device2_url, data=data2_json, headers=headers)
-response3 = requests.post(device3_url, data=data3_json, headers=headers)
+    data3_json= {
+                    "deviceId": 2,
+                    "deviceName": "SPRINKLER:1",
+                    "deviceType": 7,
+                    "spaceId": 4,
+                    "state": 0
+                }
 
 
-# print response received from the server API; <Response [200]> indicates correct response
-print response1
-print response2
-print response3
+    # POST method to send over data to Device API via the server API
+    response1 = requests.post(device1_url, data=data1_json, headers=headers)
+    response2 = requests.post(device2_url, data=data2_json, headers=headers)
+    response3 = requests.post(device3_url, data=data3_json, headers=headers)
 
 
+    # print response received from the server API; <Response [200]> indicates correct response
+    print response1
+    print response2
+    print response3
+
+if __name__ == '__main__':
+    runOutgoingAPI()
