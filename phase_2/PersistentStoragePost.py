@@ -1,5 +1,8 @@
-#Contributor : Prerana Rane
-#Post function will send the device, house, room and user data to the localhost, port 8080 
+"""API Calls to and from the Persistent Storage
+Contributors : Prerana Rane
+Date : 3/30/2015
+Purpose : Post function will send the device, house, room and user data to the localhost, port 8080 
+Method of Testing: Run this file and then send a POST command."""
 
 import BaseHTTPServer
 import SocketServer
@@ -14,12 +17,13 @@ class PersistentInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         try:
             self.PostRequest(self.path)
         except:
-            error = sys.exc_info()
+            error = sys.exc_info()  #catches exceptions
             print error
             self.ResponseInternalErr()
 
     def PostRequest(self, path):
-        InputPath = path.strip('/').split('/')
+        InputPath = path.strip('/').split('/') 
+"""Based on the outgoing POST command, this function will send the relevant data to the persistent storage."""
         print InputPath
         if not InputPath[0] in POST_FUNCTION_RANGE:
             return False 
