@@ -1,3 +1,7 @@
+""" Purpose : The decision system accepts incoming data from the server API. The incoming data includes user location,
+commands from the App, local time, weather and state of the devices. The data will be continuously received from the server API
+and  posted to the local server. The data will then be stored in temporary data structures (temporaryHolding.py). """
+
 import BaseHTTPServer
 import SocketServer
 import json
@@ -9,11 +13,11 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     data = self.rfile.read(length)
     message = json.loads(data)
     if self.path == "/Weather":
-      print "The weather condition is " + str(message["condition"])
-      print "The temperature is " + str(message["temperature"])
-      print "Timestamp of WeatherUpdate " + str(message["WeatherTimeStamp"])
-      decisions.randomDecision()
-      self.send_response(200)
+        print "The weather condition is " + str(message["condition"])
+        print "The temperature is " + str(message["temperature"])
+        print "Timestamp of WeatherUpdate " + str(message["WeatherTimeStamp"])
+        decisions.randomDecision()
+        self.send_response(200)
     elif self.path == "/DeviceState":
         print "The Device ID is " + str(message["deviceID"])
         print "The Device Name is " + str(message["deviceName"])
