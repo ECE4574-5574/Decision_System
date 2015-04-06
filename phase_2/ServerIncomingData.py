@@ -53,6 +53,7 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.send_response(500)
         self.end_headers()
         self.wfile.write("An internal error occured. Please report this to the Decision-Making API team.\n")
+        self.wfile.write("Request path: " + self.path + "\n")
         traceback.print_exc(None, self.wfile)
         
         
