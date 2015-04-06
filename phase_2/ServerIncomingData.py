@@ -18,40 +18,60 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.wfile.write("\nThe request body could not be parsed as JSON. The received request body:\n" + data)
             return
         if self.path == "/Weather":
-          print "The weather condition is " + str(message["condition"])
-          print "The temperature is " + str(message["temperature"])
-          print "Timestamp of WeatherUpdate " + str(message["WeatherTimeStamp"])
-          decisions.randomDecision()
-          self.send_response(200)
+            try: 
+                print "The weather condition is " + str(message["condition"])
+                print "The temperature is " + str(message["temperature"])
+                print "Timestamp of WeatherUpdate " + str(message["WeatherTimeStamp"])
+            except KeyError as ke:
+                self.handleMissingKey(ke)
+                return
+            decisions.randomDecision()
+            self.send_response(200)
         elif self.path == "/DeviceState":
-            print "The Device ID is " + str(message["deviceID"])
-            print "The Device Name is " + str(message["deviceName"])
-            print "The Device Type is " + str(message["deviceType"])
-            print "The SpaceID is " + str(message["spaceID"])
-            print "The state is " + str(message["stateDevice"])
-            print "Timestamp of DeviceState Action " + str(message["DeviceStateTimeStamp"])
+            try:
+                print "The Device ID is " + str(message["deviceID"])
+                print "The Device Name is " + str(message["deviceName"])
+                print "The Device Type is " + str(message["deviceType"])
+                print "The SpaceID is " + str(message["spaceID"])
+                print "The state is " + str(message["stateDevice"])
+                print "Timestamp of DeviceState Action " + str(message["DeviceStateTimeStamp"])
+            except KeyError as ke:
+                self.handleMissingKey(ke)
+                return
             decisions.randomDecision()
             self.send_response(200)
         elif self.path == "/LocationChange":
-            print "The UserID that changed location is " + str(message["usersID"])
-            print "The Latitude is " + str(message["latitude"])
-            print "The Longitude is  " + str(message["longitude"])
-            print "The Altitude is " + str(message["altitude"])
-            print "Timestamp of LocationChange " + str(message["locationTimeStamp"])
+            try:
+                print "The UserID that changed location is " + str(message["usersID"])
+                print "The Latitude is " + str(message["latitude"])
+                print "The Longitude is  " + str(message["longitude"])
+                print "The Altitude is " + str(message["altitude"])
+                print "Timestamp of LocationChange " + str(message["locationTimeStamp"])
+            except KeyError as ke:
+                self.handleMissingKey(ke)
+                return
             decisions.randomDecision()
             self.send_response(200)
         elif self.path == "/CommandsFromApp":
-            print "For User " + str(message["commandUserID"])
-            print "Turn off Device ID " + str(message["commanddeviceID"])
-            print "The Device Name is " + str(message["commanddeviceName"])
-            print "The Device Type is " + str(message["commanddeviceType"])
-            print "The SpaceID is " + str(message["commandspaceID"])
-            print "The state is " + str(message["commandstateDevice"])
-            print "Timestamp of Command " + str(message["CommandTimeStamp"])
+            try:
+                print "For User " + str(message["commandUserID"])
+                print "Turn off Device ID " + str(message["commanddeviceID"])
+                print "The Device Name is " + str(message["commanddeviceName"])
+                print "The Device Type is " + str(message["commanddeviceType"])
+                print "The SpaceID is " + str(message["commandspaceID"])
+                print "The state is " + str(message["commandstateDevice"])
+                print "Timestamp of Command " + str(message["CommandTimeStamp"])
+            except KeyError as ke:
+                self.handleMissingKey(ke)
+                return
             decisions.randomDecision()
             self.send_response(200)
         elif self.path == "/LocalTime":
-            print "You may choose to perform a action based on time/date, so the time/date is now" + str(message["localTime"])
+            try:
+                print "You may choose to perform a action based on time/date, so the time/date is now" + str(message["localTime"])
+            except KeyError as ke:
+                self.handleMissingKey(ke)
+                return
             self.send_response(200)
         else:
             self.send_response(400)
@@ -64,6 +84,14 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.wfile.write("\nAn internal error occured. Please report this to the Decision-Making API team.\n")
         self.wfile.write("Request path: " + self.path + "\n")
         traceback.print_exc(None, self.wfile)
+  
+  def handleMissingKey(self, keyError):
+    self.send_response(400)
+    self.end_headers()
+    self.wfile.write('\nYour request body is missing a JSON key which is necessary to handle your request.\n')
+    self.wfile.write('Request path: ' + self.path + '\n')
+    if not keyError is None:
+        self.wfile.write('Missing key: ' + keyError.args[0])
         
         
 
