@@ -9,7 +9,14 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     try:
         length = int(self.headers.getheader('content-length', 0))
         data = self.rfile.read(length)
-        message = json.loads(data)
+        message = ""
+        try:
+            message = json.loads(data)
+        except ValueError:
+            self.send_response(400)
+            self.end_headers
+            self.wfile.write("\nThe request body could not be parsed as JSON. The received request body:\n" + data)
+            return
         if self.path == "/Weather":
           print "The weather condition is " + str(message["condition"])
           print "The temperature is " + str(message["temperature"])
@@ -52,7 +59,7 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         #We want to catch all otherwise-unhandled errors, and return a 500 error code.
         self.send_response(500)
         self.end_headers()
-        self.wfile.write("An internal error occured. Please report this to the Decision-Making API team.\n")
+        self.wfile.write("\nAn internal error occured. Please report this to the Decision-Making API team.\n")
         self.wfile.write("Request path: " + self.path + "\n")
         traceback.print_exc(None, self.wfile)
         
