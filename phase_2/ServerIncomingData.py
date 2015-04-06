@@ -55,6 +55,8 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.send_response(200)
         else:
             self.send_response(400)
+            self.end_headers()
+            self.wfile.write("\nThe request path: " + self.path + " does not match anything on the decision-making API.")
     except:
         #We want to catch all otherwise-unhandled errors, and return a 500 error code.
         self.send_response(500)
