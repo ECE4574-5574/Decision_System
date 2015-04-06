@@ -7,6 +7,8 @@ from ServerIncomingData import ServerInfoHandler as sih
 from decisions import randomDecision
 from PersistentStorageFunctions import PersistentStorageFunctions as psf
 from outgoingAPI import runOutgoingAPI
+from PersistentStoragePost import PersistentInfoHandler as PIH
+
 class DecisionSystemTest(unittest.TestCase):
 
     def testIncomingData(self):
@@ -28,6 +30,16 @@ class DecisionSystemTest(unittest.TestCase):
 
     def testOutgoingApi(self):
         self.assert_(runOutgoingAPI(), "Outgoing API failed test.")
+
+    def testPersistentStoragePost(self):
+        # Please change the following parameters.
+        path = ""
+        houseID = ""
+        version = ""
+        roomID = ""
+        deviceID = ""
+        userID = ""
+        self.assert_(PIH.PostRequest(path, houseID, version, roomID, deviceID, userID), "Outgoing API failed test.")
 
 if __name__ == '__main__':
     unittest.main()
