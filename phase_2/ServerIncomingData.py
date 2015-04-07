@@ -60,7 +60,7 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 print "The Altitude is " + str(message["alt"])
                 print "Timestamp of LocationChange " + str(message["time"])
                 #Set up connection to persistent storage
-                conn = httplib.HTTPConnection("54.152.190.217", 8081)
+                conn = httplib.HTTPConnection("54.152.190.217", 8080)
                 #change the format to the format required by persistent storage
                 dateTimeObject = datetime.strptime(message["time"], "%Y-%m-%d %H:%M:%S")
                 formatted = dateTimeObject.strftime("%Y-%m-%dT%H:%M:%SZ")
