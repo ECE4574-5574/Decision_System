@@ -22,7 +22,6 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         print "The weather condition is " + str(message["condition"])
         print "The temperature is " + str(message["temperature"])
         print "Timestamp of WeatherUpdate " + str(message["time"])
-        decisions.randomDecision()
         self.send_response(200)
     #If a device state update is received then that inofrmation is printed and a 200 response is sent
     elif self.path == "/DeviceState":
@@ -37,6 +36,7 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     #and a 200 response is sent
     elif self.path == "/LocationChange":
         temp = TemporaryHolding()
+        print "The user ID is: " + str(message["userId"])
         print "The Latitude is " + str(message["lat"])
         print "The Longitude is  " + str(message["long"])
         print "The Altitude is " + str(message["alt"])
@@ -46,14 +46,16 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         #change the format to the format required by persistent storage
         dateTimeObject = datetime.strptime(message["time"], "%Y-%m-%d %H:%M:%S")
         formatted = dateTimeObject.strftime("%Y-%m-%dT%H:%M:%SZ")
-        #P
+        #Pass the JSON file to persistent storage
         payload = json.dumps({"action-type":"location-update","action-data":message})
-        conn.request('PATCH', 'A/' + 'bsaget' + '/' + formatted + '/' + 'WayneManor', payload)
+        conn.request('PATCH', 'A/' + message['userId'] + '/' + formatted + '/' + 'WayneManor', payload)
         response = conn.getresponse()
         print response.status
         print response.read()
-        decisions.randomDecision(float(lat), float(longi), float(alt), formatted)        
+        #make a random decision
+        decisions.randomDecision(float(message["lat"]), float(message["long"]), float(message["alt"]), str(message["userId"]), formatted)        
         self.send_response(200)
+    #If there is a command from the app print the command
     elif self.path == "/CommandsFromApp":
         print "For User " + str(message["commandUserID"])
         print "Turn off Device ID " + str(message["commanddeviceID"])
@@ -62,8 +64,8 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         print "The SpaceID is " + str(message["commandspaceID"])
         print "The state is " + str(message["commandstateDevice"])
         print "Timestamp of Command " + str(message["time"])
-        decisions.randomDecision()
         self.send_response(200)
+        
     elif self.path == "/LocalTime":
         print "You may choose to perform a action based on time/date, so the time/date is now" + str(message["localTime"])
         self.send_response(200)
