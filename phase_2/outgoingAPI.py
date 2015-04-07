@@ -23,7 +23,7 @@ def runOutgoingAPI(message):
     #device1_url = url + '1'
     device1_url = url + str(message["deviceID"])
 
-	# Toggle the device state
+    # Toggle the device state
     if (str(message["stateDevice"]) == '1'):
         deviceState = 0;
 	else: 
@@ -44,7 +44,7 @@ def runOutgoingAPI(message):
                     "deviceName": message["deviceName"],
                     "deviceType": message["deviceType"],
                     "spaceId": message["spaceID"],
-                    "state": deviceStage
+                    "state": deviceState
                 }
 
     # POST method to send over data to the server API
