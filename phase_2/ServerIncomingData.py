@@ -24,7 +24,7 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         print "Timestamp of WeatherUpdate " + str(message["time"])
         decisions.randomDecision()
         self.send_response(200)
-    #If a device state update is received then that inofrmation is printed and a 200 response is sents
+    #If a device state update is received then that inofrmation is printed and a 200 response is sent
     elif self.path == "/DeviceState":
         print "The Device ID is " + str(message["deviceID"])
         print "The Device Name is " + str(message["deviceName"])
