@@ -10,7 +10,7 @@ import httplib
 
 def randomDecision(lat, longi, alt, userId, timeframe):   
     # Run the URL hosted by server API teams
-    url = 'http://5574serverapi.azurewebsites.net/api/devicemgr/state/'         #URL for Server API
+    url = 'http://localhost:8082/api/devicemgr/state/'         #URL for Server API
     conn = httplib.HTTPConnection("54.152.190.217", 8081)                       #IP Address for Persistent Storage
     # Header for JSON data objects
     headers = {'Content-type': 'application/json'}
