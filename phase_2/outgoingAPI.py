@@ -20,7 +20,7 @@ def runOutgoingAPI(message):
     headers = {'Content-type': 'application/json'}
 	
     # Append the device id to the URL to modify state for that particular deviceId
-    device1_url = url + '1'
+    #device1_url = url + '1'
     device1_url = url + str(message["deviceID"])
 
 	# Toggle the device state
