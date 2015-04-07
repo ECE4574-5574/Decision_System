@@ -26,8 +26,8 @@ def randomDecision(lat, longi, alt, userId, timeframe):
         print "User is in Room#1"
         print "Turn on devices in Room1"
         data1_json= {
-                    "houseId": "WayneManor"
-                    "roomId": "Atrium"
+                    "houseId": "WayneManor",
+                    "roomId": "Atrium",
                     "deviceId": 1,
                     "deviceName": "LIGHT:1",
                     "deviceType": 5,
@@ -47,8 +47,8 @@ def randomDecision(lat, longi, alt, userId, timeframe):
         print "User is in Room#2"
         print "Turn on devices in Room2"
         data2_json= {
-                    "houseId": "WayneManor"
-                    "roomId": "Atrium"
+                    "houseId": "WayneManor",
+                    "roomId": "Atrium",
                     "deviceId": 2,
                     "deviceName": "THERMOSTAT:1",
                     "deviceType": 6,
@@ -68,8 +68,8 @@ def randomDecision(lat, longi, alt, userId, timeframe):
         print "User is in Room#3"
         print "Turn on devices in Room3"
         data3_json= {
-                    "houseId": "WayneManor"
-                    "roomId": "Atrium"
+                    "houseId": "WayneManor",
+                    "roomId": "Atrium",
                     "deviceId": 3,
                     "deviceName": "SPRINKLER:1",
                     "deviceType": 7,
