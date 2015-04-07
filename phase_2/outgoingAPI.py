@@ -14,8 +14,9 @@ import os
 
 def runOutgoingAPI(message):
     # Run the URL hosted by server API teams
-    url = 'http://5574serverapi.azurewebsites.net/api/devicemgr/state/'
-
+    # url = 'http://5574serverapi.azurewebsites.net/api/devicemgr/state/'
+    url = 'http://localhost:8082/api/devicemgr/state/'
+	
     # Header for JSON data objects
     headers = {'Content-type': 'application/json'}
 	
