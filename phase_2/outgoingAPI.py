@@ -26,7 +26,7 @@ def runOutgoingAPI(message):
     # Toggle the device state
     if (str(message["stateDevice"]) == '1'):
         deviceState = 0;
-	else: 
+    else: 
         deviceState = 1;
 		
     # Modify the state for the deviceId based on decision made by the Decision Making algorithm
