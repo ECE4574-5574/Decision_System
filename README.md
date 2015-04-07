@@ -1,8 +1,8 @@
-#Decision System
+#Decision System - Assignment 6 Part 2b
 
-Code for 
-- Receiving information about user’s location, weather, time of the day, commands from App and states of the devices from the Server API -  "ServerIncomingData.py" - Graham Cantor-Cooke and Trevon Christian
-- Receiving and sending data about the users, devices, user profile, and history of the devices to the Persistent Storage - "PersistentStorageAPI.py" - Prerana Rane and Luke Lapham
-- Generating a random decision based on the data received - "Decisions.py" 
--  Sending the action to be taken to the devices through the Server API - "outgoingAPI.py" - Jigar Patel and Sumit Kumar
-
+Demo Code:
+- User's location changes will be sent by the Server API. This data is posted on a local server.
+- The data received is sent to the persistent server.
+- A decision is made based on the latitude and longitude of the user.
+- The decision is conveyed to the Server API via a POST method and to the Persistent Server via a PATCH method.
+- 
