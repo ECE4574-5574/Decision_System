@@ -2,6 +2,10 @@
 commands from the App, local time, weather and state of the devices. The data will be continuously received from the server API
 and  posted to the local server. The data will then be stored in temporary data structures (temporaryHolding.py). """
 
+#Andrew Gardner: Added functionality to the location change post request so that the location data would be written to persistent storage and the 
+#decision class would be called to make a random decision to send to the server and persistent storage. Also editted the JSON string received to 
+#meet requirements from other teams
+
 import BaseHTTPServer
 import SocketServer
 import json
