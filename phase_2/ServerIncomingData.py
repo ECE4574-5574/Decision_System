@@ -6,6 +6,9 @@ and  posted to the local server. The data will then be stored in temporary data 
 #decision class would be called to make a random decision to send to the server and persistent storage. Also editted the JSON string received to 
 #meet requirements from other teams
 
+#Mark Koninckx: Added error-handling code that allows for discerning between unhandled internal errors and malformed requests, and accurately
+#reporting these errors to the code making the call over HTTP.
+
 import BaseHTTPServer
 import SocketServer
 import json
