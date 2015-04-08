@@ -71,7 +71,7 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 print "The Altitude is " + str(message["alt"])
                 print "Timestamp of LocationChange " + str(message["time"])
                 #Set up connection to persistent storage
-                conn = httplib.HTTPConnection("54.152.190.217", 8080)
+                conn = httplib.HTTPConnection(self.server.storageAddress[0], self.server.storageAddress[1])
                 #change the format to the format required by persistent storage
                 dateTimeObject = datetime.strptime(message["time"], "%Y-%m-%d %H:%M:%S")
                 formatted = dateTimeObject.strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -133,10 +133,11 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
 class HaltableHTTPServer(BaseHTTPServer.HTTPServer):
 
-    def __init__(self, server_address, RequestHandlerClass):
+    def __init__(self, server_address, persistentStorageAddress, RequestHandlerClass):
         BaseHTTPServer.HTTPServer.__init__(self, server_address, RequestHandlerClass)
         self.shouldStop = False
         self.timeout = 1
+        self.storageAddress = persistentStorageAddress
 
     def serve_forever (self):
         while not self.shouldStop:
@@ -154,15 +155,29 @@ if __name__ == "__main__":
     argparser = argparse.ArgumentParser()
     argparser.add_argument('-q', '--quiet', action='store_true')
     argparser.add_argument('-p', '--port', type=int)
+    argparser.add_argument('-t', '--storage', type=str)
     args = argparser.parse_args()
+    #Validate arguments. Port number:
     if args.port < 0:
         print "You must enter a port number greater than 0."
         argparser.print_help()
         sys.exit(1)
-    server = HaltableHTTPServer(('',args.port), ServerInfoHandler)
+    #Persistent storage address:
+    persistentStorageAddress=[]
+    try:
+        persistentStorageAddress.append(args.storage.split(':')[0])
+        persistentStorageAddress.append(args.storage.split(':')[1])
+        if persistentStorageAddress[1] <= 0:
+            raise ValueError
+    except (ValueError, IndexError):
+        print "You must enter a valid persistent storage address and port number (e.g. 127.0.0.1:8080)"
+        argparser.print_help()
+        sys.exit(1) 
+    server = HaltableHTTPServer(('',args.port), persistentStorageAddress, ServerInfoHandler)
     #Print the server port. We actually get this from the server object, since
     #the user can enter a port number of 0 to have the OS assign some open port.
     print "Serving on port " + str(server.socket.getsockname()[1]) + "..."
+    print "Using persistent storage at " + persistentStorageAddress[0] + ":" + str(persistentStorageAddress[1]) + "..."
     serverThread = serveInBackground(server)
     try:
         while serverThread.isAlive():
