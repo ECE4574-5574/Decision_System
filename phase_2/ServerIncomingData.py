@@ -14,7 +14,11 @@ import SocketServer
 import json
 import decisions
 import traceback
+import threading
+import time
 import httplib
+import argparse
+import sys
 from temporaryHolding import TemporaryHolding
 from datetime import datetime
 
@@ -127,11 +131,50 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     if not keyError is None:
         self.wfile.write('Missing key: ' + keyError.args[0])
 
-PORT = 8081
+class HaltableHTTPServer(BaseHTTPServer.HTTPServer):
 
-Handler = ServerInfoHandler
-SocketServer.ThreadingTCPServer.allow_reuse_address = True
-httpd = SocketServer.TCPServer(("localhost", PORT), Handler)
-print "serving at port: ", PORT
+    def __init__(self, server_address, RequestHandlerClass):
+        BaseHTTPServer.HTTPServer.__init__(self, server_address, RequestHandlerClass)
+        self.shouldStop = False
+        self.timeout = 1
 
-httpd.serve_forever()
+    def serve_forever (self):
+        while not self.shouldStop:
+            self.handle_request()
+
+def runServer(server):
+    server.serve_forever()
+
+def serveInBackground(server):
+    thread = threading.Thread(target=runServer, args =(server,))
+    thread.start()
+    return thread
+
+if __name__ == "__main__":
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument('-q', '--quiet', action='store_true')
+    argparser.add_argument('-p', '--port', type=int)
+    args = argparser.parse_args()
+    if args.port < 0:
+        print "You must enter a port number greater than 0."
+        argparser.print_help()
+        sys.exit(1)
+    server = HaltableHTTPServer(('',args.port), ServerInfoHandler)
+    #Print the server port. We actually get this from the server object, since
+    #the user can enter a port number of 0 to have the OS assign some open port.
+    print "Serving on port " + str(server.socket.getsockname()[1]) + "..."
+    serverThread = serveInBackground(server)
+    try:
+        while serverThread.isAlive():
+            if not args.quiet:
+                print 'Serving...'
+            time.sleep(10)
+            if not args.quiet:
+                print 'Still serving...'
+            time.sleep(10)
+    except KeyboardInterrupt:
+        print 'Attempting to stop server (timeout in 30s)...'
+        server.shouldStop = True
+        serverThread.join(30)
+        if serverThread.isAlive():
+            print 'WARNING: Failed to gracefully halt server.'
