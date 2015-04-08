@@ -82,12 +82,11 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 print response.status
                 print response.read()
                 #make a random decision
-                decisions.randomDecision(float(message["lat"]), float(message["long"]), float(message["alt"]), str(message["userId"]), formatted)        
+                decisions.randomDecision(float(message["lat"]), float(message["long"]), float(message["alt"]), str(message["userId"]), formatted, self.server.storageAddress, self.server.deviceBase)        
                 self.send_response(200)
             except KeyError as ke:
                 self.handleMissingKey(ke)
                 return
-            decisions.randomDecision()
             self.send_response(200)
         #If there is a command from the app print the command
         elif self.path == "/CommandsFromApp":
@@ -133,11 +132,12 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
 class HaltableHTTPServer(BaseHTTPServer.HTTPServer):
 
-    def __init__(self, server_address, persistentStorageAddress, RequestHandlerClass):
+    def __init__(self, server_address, persistentStorageAddress, deviceBase, RequestHandlerClass):
         BaseHTTPServer.HTTPServer.__init__(self, server_address, RequestHandlerClass)
         self.shouldStop = False
         self.timeout = 1
         self.storageAddress = persistentStorageAddress
+	self.deviceBase = deviceBase
 
     def serve_forever (self):
         while not self.shouldStop:
@@ -156,6 +156,7 @@ if __name__ == "__main__":
     argparser.add_argument('-q', '--quiet', action='store_true')
     argparser.add_argument('-p', '--port', type=int)
     argparser.add_argument('-t', '--storage', type=str)
+    argparser.add_argument('-d', '--devicebase', type=str, default='http://localhost:8082/api/devicemgr/state/')
     args = argparser.parse_args()
     #Validate arguments. Port number:
     if args.port < 0:
@@ -173,7 +174,7 @@ if __name__ == "__main__":
         print "You must enter a valid persistent storage address and port number (e.g. 127.0.0.1:8080)"
         argparser.print_help()
         sys.exit(1) 
-    server = HaltableHTTPServer(('',args.port), persistentStorageAddress, ServerInfoHandler)
+    server = HaltableHTTPServer(('',args.port), persistentStorageAddress, args.devicebase, ServerInfoHandler)
     #Print the server port. We actually get this from the server object, since
     #the user can enter a port number of 0 to have the OS assign some open port.
     print "Serving on port " + str(server.socket.getsockname()[1]) + "..."

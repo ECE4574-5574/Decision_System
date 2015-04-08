@@ -8,10 +8,10 @@ import os
 import httplib
 
 
-def randomDecision(lat, longi, alt, userId, timeframe):   
+def randomDecision(lat, longi, alt, userId, timeframe, persistent, server):   
     # Run the URL hosted by server API teams
-    url = 'http://localhost:8082/api/devicemgr/state/'         #URL for Server API
-    conn = httplib.HTTPConnection("54.152.190.217", 8080)                       #IP Address for Persistent Storage
+    url = server         #URL for Server API
+    conn = httplib.HTTPConnection(persistent[0], persistent[1])                       #IP Address for Persistent Storage
     # Header for JSON data objects
     headers = {'Content-type': 'application/json'}
 
@@ -35,11 +35,11 @@ def randomDecision(lat, longi, alt, userId, timeframe):
                     "state": 1
             }
        
-        response = requests.post(device1_url, data=data1_json, headers=headers)  #sends response to the Server API
+        #response = requests.post(device1_url, data=data1_json, headers=headers)  #sends response to the Server API
         conn.request('PATCH', 'C/' + userId + '/' + timeframe + '/' + 'WayneManor' + '/11' + '/1', json.dumps(data1_json))  #sends response to the Persistent Storage
         response2 = conn.getresponse()
-        print "Server response"
-        print response  
+        #print "Server response"
+        #print response  
         print "Persistent storage response"                                                        #prints response
         print response2.status
         print response2.read()
@@ -56,10 +56,10 @@ def randomDecision(lat, longi, alt, userId, timeframe):
                     "state": 1
             }
             
-        response = requests.post(device1_url, data=data2_json, headers=headers)  #sends response to the Server API
+        #response = requests.post(device1_url, data=data2_json, headers=headers)  #sends response to the Server API
         conn.request('PATCH', 'C/' + userId + '/' + timeframe + '/' + 'WayneManor' + '/12' + '/2', json.dumps(data2_json))  #sends response to the Persistent Storage
         response2 = conn.getresponse()
-        print "Server response"
+        #print "Server response"
         print response 
         print "Persistent storage response"                                                          #prints response
         print response2.status
@@ -77,11 +77,11 @@ def randomDecision(lat, longi, alt, userId, timeframe):
                     "state": 0
             }
             
-        response = requests.post(device1_url, data=data3_json, headers=headers)  #sends response to the Server API
+        #response = requests.post(device1_url, data=data3_json, headers=headers)  #sends response to the Server API
         conn.request('PATCH', 'C/' + userId + '/' + timeframe + '/' + 'WayneManor' + '/13' + '/3', json.dumps(data3_json))  #sends response to the Persistent Storage
         response2 = conn.getresponse()
-        print "Server response"
-        print response     
+        #print "Server response"
+        #print response     
         print "Persistent storage response"                                                     #prints response
         print response2.status
         print response2.read()

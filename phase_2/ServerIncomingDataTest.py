@@ -2,7 +2,7 @@ import httplib
 import json
 import datetime
 
-connection = httplib.HTTPConnection('localhost', 8081)
+connection = httplib.HTTPConnection('localhost', 8085)
 
 
 
@@ -19,6 +19,8 @@ connection.request('POST', '/DeviceState', json.dumps(deviceState))
 res = connection.getresponse()
 connection.request('POST', '/LocationChange', json.dumps(locationChange))
 res = connection.getresponse()
+print 'Location Change Response' + str(res.status)
+print 'Location Change Body:\n' + str(res.read())
 connection.request('POST', '/CommandsFromApp', json.dumps(commandsfromApp))
 res = connection.getresponse()
 connection.request('POST', '/LocalTime', json.dumps(time))
