@@ -87,7 +87,6 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             except KeyError as ke:
                 self.handleMissingKey(ke)
                 return
-            self.send_response(200)
         #If there is a command from the app print the command
         elif self.path == "/CommandsFromApp":
             try:
@@ -103,6 +102,10 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 return
             decisions.randomDecision()
             self.send_response(200)
+        elif self.path == "/TimeConfig":
+            self.server.timeconfig = message
+            self.send_response(200)
+            self.end_headers()
         elif self.path == "/LocalTime":
             try:
                 print "You may choose to perform a action based on time/date, so the time/date is now" + str(message["localTime"])
@@ -137,6 +140,7 @@ class HaltableHTTPServer(BaseHTTPServer.HTTPServer):
         self.shouldStop = False
         self.timeout = 1
         self.storageAddress = persistentStorageAddress
+        self.timeconfig = {}
 	self.deviceBase = deviceBase
 
     def serve_forever (self):
