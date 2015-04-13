@@ -75,6 +75,9 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 #change the format to the format required by persistent storage
                 dateTimeObject = datetime.strptime(message["time"], "%Y-%m-%d %H:%M:%S")
                 formatted = dateTimeObject.strftime("%Y-%m-%dT%H:%M:%SZ")
+                handler = threading.Thread(None, self.bgHandlerProof, 'Handler for POST/LocationChange', args = (message,))
+                self.server.threads.append(handler)
+                handler.start()
                 #Pass the JSON file to persistent storage
                 payload = json.dumps({"action-type":"location-update","action-data":message})
                 conn.request('PATCH', 'A/' + message['userId'] + '/' + formatted + '/' + 'WayneManor', payload)
@@ -133,6 +136,12 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     if not keyError is None:
         self.wfile.write('Missing key: ' + keyError.args[0])
 
+  def bgHandlerProof(self, message):
+    print 'Pretending to handle something in the background...'
+    time.sleep(1)    
+    print message
+    print 'Done handling something in the background!...'
+
 class HaltableHTTPServer(BaseHTTPServer.HTTPServer):
 
     def __init__(self, server_address, persistentStorageAddress, deviceBase, RequestHandlerClass):
@@ -141,11 +150,17 @@ class HaltableHTTPServer(BaseHTTPServer.HTTPServer):
         self.timeout = 1
         self.storageAddress = persistentStorageAddress
         self.timeconfig = {}
-	self.deviceBase = deviceBase
+        self.threads=[]
+        self.deviceBase = deviceBase
 
     def serve_forever (self):
         while not self.shouldStop:
             self.handle_request()
+            self.threads = [t for t in self.threads if t.isAlive()]
+        for handler in self.threads:
+            print 'Encountered running background handler on shutdown.'
+            print 'Attempting to join (timeout in 5s...)'
+            handler.join(5)
 
 def runServer(server):
     server.serve_forever()
