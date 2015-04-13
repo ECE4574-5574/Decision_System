@@ -70,22 +70,13 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 print "The Longitude is  " + str(message["long"])
                 print "The Altitude is " + str(message["alt"])
                 print "Timestamp of LocationChange " + str(message["time"])
-                #Set up connection to persistent storage
-                conn = httplib.HTTPConnection(self.server.storageAddress[0], self.server.storageAddress[1])
                 #change the format to the format required by persistent storage
                 dateTimeObject = datetime.strptime(message["time"], "%Y-%m-%d %H:%M:%S")
                 formatted = dateTimeObject.strftime("%Y-%m-%dT%H:%M:%SZ")
-                handler = threading.Thread(None, self.bgHandlerProof, 'Handler for POST/LocationChange', args = (message,))
+                handler = threading.Thread(None, self.decisionThread, 'Handler for POST/LocationChange', args = (message,formatted,self.server.storageAddress,self.server.deviceBase))
                 self.server.threads.append(handler)
                 handler.start()
-                #Pass the JSON file to persistent storage
-                payload = json.dumps({"action-type":"location-update","action-data":message})
-                conn.request('PATCH', 'A/' + message['userId'] + '/' + formatted + '/' + 'WayneManor', payload)
-                response = conn.getresponse()
-                print response.status
-                print response.read()
-                #make a random decision
-                decisions.randomDecision(float(message["lat"]), float(message["long"]), float(message["alt"]), str(message["userId"]), formatted, self.server.storageAddress, self.server.deviceBase)        
+                        
                 self.send_response(200)
             except KeyError as ke:
                 self.handleMissingKey(ke)
@@ -136,11 +127,17 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     if not keyError is None:
         self.wfile.write('Missing key: ' + keyError.args[0])
 
-  def bgHandlerProof(self, message):
-    print 'Pretending to handle something in the background...'
-    time.sleep(1)    
-    print message
-    print 'Done handling something in the background!...'
+  def decisionThread(self, message, cleanTime,storageAdd,deviceBaseAdd):
+    #Set up connection to persistent storage
+    conn = httplib.HTTPConnection(self.server.storageAddress[0], self.server.storageAddress[1])
+    #Pass the JSON file to persistent storage
+    payload = json.dumps({"action-type":"location-update","action-data":message})
+    conn.request('PATCH', 'A/' + message['userId'] + '/' + cleanTime + '/' + 'WayneManor', payload)
+    response = conn.getresponse()
+    print response.status
+    print response.read()
+    #make a random decision
+    decisions.randomDecision(float(message["lat"]), float(message["long"]), float(message["alt"]), str(message["userId"]), cleanTime, storageAdd, deviceBaseAdd)
 
 class HaltableHTTPServer(BaseHTTPServer.HTTPServer):
 
