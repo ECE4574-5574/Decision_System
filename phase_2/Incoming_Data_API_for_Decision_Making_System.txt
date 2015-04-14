@@ -1,6 +1,6 @@
-Incoming API for Decision Making System
+#Incoming Server API for Decision Making System
 
-Connect to: "http://localhost:8081"
+#Connect to: "http://localhost:8081"
 
 POST:
 	Path "/Weather":
@@ -14,7 +14,7 @@ POST:
 				"temperature":70, 
 				"time":"YYYY-MM-DD HH:MM:SS" 
 			}
-	Path "/DeviceState":		#this might have been changed to "device"
+	Path "/DeviceState":		#this might have been changed to "device" # the same JSON format will be used when changing device states
 	url: "DeviceState/{houseid}/{roomid}/{deviceid}"
 		Expects a JSON string formated like:
 			{
