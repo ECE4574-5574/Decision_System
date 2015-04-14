@@ -34,7 +34,7 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             message = json.loads(data)
         except ValueError:
             self.send_response(400)
-            self.end_headers
+            self.end_headers()
             self.wfile.write("\nThe request body could not be parsed as JSON. The received request body:\n" + data)
             return
         #If a weather update is received then that information is printed and a 200 response is sent
@@ -47,6 +47,7 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.handleMissingKey(ke)
                 return
             self.send_response(200)
+            self.end_headers()
         #If a device state update is received then that inofrmation is printed and a 200 response is sent
         elif self.path == "/DeviceState":
             try:
@@ -60,6 +61,7 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.handleMissingKey(ke)
                 return
             self.send_response(200)
+            self.end_headers()
         #If a location change update is received the information is printed and sent to persistent storage. A decision is also made based on the change of location
         #and a 200 response is sent
         elif self.path == "/LocationChange":
@@ -75,9 +77,9 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 formatted = dateTimeObject.strftime("%Y-%m-%dT%H:%M:%SZ")
                 handler = threading.Thread(None, self.decisionThread, 'Handler for POST/LocationChange', args = (message,formatted,self.server.storageAddress,self.server.deviceBase))
                 self.server.threads.append(handler)
-                handler.start()
-                        
+                handler.start()             
                 self.send_response(200)
+                self.end_headers()
             except KeyError as ke:
                 self.handleMissingKey(ke)
                 return
@@ -96,6 +98,7 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 return
             decisions.randomDecision()
             self.send_response(200)
+            self.end_headers()
         elif self.path == "/TimeConfig":
             self.server.timeconfig = message
             self.send_response(200)
@@ -107,6 +110,7 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.handleMissingKey(ke)
                 return
             self.send_response(200)
+            self.end_headers()
         else:
             self.send_response(400)
             self.end_headers()
