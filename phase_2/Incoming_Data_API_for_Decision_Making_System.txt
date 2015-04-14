@@ -4,6 +4,7 @@ Connect to: "http://localhost:8081"
 
 POST:
 	Path "/Weather":
+	url: "/Weather/{username}"
 		Expects a JSON string formated like:
 			{
 				"lat":70.123456, 
@@ -13,17 +14,19 @@ POST:
 				"temperature":70, 
 				"time":"YYYY-MM-DD HH:MM:SS" 
 			}
-	Path "/DeviceState":
+	Path "/DeviceState":		#this might have been changed to "device"
+	url: "DeviceState/{houseid}/{roomid}/{deviceid}"
 		Expects a JSON string formated like:
 			{
-				"deviceID":1, 
 				"deviceName":"BedroomLight", 
-				"deviceType":3, 
-				"spaceID": 4, 
-				"stateDevice":1, 
+				"deviceType":3, #this will be based on the device types provided by the device API  
+				"enabled":  true/false,
+				"setpoint:": int64,
+				#the device parameters will change depending upon device type
 				"time":"YYYY-MM-DD HH:MM:SS"
 			}
 	Path "/LocationChange":
+	url: "/LocationChange/{username}"
 		Expects a JSON string formated like:
 			{	
 				"lat":70.123456, 
@@ -33,14 +36,18 @@ POST:
 			}
 		**NOTE: A field will need to be added here with a key of "user" or something similar that will hold the user name
 	Path "/CommandsFromApp":
+	url: "/CommandsFromApp/{username}"
 		Expects a JSON string formated like:
 			{
-				"commandUserID":4,
-				"commanddeviceID":1, 
-				"commanddeviceName":"BedroomLight", 
-				"commanddeviceType":3, 
-				"commandspaceID": 4, 
-				"commandstateDevice":0, 
+				"commandUserID":"Brighten", #OR "dim" etc.
+				"lat":70.123456,
+				"long":300.123456, 
+				"alt":150.123456,
+				#"commanddeviceID":1, 
+				#"commanddeviceName":"BedroomLight", 
+				#"commanddeviceType":3, 
+				#"commandspaceID": 4, 
+				#"commandstateDevice":0, 
 				"time":"YYYY-MM-DD HH:MM:SS"
 			}
 	Path "/LocalTime":
