@@ -78,6 +78,7 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 handler.start()
                         
                 self.send_response(200)
+                self.end_headers()
             except KeyError as ke:
                 self.handleMissingKey(ke)
                 return
