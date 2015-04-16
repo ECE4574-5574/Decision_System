@@ -43,11 +43,11 @@ POST:
 				"lat":70.123456,
 				"long":300.123456, 
 				"alt":150.123456,
-				#"commanddeviceID":1, 
-				#"commanddeviceName":"BedroomLight", 
-				#"commanddeviceType":3, 
-				#"commandspaceID": 4, 
-				#"commandstateDevice":0, 
+				"commanddeviceID":1, 
+				"commanddeviceName":"BedroomLight", 
+				"commanddeviceType":3, 
+				"commandspaceID": 4, 
+				"commandstateDevice":0, 
 				"time":"YYYY-MM-DD HH:MM:SS"
 			}
 	Path "/LocalTime":

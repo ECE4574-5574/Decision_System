@@ -51,12 +51,24 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         #If a device state update is received then that inofrmation is printed and a 200 response is sent
         elif self.path == "/DeviceState":
             try:
-                print "The Device ID is " + str(message["deviceID"])
                 print "The Device Name is " + str(message["deviceName"])
                 print "The Device Type is " + str(message["deviceType"])
-                print "The SpaceID is " + str(message["spaceID"])
-                print "The state is " + str(message["stateDevice"])
-                print "Timestamp of DeviceState Action " + str(message["DeviceStateTimeStamp"])
+                print "The Device is enabled " + str(message["enabled"])
+                print "The setpoint is " + str(message["setpoint"])
+                print "Timestamp of DeviceState Action " + str(message["time"])
+                # Begin - Prerana Rane 4/15/2015
+                #Logging the device state changes in the persistent storage 
+                #Set up connection to persistent storage
+                conn = httplib.HTTPConnection(self.server.storageAddress[0], self.server.storageAddress[1])
+                #change the format to the format required by persistent storage
+                dateTimeObject = datetime.strptime(message["time"], "%Y-%m-%d %H:%M:%S")
+                formatted = dateTimeObject.strftime("%Y-%m-%dT%H:%M:%SZ")
+                payload = json.dumps({"action-type":"device state change","action-data":message})
+                conn.request('PATCH', 'C/' + "user1" + '/' + formatted + '/' + 'WayneManor' + '/' + "aspace" + '/' + message['deviceName'], payload)
+                response = conn.getresponse()
+                print response.status
+                print response.read()                
+                #End - Prerana Rane 4/15/2015
             except KeyError as ke:
                 self.handleMissingKey(ke)
                 return
@@ -87,16 +99,34 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         elif self.path == "/CommandsFromApp":
             try:
                 print "For User " + str(message["commandUserID"])
+                print "Latitude " + str(message["lat"])
+                print "Longitude " + str(message["long"])
+                print "Altitude " + str(message["alt"])
                 print "Turn off Device ID " + str(message["commanddeviceID"])
                 print "The Device Name is " + str(message["commanddeviceName"])
                 print "The Device Type is " + str(message["commanddeviceType"])
                 print "The SpaceID is " + str(message["commandspaceID"])
                 print "The state is " + str(message["commandstateDevice"])
-                print "Timestamp of Command " + str(message["CommandTimeStamp"])
+                print "Timestamp of Command " + str(message["time"])
+                #Begin - Prerana Rane 4/15/2015
+                #Set up connection to persistent storage
+                #change the format to the format required by persistent storage
+                
+                #dateTimeObject = datetime.strptime(message["time"], "%Y-%m-%d %H:%M:%S")
+                
+                #formatted = dateTimeObject.strftime("%Y-%m-%dT%H:%M:%SZ")
+                #Pass the JSON file to persistent storage
+                #print "sending now"
+                #payload = json.dumps({"action-type":"verbal-command","action-data":message})
+                #conn.request('PATCH', 'C/' + message['commandUserID'] + '/' + formatted + '/' + 'WayneManor' + '/' + message['commandspaceID'] + '/' + message['commanddeviceName'], payload)
+                #print "getting response"
+                #response = conn.getresponse()
+                #print response.status
+                #print response.read()
+                #End - Prerana Rane 4/15/2015
             except KeyError as ke:
                 self.handleMissingKey(ke)
                 return
-            decisions.randomDecision()
             self.send_response(200)
             self.end_headers()
         elif self.path == "/TimeConfig":
