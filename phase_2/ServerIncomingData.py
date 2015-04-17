@@ -12,7 +12,6 @@ and  posted to the local server. The data will then be stored in temporary data 
 import BaseHTTPServer
 import SocketServer
 import json
-import decisions
 import traceback
 import threading
 import time
@@ -21,11 +20,13 @@ import argparse
 import sys
 from temporaryHolding import TemporaryHolding
 from datetime import datetime
+from decisionClass import decisionMaking
 
 #Class that gets called whenever there is an HTTP request
 class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
   def do_POST(self):
     try:
+        decision = decisionMaking("alocation", self.server.storageAddress, self.server.deviceBase)
         length = int(self.headers.getheader('content-length', 0))
         data = self.rfile.read(length)
         message = ""
@@ -39,100 +40,30 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             return
         #If a weather update is received then that information is printed and a 200 response is sent
         if self.path == "/Weather":
-            try: 
-                print "The weather condition is " + str(message["condition"])
-                print "The temperature is " + str(message["temperature"])
-                print "Timestamp of WeatherUpdate " + str(message["WeatherTimeStamp"])
-            except KeyError as ke:
-                self.handleMissingKey(ke)
-                return
-            self.send_response(200)
-            self.end_headers()
+            if(decision.weatherDecision(message)):
+                self.send_response(200)
+                self.end_headers()
         #If a device state update is received then that inofrmation is printed and a 200 response is sent
         elif self.path == "/DeviceState":
-            try:
-                print "The Device Name is " + str(message["deviceName"])
-                print "The Device Type is " + str(message["deviceType"])
-                print "The Device is enabled " + str(message["enabled"])
-                print "The setpoint is " + str(message["setpoint"])
-                print "Timestamp of DeviceState Action " + str(message["time"])
-                # Begin - Prerana Rane 4/15/2015
-                #Logging the device state changes in the persistent storage 
-                #Set up connection to persistent storage
-                conn = httplib.HTTPConnection(self.server.storageAddress[0], self.server.storageAddress[1])
-                #change the format to the format required by persistent storage
-                dateTimeObject = datetime.strptime(message["time"], "%Y-%m-%d %H:%M:%S")
-                formatted = dateTimeObject.strftime("%Y-%m-%dT%H:%M:%SZ")
-                payload = json.dumps({"action-type":"device state change","action-data":message})
-                conn.request('PATCH', 'C/' + "user1" + '/' + formatted + '/' + 'WayneManor' + '/' + "aspace" + '/' + message['deviceName'], payload)
-                response = conn.getresponse()
-                print response.status
-                print response.read()                
-                #End - Prerana Rane 4/15/2015
-            except KeyError as ke:
-                self.handleMissingKey(ke)
-                return
-            self.send_response(200)
-            self.end_headers()
+            if(decision.deviceStateDecision(message)):
+                self.send_response(200)
+                self.end_headers()
         #If a location change update is received the information is printed and sent to persistent storage. A decision is also made based on the change of location
         #and a 200 response is sent
         elif self.path == "/LocationChange":
-            try:
-                temp = TemporaryHolding()
-                print "The user ID is: " + str(message["userId"])
-                print "The Latitude is " + str(message["lat"])
-                print "The Longitude is  " + str(message["long"])
-                print "The Altitude is " + str(message["alt"])
-                print "Timestamp of LocationChange " + str(message["time"])
-                #change the format to the format required by persistent storage
-                dateTimeObject = datetime.strptime(message["time"], "%Y-%m-%d %H:%M:%S")
-                formatted = dateTimeObject.strftime("%Y-%m-%dT%H:%M:%SZ")
-                handler = threading.Thread(None, self.decisionThread, 'Handler for POST/LocationChange', args = (message,formatted,self.server.storageAddress,self.server.deviceBase))
-                self.server.threads.append(handler)
-                handler.start()             
+            if(decision.locationDecision(message)):
                 self.send_response(200)
                 self.end_headers()
-            except KeyError as ke:
-                self.handleMissingKey(ke)
-                return
         #If there is a command from the app print the command
         elif self.path == "/CommandsFromApp":
-            try:
-                print "For User " + str(message["commandUserID"])
-                print "Latitude " + str(message["lat"])
-                print "Longitude " + str(message["long"])
-                print "Altitude " + str(message["alt"])
-                print "Turn off Device ID " + str(message["commanddeviceID"])
-                print "The Device Name is " + str(message["commanddeviceName"])
-                print "The Device Type is " + str(message["commanddeviceType"])
-                print "The SpaceID is " + str(message["commandspaceID"])
-                print "The state is " + str(message["commandstateDevice"])
-                print "Timestamp of Command " + str(message["time"])
-                #Begin - Prerana Rane 4/15/2015
-                #Set up connection to persistent storage
-                #change the format to the format required by persistent storage
-                
-                #dateTimeObject = datetime.strptime(message["time"], "%Y-%m-%d %H:%M:%S")
-                
-                #formatted = dateTimeObject.strftime("%Y-%m-%dT%H:%M:%SZ")
-                #Pass the JSON file to persistent storage
-                #print "sending now"
-                #payload = json.dumps({"action-type":"verbal-command","action-data":message})
-                #conn.request('PATCH', 'C/' + message['commandUserID'] + '/' + formatted + '/' + 'WayneManor' + '/' + message['commandspaceID'] + '/' + message['commanddeviceName'], payload)
-                #print "getting response"
-                #response = conn.getresponse()
-                #print response.status
-                #print response.read()
-                #End - Prerana Rane 4/15/2015
-            except KeyError as ke:
-                self.handleMissingKey(ke)
-                return
-            self.send_response(200)
-            self.end_headers()
+            if(decision.command(message)):
+                self.send_response(200)
+                self.end_headers()
         elif self.path == "/TimeConfig":
-            self.server.timeconfig = message
-            self.send_response(200)
-            self.end_headers()
+            if(decision.timeDecision(message)):
+                self.send_response(200)
+                self.end_headers()
+
         elif self.path == "/LocalTime":
             try:
                 print "You may choose to perform a action based on time/date, so the time/date is now" + str(message["localTime"])
@@ -160,18 +91,6 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     self.wfile.write('Request path: ' + self.path + '\n')
     if not keyError is None:
         self.wfile.write('Missing key: ' + keyError.args[0])
-
-  def decisionThread(self, message, cleanTime,storageAdd,deviceBaseAdd):
-    #Set up connection to persistent storage
-    conn = httplib.HTTPConnection(self.server.storageAddress[0], self.server.storageAddress[1])
-    #Pass the JSON file to persistent storage
-    payload = json.dumps({"action-type":"location-update","action-data":message})
-    conn.request('PATCH', 'A/' + message['userId'] + '/' + cleanTime + '/' + 'WayneManor', payload)
-    response = conn.getresponse()
-    print response.status
-    print response.read()
-    #make a random decision
-    decisions.randomDecision(float(message["lat"]), float(message["long"]), float(message["alt"]), str(message["userId"]), cleanTime, storageAdd, deviceBaseAdd)
 
 class HaltableHTTPServer(BaseHTTPServer.HTTPServer):
 

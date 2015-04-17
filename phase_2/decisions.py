@@ -23,8 +23,8 @@ def randomDecision(lat, longi, alt, userId, timeframe, persistent, server):
     # Modify the state for the deviceId based on decision made by the Decision Making algorithm and the location received
 
     if(lat>= 0 and longi >= 0):                                                 #Checks latitude,longitude before making a decision
-        print "User is in Room#1"
-        print "Turn on devices in Room1"
+        print "User is in Room #1"
+        print "Turn on devices in Room 1"
         data1_json= {
                     "houseId": "WayneManor",
                     "roomId": "Atrium",
@@ -44,7 +44,7 @@ def randomDecision(lat, longi, alt, userId, timeframe, persistent, server):
         print response2.status
         print response2.read()
     elif(lat < 0 and longi < 0):                                                 #Checks latitude,longitude before making a decision
-        print "User is in Room#2"
+        print "User is in Room #2"
         print "Turn on devices in Room2"
         data2_json= {
                     "houseId": "WayneManor",
