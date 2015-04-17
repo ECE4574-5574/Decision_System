@@ -1,27 +1,63 @@
 import httplib
 import json
 import datetime
+import argparse
 
-connection = httplib.HTTPConnection('localhost', 8081)
+parser = argparse.ArgumentParser(description='Get port number...')
+parser.add_argument('-p', '--port', type=int)
+args=parser.parse_args()
+
+connection = httplib.HTTPConnection('localhost', args.port)
 
 
-
-weather = {"condition":"Sunny", "temperature":70, "WeatherTimeStamp":str(datetime.datetime.now())}
-deviceState = {"deviceID":1, "deviceName":"BedroomLight", "deviceType":3, "spaceID": 4, "stateDevice":1, "DeviceStateTimeStamp":str(datetime.datetime.now())}
-locationChange = {"usersID":3, "latitude":70, "longitude":300, "altitude":150, "locationTimeStamp":str(datetime.datetime.now())}
-commandsfromApp = {"commandUserID":4,"commanddeviceID":1, "commanddeviceName":"BedroomLight", "commanddeviceType":3, "commandspaceID": 4, "commandstateDevice":0, "CommandTimeStamp":str(datetime.datetime.now())}
+deviceState = {"deviceName":"BedroomLight", "deviceType":3, "enabled":"true", "setpoint":5, "time":"2015-04-06 18:05:05"}
+locationChange = {"userId":"user1", "lat":70.123456, "long":300.123456, "alt":150.123456, "time":"2015-04-06 18:05:05"}
 time = {"localTime":str(datetime.datetime.now())}
-
-
-connection.request('POST', '/Weather', json.dumps(weather))
-res =  connection.getresponse()
+commandsfromApp = {"commandUserID":"user1", "lat":70.123456, "long":300.123456, "alt":150.123456,"commanddeviceID":1,"commanddeviceName":"BedroomLight", "commanddeviceType":3,"commandspaceID": 4,"commandstateDevice":0,"time":"2015-04-06 18:05:05"}
+#Test device state change response.
+print 'Testing response to device state change'
 connection.request('POST', '/DeviceState', json.dumps(deviceState))
-res =  connection.getresponse()
+res = connection.getresponse()
+print 'Device State Change Response' + str(res.status)
+if (res.status == 200):
+    print 'PASS'
+else:
+    print 'FAIL'
+
+#Test location change response.
+print 'Testing response to location change...'
+print 'POST/LocationChange ' + json.dumps(locationChange)
 connection.request('POST', '/LocationChange', json.dumps(locationChange))
-res =  connection.getresponse()
+res = connection.getresponse()
+print 'Location Change Response' + str(res.status)
+if (res.status == 200):
+    print 'PASS'
+else:
+    print 'FAIL'
+    
+#Test test receiving a user command from the app (ex. brighten lights)
+print 'Testing response to app command...'
 connection.request('POST', '/CommandsFromApp', json.dumps(commandsfromApp))
-res =  connection.getresponse()
+res = connection.getresponse()
+if (res.status == 200):
+    print 'PASS'
+else:
+    print 'FAIL'
+
+#test sending the local time to us
+print "Testing response to the time"
 connection.request('POST', '/LocalTime', json.dumps(time))
-res =  connection.getresponse()
+res = connection.getresponse()
+if (res.status == 200):
+    print 'PASS'
+else:
+    print 'FAIL'
+
+#Testing an in correct URL
+print "Testing an incorrect URL"
 connection.request('POST', '/CausesError', json.dumps(time))
 res = connection.getresponse()
+if (res.status == 200):
+    print 'PASS'
+else:
+    print 'FAIL'
