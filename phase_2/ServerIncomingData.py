@@ -26,7 +26,7 @@ from decisionClass import decisionMaking
 class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
   def do_POST(self):
     try:
-        decision = decisionMaking("alocation", self.server.storageAddress, self.server.deviceBase)
+        decision = decisionMaking(self.server.outputfile, self.server.storageAddress, self.server.deviceBase)
         length = int(self.headers.getheader('content-length', 0))
         data = self.rfile.read(length)
         message = ""
@@ -41,28 +41,48 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         #If a weather update is received then that information is printed and a 200 response is sent
         if self.path == "/Weather":
             if(decision.weatherDecision(message)):
+                line = "Decision " + str(self.server.decisionCount) + ":\n"
+                self.server.decisionCount += 1
+                self.server.outputfile.write(line)
                 self.send_response(200)
                 self.end_headers()
+                
         #If a device state update is received then that inofrmation is printed and a 200 response is sent
         elif self.path == "/DeviceState":
             if(decision.deviceStateDecision(message)):
+                line = "Decision " + str(self.server.decisionCount) + ":\n"
+                self.server.decisionCount += 1
+                self.server.outputfile.write(line)
                 self.send_response(200)
                 self.end_headers()
+                
         #If a location change update is received the information is printed and sent to persistent storage. A decision is also made based on the change of location
         #and a 200 response is sent
         elif self.path == "/LocationChange":
             if(decision.locationDecision(message)):
+                line = "Decision " + str(self.server.decisionCount) + ":\n"
+                self.server.decisionCount += 1
+                self.server.outputfile.write(line)
                 self.send_response(200)
                 self.end_headers()
+
         #If there is a command from the app print the command
         elif self.path == "/CommandsFromApp":
             if(decision.command(message)):
+                line = "Decision " + str(self.server.decisionCount) + ":\n"
+                self.server.decisionCount += 1
+                self.server.outputfile.write(line)
                 self.send_response(200)
                 self.end_headers()
+
         elif self.path == "/TimeConfig":
             if(decision.timeDecision(message)):
+                line = "Decision " + str(self.server.decisionCount) + ":\n"
+                self.server.decisionCount += 1
+                self.server.outputfile.write(line)
                 self.send_response(200)
                 self.end_headers()
+                
 
         elif self.path == "/LocalTime":
             try:
@@ -94,7 +114,7 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
 class HaltableHTTPServer(BaseHTTPServer.HTTPServer):
 
-    def __init__(self, server_address, persistentStorageAddress, deviceBase, RequestHandlerClass):
+    def __init__(self, server_address, persistentStorageAddress, deviceBase, RequestHandlerClass, outputfile):
         BaseHTTPServer.HTTPServer.__init__(self, server_address, RequestHandlerClass)
         self.shouldStop = False
         self.timeout = 1
@@ -102,6 +122,8 @@ class HaltableHTTPServer(BaseHTTPServer.HTTPServer):
         self.timeconfig = {}
         self.threads=[]
         self.deviceBase = deviceBase
+        self.outputfile = outputfile
+        self.decisionCount = 1
 
     def serve_forever (self):
         while not self.shouldStop:
@@ -126,12 +148,18 @@ if __name__ == "__main__":
     argparser.add_argument('-p', '--port', type=int)
     argparser.add_argument('-t', '--storage', type=str)
     argparser.add_argument('-d', '--devicebase', type=str, default='http://localhost:8082/api/devicemgr/state/')
+    argparser.add_argument('-o', '--outputfile', type=str)
     args = argparser.parse_args()
     #Validate arguments. Port number:
     if args.port < 0:
         print "You must enter a port number greater than 0."
         argparser.print_help()
         sys.exit(1)
+    if args.outputfile <= 0:
+        print "You must specify an output file name"
+        argparser.print_help()
+        sys.exit(1)
+    outf = open(args.outputfile, 'w')
     #Persistent storage address:
     persistentStorageAddress=[]
     try:
@@ -143,7 +171,7 @@ if __name__ == "__main__":
         print "You must enter a valid persistent storage address and port number (e.g. 127.0.0.1:8080)"
         argparser.print_help()
         sys.exit(1) 
-    server = HaltableHTTPServer(('',args.port), persistentStorageAddress, args.devicebase, ServerInfoHandler)
+    server = HaltableHTTPServer(('',args.port), persistentStorageAddress, args.devicebase, ServerInfoHandler, outf)
     #Print the server port. We actually get this from the server object, since
     #the user can enter a port number of 0 to have the OS assign some open port.
     print "Serving on port " + str(server.socket.getsockname()[1]) + "..."
@@ -159,6 +187,7 @@ if __name__ == "__main__":
             time.sleep(10)
     except KeyboardInterrupt:
         print 'Attempting to stop server (timeout in 30s)...'
+        outf.close()
         server.shouldStop = True
         serverThread.join(30)
         if serverThread.isAlive():

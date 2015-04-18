@@ -8,7 +8,7 @@ import os
 import httplib
 
 
-def randomDecision(lat, longi, alt, userId, timeframe, persistent, server):   
+def randomDecision(lat, longi, alt, userId, timeframe, persistent, server, outputfile):   
     # Run the URL hosted by server API teams
     url = server         #URL for Server API
     conn = httplib.HTTPConnection(persistent[0], persistent[1])                       #IP Address for Persistent Storage
@@ -34,7 +34,8 @@ def randomDecision(lat, longi, alt, userId, timeframe, persistent, server):
                     "spaceId": 4,
                     "state": 1
             }
-       
+        line = str(data1_json) + "\n"
+        outputfile.write(line)
         #response = requests.post(device1_url, data=data1_json, headers=headers)  #sends response to the Server API
         conn.request('PATCH', 'C/' + userId + '/' + timeframe + '/' + 'WayneManor' + '/11' + '/1', json.dumps(data1_json))  #sends response to the Persistent Storage
         response2 = conn.getresponse()
@@ -43,6 +44,7 @@ def randomDecision(lat, longi, alt, userId, timeframe, persistent, server):
         print "Persistent storage response"                                                        #prints response
         print response2.status
         print response2.read()
+
     elif(lat < 0 and longi < 0):                                                 #Checks latitude,longitude before making a decision
         print "User is in Room #2"
         print "Turn on devices in Room2"
@@ -55,7 +57,8 @@ def randomDecision(lat, longi, alt, userId, timeframe, persistent, server):
                     "spaceId": 5,
                     "state": 1
             }
-            
+        line = str(data2_json) + "\n"
+        outputfile.write(line)    
         #response = requests.post(device1_url, data=data2_json, headers=headers)  #sends response to the Server API
         conn.request('PATCH', 'C/' + userId + '/' + timeframe + '/' + 'WayneManor' + '/12' + '/2', json.dumps(data2_json))  #sends response to the Persistent Storage
         response2 = conn.getresponse()
@@ -76,7 +79,8 @@ def randomDecision(lat, longi, alt, userId, timeframe, persistent, server):
                     "spaceId": 4,
                     "state": 0
             }
-            
+        line = str(data3_json) + "\n"
+        outputfile.write(line)    
         #response = requests.post(device1_url, data=data3_json, headers=headers)  #sends response to the Server API
         conn.request('PATCH', 'C/' + userId + '/' + timeframe + '/' + 'WayneManor' + '/13' + '/3', json.dumps(data3_json))  #sends response to the Persistent Storage
         response2 = conn.getresponse()
