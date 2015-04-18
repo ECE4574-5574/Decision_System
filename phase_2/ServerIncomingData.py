@@ -40,49 +40,92 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             return
         #If a weather update is received then that information is printed and a 200 response is sent
         if self.path == "/Weather":
-            if(decision.weatherDecision(message)):
-                line = "Decision " + str(self.server.decisionCount) + ":\n"
-                self.server.decisionCount += 1
-                self.server.outputfile.write(line)
-                self.send_response(200)
-                self.end_headers()
+            try: 
+                print "The weather condition is " + str(message["condition"])
+                print "The temperature is " + str(message["temperature"])
+                print "Timestamp of WeatherUpdate " + str(message["WeatherTimeStamp"])
+                if(decision.weatherDecision(message)):
+                    line = "Decision " + str(self.server.decisionCount) + ":\n"
+                    self.server.decisionCount += 1
+                    self.server.outputfile.write(line)
+                    self.send_response(200)
+                    self.end_headers()
+            except KeyError as ke:
+                self.handleMissingKey(ke)
+                return 
                 
         #If a device state update is received then that inofrmation is printed and a 200 response is sent
         elif self.path == "/DeviceState":
-            if(decision.deviceStateDecision(message)):
-                line = "Decision " + str(self.server.decisionCount) + ":\n"
-                self.server.decisionCount += 1
-                self.server.outputfile.write(line)
-                self.send_response(200)
-                self.end_headers()
-                
+            try:
+                print "The Device Name is " + str(message["deviceName"])
+                print "The Device Type is " + str(message["deviceType"])
+                print "The Device is enabled " + str(message["enabled"])
+                print "The setpoint is " + str(message["setpoint"])
+                print "Timestamp of DeviceState Action " + str(message["time"])
+                if(decision.deviceStateDecision(message)):
+                    line = "Decision " + str(self.server.decisionCount) + ":\n"
+                    self.server.decisionCount += 1
+                    self.server.outputfile.write(line)
+                    self.send_response(200)
+                    self.end_headers()
+            except KeyError as ke:
+                self.handleMissingKey(ke)
+                return
+
         #If a location change update is received the information is printed and sent to persistent storage. A decision is also made based on the change of location
         #and a 200 response is sent
         elif self.path == "/LocationChange":
-            if(decision.locationDecision(message)):
-                line = "Decision " + str(self.server.decisionCount) + ":\n"
-                self.server.decisionCount += 1
-                self.server.outputfile.write(line)
-                self.send_response(200)
-                self.end_headers()
+            try:
+                print "The user ID is: " + str(message["userId"])
+                print "The Latitude is " + str(message["lat"])
+                print "The Longitude is  " + str(message["long"])
+                print "The Altitude is " + str(message["alt"])
+                print "Timestamp of LocationChange " + str(message["time"])
+                if(decision.locationDecision(message)):
+                    line = "Decision " + str(self.server.decisionCount) + ":\n"
+                    self.server.decisionCount += 1
+                    self.server.outputfile.write(line)
+                    self.send_response(200)
+                    self.end_headers()
+            except KeyError as ke:
+                self.handleMissingKey(ke)
+                return
 
         #If there is a command from the app print the command
         elif self.path == "/CommandsFromApp":
-            if(decision.command(message)):
-                line = "Decision " + str(self.server.decisionCount) + ":\n"
-                self.server.decisionCount += 1
-                self.server.outputfile.write(line)
-                self.send_response(200)
-                self.end_headers()
+            try:
+                print "For User " + str(message["commandUserID"])
+                print "Latitude " + str(message["lat"])
+                print "Longitude " + str(message["long"])
+                print "Altitude " + str(message["alt"])
+                print "Turn off Device ID " + str(message["commanddeviceID"])
+                print "The Device Name is " + str(message["commanddeviceName"])
+                print "The Device Type is " + str(message["commanddeviceType"])
+                print "The SpaceID is " + str(message["commandspaceID"])
+                print "The state is " + str(message["commandstateDevice"])
+                print "Timestamp of Command " + str(message["time"])
+                if(decision.command(message)):
+                    line = "Decision " + str(self.server.decisionCount) + ":\n"
+                    self.server.decisionCount += 1
+                    self.server.outputfile.write(line)
+                    self.send_response(200)
+                    self.end_headers()
+            except KeyError as ke:
+                self.handleMissingKey(ke)
+                return
 
         elif self.path == "/TimeConfig":
-            if(decision.timeDecision(message)):
-                line = "Decision " + str(self.server.decisionCount) + ":\n"
-                self.server.decisionCount += 1
-                self.server.outputfile.write(line)
-                self.send_response(200)
-                self.end_headers()
-                
+            try:
+                print "You may choose to perform a action based on time/date, so the time/date is now" + str(message["localTime"])
+                if(decision.timeDecision(message)):
+                    line = "Decision " + str(self.server.decisionCount) + ":\n"
+                    self.server.decisionCount += 1
+                    self.server.outputfile.write(line)
+                    self.send_response(200)
+                    self.end_headers()
+            except KeyError as ke:
+                self.handleMissingKey(ke)
+                return
 
         elif self.path == "/LocalTime":
             try:
