@@ -58,11 +58,11 @@ if __name__ == "__main__":
     notJson = "this is some garbage that isn't json"
 
     missingKeys = json.dumps({'userID':'some-user-id',
-        'lat':0.1111, 'long':0.1111, 
+        'lat':0.1111, 'lon':0.1111, 
         'command-string':'brightenNearMe'})
 
     notANumber = json.dumps({'userID':'some-user-id',
-        'lat':0.1111, 'long':'garbage', 'alt':0.111,
+        'lat':0.1111, 'lon':'garbage', 'alt':0.111,
         'command-string':'brightenNearMe'})
         
     conn = httplib.HTTPConnection('localhost', decision_server_port)
