@@ -94,16 +94,17 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         #If there is a command from the app print the command
         elif self.path == "/CommandsFromApp":
             try:
-                print "For User " + str(message["commandUserID"])
+                print "For User " + str(message["userID"])
                 print "Latitude " + str(message["lat"])
-                print "Longitude " + str(message["long"])
+                print "Longitude " + str(message["lon"])
                 print "Altitude " + str(message["alt"])
-                print "Turn off Device ID " + str(message["commanddeviceID"])
-                print "The Device Name is " + str(message["commanddeviceName"])
-                print "The Device Type is " + str(message["commanddeviceType"])
-                print "The SpaceID is " + str(message["commandspaceID"])
-                print "The state is " + str(message["commandstateDevice"])
-                print "Timestamp of Command " + str(message["time"])
+                for field in ["lat", "lon", "alt"]:
+                    if not (isinstance(message[field], int) or isinstance(message[field], float)):
+                        self.send_response(400)
+                        self.end_headers()
+                        self.wfile.write('The field ' + field + ' must be numeric. Received: ' + str(message[field]))
+                        return
+                print "The command is " + str(message["command-string"])
                 if(decision.command(message)):
                     line = "Decision " + str(self.server.decisionCount) + ":\n"
                     self.server.decisionCount += 1
