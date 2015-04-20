@@ -95,12 +95,13 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 print "Latitude " + str(message["lat"])
                 print "Longitude " + str(message["lon"])
                 print "Altitude " + str(message["alt"])
-                print "Turn off Device ID " + str(message["commanddeviceID"])
-                print "The Device Name is " + str(message["commanddeviceName"])
-                print "The Device Type is " + str(message["commanddeviceType"])
-                print "The SpaceID is " + str(message["commandspaceID"])
-                print "The state is " + str(message["commandstateDevice"])
-                print "Timestamp of Command " + str(message["time"])
+                for field in ["lat", "lon", "alt"]:
+                    if not (isinstance(message[field], int) or isinstance(message[field], float)):
+                        self.send_response(400)
+                        self.end_headers()
+                        self.wfile.write('The field ' + field + ' must be numeric. Received: ' + str(message[field]))
+                        return
+                print "The command is " + str(message["command-string"])
                 self.send_response(200)
                 self.end_headers()
                 decision.command(message, self.server.decisionCount)
