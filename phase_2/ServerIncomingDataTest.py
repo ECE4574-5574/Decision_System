@@ -9,7 +9,7 @@ args=parser.parse_args()
 
 connection = httplib.HTTPConnection('localhost', args.port)
 
-
+weather = {"condition":"sunny","temperature":72.2,"time":"2015-04-06 18:05:05"}
 deviceState = {"deviceName":"BedroomLight", "deviceType":3, "enabled":"true", "setpoint":5, "time":"2015-04-06 18:05:05"}
 locationChange = {"userId":"user1", "lat":70.123456, "long":300.123456, "alt":150.123456, "time":"2015-04-06 18:05:05"}
 time = {"localTime":str(datetime.datetime.now())}
@@ -48,6 +48,17 @@ else:
 print "Testing response to the time"
 connection.request('POST', '/LocalTime', json.dumps(time))
 res = connection.getresponse()
+if (res.status == 200):
+    print 'PASS'
+else:
+    print 'FAIL'
+
+#Testing sending a weather update
+print 'Testing response to weather change...'
+print 'POST/Weather ' + json.dumps(weather)
+connection.request('POST', '/Weather', json.dumps(weather))
+res = connection.getresponse()
+print 'Weather Response' + str(res.status)
 if (res.status == 200):
     print 'PASS'
 else:

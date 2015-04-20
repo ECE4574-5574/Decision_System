@@ -7,6 +7,7 @@
 import json
 import httplib
 import unittest
+import logging
 from decisionClass import decisionMaking
 
 def checkStatus(expected, response):
@@ -63,33 +64,37 @@ class commandDecisionTest(unittest.TestCase):
     #We do this because when the server is actually running, the decision runs asynchronously,
     #so it is a little bit harder to test.
     def testNoMatchingUser(self):
-        testoutfile = open('nomatchinguser.txt', 'w')
         try:
+            TEST_LOG_FILE = 'testnouser.log'
+            testLogger = logging.getLogger('nouser')
+            testHandler = logging.FileHandler(TEST_LOG_FILE, mode='w')
+            testHandler.setFormatter(logging.Formatter('%(message)'))
+            testLogger.addHandler(logging.FileHandler(TEST_LOG_FILE, mode='w'))
             print 'Testing command decision when user does not exist.'
-            dmaking = decisionMaking(testoutfile, ['localhost', 8080], 'http://localhost:8082')
-            dmaking.command(good_request_no_user, 0)
-            testoutfile.close()
-            testoutfile = open('nomatchinguser.txt')
-            log = testoutfile.read()
-            expected = ['Decision 0:',
+            dmaking = decisionMaking(testLogger, ['localhost', 8080], 'http://localhost:8082')
+            dmaking.command(good_request_no_user)
+            testoutfile = open(TEST_LOG_FILE)
+            log = testoutfile.read().strip('\n')
+            expected = ['Command Decision 1:',
                         'req localhost:8080 GET UI/nouser',
                         'response 404']
             self.assertTrue(validateLog(expected, log))
         except:
-            if not f.closed:
-                f.close()
             raise
     
     def testNoMatchingHouse(self):
-        testoutfile = open('nomatchinghouse.txt', 'w')
         try:
+            TEST_LOG_FILE = 'testnohouse.log'
+            testLogger = logging.getLogger('nohouse')
+            testHandler = logging.FileHandler(TEST_LOG_FILE, mode='w')
+            testHandler.setFormatter(logging.Formatter('%(message)'))
+            testLogger.addHandler(logging.FileHandler(TEST_LOG_FILE, mode='w'))
             print 'Testing command decision when there will be no matching house'
-            dmaking = decisionMaking(testoutfile, ['localhost', 8080], 'http://localhost:8082')
-            dmaking.command(good_request_no_house, 0)
-            testoutfile.close()
-            testoutfile = open('nomatchinghouse.txt')
+            dmaking = decisionMaking(testLogger, ['localhost', 8080], 'http://localhost:8082')
+            dmaking.command(good_request_no_house)
+            testoutfile = open(TEST_LOG_FILE)
             log = testoutfile.read().strip('\n')
-            expected = ['Decision 0:',
+            expected = ['Command Decision 1:',
                         'req localhost:8080 GET UI/'+ACTUAL_USER_ID,
                         'response 200',
                         'req localhost:8080 GET HI/1',
@@ -99,20 +104,22 @@ class commandDecisionTest(unittest.TestCase):
                         'Could not find a matching house for that user and coordinates.']
             self.assertTrue(validateLog(expected, log))
         except:
-            if not testoutfile.closed:
-                testoutfile.close()
             raise
     
     def testGoodRequest(self):
-        testoutfile = open('goodhouse.txt', 'w')
         try:
+            TEST_LOG_FILE = 'testallok.log'
+            testLogger = logging.getLogger('allok')
+            testHandler = logging.FileHandler(TEST_LOG_FILE, mode='w')
+            testHandler.setFormatter(logging.Formatter('%(message)'))
+            testLogger.addHandler(logging.FileHandler(TEST_LOG_FILE, mode='w'))
+            testLogger.setLevel(logging.INFO)
             print 'Testing command decision when there will be no matching user'
-            dmaking = decisionMaking(testoutfile, ['localhost', 8080], 'http://localhost:8082')
-            dmaking.command(good_request_should_work, 0)
-            testoutfile.close()
-            testoutfile = open('goodhouse.txt')
+            dmaking = decisionMaking(testLogger, ['localhost', 8080], 'http://localhost:8082')
+            dmaking.command(good_request_should_work)
+            testoutfile = open(TEST_LOG_FILE)
             log = testoutfile.read().strip('\n')
-            expected = ['Decision 0:',
+            expected = ['Command Decision 1:',
                 'req localhost:8080 GET UI/'+ACTUAL_USER_ID,
                 'response 200',
                 'req localhost:8080 GET HI/1',
@@ -123,8 +130,6 @@ class commandDecisionTest(unittest.TestCase):
                 'requesting devices']
             self.assertTrue(validateLog(expected, log))
         except:
-            if not testoutfile.closed:
-                testoutfile.close()
             raise
 
 notJson = "this is some garbage that isn't json"
