@@ -56,15 +56,20 @@ class commandDecisionTest(unittest.TestCase):
     #so it is a little bit harder to test.
     def testNoMatchingUser(self):
         testoutfile = open(OUTPUT_FILE, 'w')
-        print 'Testing command decision when user does not exist.'
-        dmaking = decisionMaking(testoutfile, ['localhost', 8080], 'dummy')
-        dmaking.command(good_request_no_user, 0)
-        testoutfile.close()
-        testoutfile = open(OUTPUT_FILE)
-        log = testoutfile.read()
-        expected = ['req localhost:8080 GET UI/nouser',
-                    'response 404']
-        self.assertTrue(validateLog(expected, log))
+        try:
+            print 'Testing command decision when user does not exist.'
+            dmaking = decisionMaking(testoutfile, ['localhost', 8080], 'dummy')
+            dmaking.command(good_request_no_user, 0)
+            testoutfile.close()
+            testoutfile = open(OUTPUT_FILE)
+            log = testoutfile.read()
+            expected = ['req localhost:8080 GET UI/nouser',
+                        'response 404']
+            self.assertTrue(validateLog(expected, log))
+        except:
+            if not f.closed:
+                f.close()
+            raise
 
 notJson = "this is some garbage that isn't json"
 
