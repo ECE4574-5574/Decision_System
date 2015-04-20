@@ -55,13 +55,13 @@ class commandDecisionTest(unittest.TestCase):
     #We do this because when the server is actually running, the decision runs asynchronously,
     #so it is a little bit harder to test.
     def testNoMatchingUser(self):
-        testoutfile = open(OUTPUT_FILE, 'w')
+        testoutfile = open('nomatchinguser.txt', 'w')
         try:
             print 'Testing command decision when user does not exist.'
             dmaking = decisionMaking(testoutfile, ['localhost', 8080], 'dummy')
             dmaking.command(good_request_no_user, 0)
             testoutfile.close()
-            testoutfile = open(OUTPUT_FILE)
+            testoutfile = open('nomatchinguser.txt')
             log = testoutfile.read()
             expected = ['req localhost:8080 GET UI/nouser',
                         'response 404']
@@ -69,6 +69,50 @@ class commandDecisionTest(unittest.TestCase):
         except:
             if not f.closed:
                 f.close()
+            raise
+    
+    def testNoMatchingHouse(self):
+        testoutfile = open('nomatchinghouse.txt', 'w')
+        try:
+            print 'Testing command decision when there will be no matching house'
+            dmaking = decisionMaking(testoutfile, ['localhost', 8080], 'dummy')
+            dmaking.command(good_request_no_house, 0)
+            testoutfile.close()
+            testoutfile = open('nomatchinghouse.txt')
+            log = testoutfile.read().strip('\n')
+            expected = ['req localhost:8080 GET UI/'+ACTUAL_USER_ID,
+                        'response 200',
+                        'req localhost:8080 GET HI/1',
+                        'response 200',
+                        'req localhost:8080 GET HI/101',
+                        'response 200',
+                        'Could not find a matching house for that user and coordinates.']
+            self.assertTrue(validateLog(expected, log))
+        except:
+            if not testoutfile.closed:
+                testoutfile.close()
+            raise
+    
+    def testGoodRequest(self):
+        testoutfile = open('goodhouse.txt', 'w')
+        try:
+            print 'Testing command decision when there will be no matching user'
+            dmaking = decisionMaking(testoutfile, ['localhost', 8080], 'dummy')
+            dmaking.command(good_request_should_work, 0)
+            testoutfile.close()
+            testoutfile = open('goodhouse.txt')
+            log = testoutfile.read().strip('\n')
+            expected = ['req localhost:8080 GET UI/'+ACTUAL_USER_ID,
+                'response 200',
+                'req localhost:8080 GET HI/1',
+                'response 200',
+                'req localhost:8080 GET HI/101',
+                'response 200',
+                'match house 101']
+            self.assertTrue(validateLog(expected, log))
+        except:
+            if not testoutfile.closed:
+                testoutfile.close()
             raise
 
 notJson = "this is some garbage that isn't json"
