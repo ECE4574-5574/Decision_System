@@ -16,6 +16,15 @@ from temporaryHolding import TemporaryHolding
 from datetime import datetime
 import decisions
 
+import clr
+import deviceAPIUtils
+clr.AddReferenceToFileAndPath("DeviceDLL/DeviceDLL/bin/Debug/DeviceDLL.dll")
+clr.AddReference('System')
+import api as devapi
+import deviceAPIUtils as devapiu
+import System
+
+
 class decisionMaking():
     def __init__(self,outputfile,server, deviceBase):
         self.outputfile = outputfile
@@ -57,12 +66,13 @@ class decisionMaking():
         self.outputfile.write(line)
 
     def command(self, message, decisionCount):
+        self.outputfile.write('Decision ' + str(decisionCount) + ':\n')
         try:
             conn = httplib.HTTPConnection(self.storageAddress[0], self.storageAddress[1])
             reqMethod = 'GET'
             reqPath = 'UI/' + message['userID']
             
-            #First, try to get the request.
+            #First, try to get the user information.
             self.outputfile.write('req ' + self.storageAddress[0] + ':' + str(self.storageAddress[1]) + ' ' + reqMethod + ' ' + reqPath + '\n')
             conn.request(reqMethod, reqPath)
             resp = conn.getresponse()
@@ -71,8 +81,11 @@ class decisionMaking():
             if (not resp.status == 200):
                 return
             body = json.loads(body)
+            
             print 'Debug: '
             print body
+            
+            #Next, try to find a matching house.
             matchingHouse = None
             for houseID in body['houseIDs']:
                 reqMethod = 'GET'
@@ -104,10 +117,24 @@ class decisionMaking():
                 return
             assert(not matchingHouse is None)
             self.outputfile.write('match house ' + str(matchingHouse) + '\n')
+            
+            #Now, request all devices in that house.
+            self.outputfile.write('requesting devices\n')
+            devinterface = devapi.Interfaces(System.Uri(self.deviceBaseAdd))
+            devices = devinterface.getDevices(matchingHouse)
+            
+            print 'Debug:'
+            print devices
+            
+            for oneDevice in devices:
+                if devapiu.canBrighten(oneDevice):
+                    print 'found a brightenable'
+                    oneDevice.set_Enabled(True)
+            
         except:
             self.outputfile.write('Error when trying to make a command decision!\n')
             self.outputfile.write('Request body being handled:\n')
-            self.outputfile.write(str(message))
+            self.outputfile.write(str(message) + '\n')
             traceback.print_exc(None, self.outputfile)
               
     def decisionThread(self, message, cleanTime,storageAdd, deviceBaseAdd, outputfile, decisionCount):
