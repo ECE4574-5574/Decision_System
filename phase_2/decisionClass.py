@@ -15,21 +15,31 @@ import sys
 from temporaryHolding import TemporaryHolding
 from datetime import datetime
 import decisions
+import logging
 
 class decisionMaking():
-    def __init__(self,outputfile,server, deviceBase):
-        self.outputfile = outputfile
+    def __init__(self, server,deviceBase):
         self.storageAddress = server
         self.deviceBaseAdd = deviceBase
-        
-    #message should be a parsed JSON dictionary
-    def weatherDecision(self, message, decisionCount):
-        line = "Decision " + str(decisionCount) + ":\n"
-        self.outputfile.write(line)
+        self.weatherDecisionCount = 1
+        self.deviceStateDecisionCount = 1
+        self.locationDecisionCount = 1
+        self.timeDecisionCount = 1
+        self.commandCount = 1
+        logging.basicConfig(filename='output.log', level=logging.DEBUG)
+        self.logger = logging.getLogger('MyLogger')
 
-    def deviceStateDecision(self, message, decisionCount):
-        line = "Decision " + str(decisionCount) + ":\n"
-        self.outputfile.write(line)
+    #message should be a parsed JSON dictionary
+    def weatherDecision(self, message):
+        line = "Weather Decision " + str(self.weatherDecisionCount) + ":\n"
+        self.weatherDecisionCount += 1
+        self.logger.debug(line)
+        
+
+    def deviceStateDecision(self, message):
+        line = "Device State Decision " + str(self.deviceStateDecisionCount) + ":\n"
+        self.deviceStateDecisionCount += 1
+        self.logger.debug(line)
         # Begin - Prerana Rane 4/15/2015
         #Logging the device state changes in the persistent storage 
         #Set up connection to persistent storage
@@ -44,35 +54,35 @@ class decisionMaking():
         print response.read()               
         #End - Prerana Rane 4/15/2015
 
-    def locationDecision(self, message, decisionCount):
+    def locationDecision(self, message):
         #change the format to the format required by persistent storage
         dateTimeObject = datetime.strptime(message["time"], "%Y-%m-%d %H:%M:%S")
-        formatted = dateTimeObject.strftime("%Y-%m-%dT%H:%M:%SZ")
-        handler = threading.Thread(None, self.decisionThread, 'Handler for POST/LocationChange', args = (message,formatted,self.storageAddress, self.deviceBaseAdd, self.outputfile, decisionCount))
-        handler.start()        
-        return True
-
-    def timeDecision(self, message, decisionCount):
-        line = "Decision " + str(decisionCount) + ":\n"
-        self.outputfile.write(line)
-
-    def command(self, message, decisionCount):
-        line = "Decision " + str(decisionCount) + ":\n"
-        self.outputfile.write(line)
-              
-    def decisionThread(self, message, cleanTime,storageAdd, deviceBaseAdd, outputfile, decisionCount):
-        line = "Decision " + str(decisionCount) + ":\n"
-        self.outputfile.write(line)
+        formatted = dateTimeObject.strftime("%Y-%m-%dT%H:%M:%SZ")        
+        line = "Location Decision " + str(self.locationDecisionCount) + ":\n"
+        self.locationDecisionCount += 1
+        self.logger.debug(line)
         #Set up connection to persistent storage
-        conn = httplib.HTTPConnection(storageAdd[0],storageAdd[1])
-        #Pass the JSON file to persistent storage
+        conn = httplib.HTTPConnection(self.storageAddress[0],self.storageAddress[1])
+        #Pass the JSON string to persistent storage
         payload = json.dumps({"action-type":"location-update","action-data":message})
-        conn.request('PATCH', 'A/' + message['userId'] + '/' + cleanTime + '/' + 'WayneManor', payload)
+        conn.request('PATCH', 'A/' + message['userId'] + '/' + formatted + '/' + 'WayneManor', payload)
         response = conn.getresponse()
         print response.status
         print response.read()
         #make a random decision
-        decisions.randomDecision(float(message["lat"]), float(message["long"]), float(message["alt"]), str(message["userId"]), cleanTime, storageAdd, deviceBaseAdd, outputfile)
+
+    def timeDecision(self, message):
+        line = "Time Decision " + str(self.timeDecisionCount) + ":\n"
+        self.timeDecisionCount += 1
+        self.logger.debug(line)
+
+    def command(self, message):
+        line = "Command " + str(self.commandCount) + ":\n"
+        self.commandCount += 1
+        self.logger.debug(line)
+              
+    
+        
 
 
 
