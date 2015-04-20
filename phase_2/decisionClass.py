@@ -40,9 +40,7 @@ class decisionMaking():
 
     def deviceStateDecision(self, message):
         try:
-            line = "Device State Decision " + str(self.deviceStateDecisionCount) + ":\n"
-            self.deviceStateDecisionCount += 1
-            self.logger.debug(line)
+            
             # Begin - Prerana Rane 4/15/2015
             #Logging the device state changes in the persistent storage 
             #Set up connection to persistent storage
@@ -51,6 +49,9 @@ class decisionMaking():
             dateTimeObject = datetime.strptime(message["time"], "%Y-%m-%d %H:%M:%S")
             formatted = dateTimeObject.strftime("%Y-%m-%dT%H:%M:%SZ")
             payload = json.dumps({"action-type":"device state change","action-data":message})
+            line = "Device State Decision " + str(self.deviceStateDecisionCount) + ":\n" + "Data sent to persistent storage: " + str(payload)
+            self.deviceStateDecisionCount += 1
+            self.logger.debug(line)
             conn.request('PATCH', 'C/' + "user1" + '/' + formatted + '/' + 'WayneManor' + '/' + "aspace" + '/' + message['deviceName'], payload)
             response = conn.getresponse()
             print response.status
@@ -65,13 +66,13 @@ class decisionMaking():
             #change the format to the format required by persistent storage
             dateTimeObject = datetime.strptime(message["time"], "%Y-%m-%d %H:%M:%S")
             formatted = dateTimeObject.strftime("%Y-%m-%dT%H:%M:%SZ")        
-            line = "Location Decision " + str(self.locationDecisionCount) + ":\n"
-            self.locationDecisionCount += 1
-            self.logger.debug(line)
             #Set up connection to persistent storage
             conn = httplib.HTTPConnection(self.storageAddress[0],self.storageAddress[1])
             #Pass the JSON string to persistent storage
             payload = json.dumps({"action-type":"location-update","action-data":message})
+            line = "Location Decision " + str(self.locationDecisionCount) + ":\n" + "Data sent to persistent storage: " + str(payload)
+            self.locationDecisionCount += 1
+            self.logger.debug(line)
             conn.request('PATCH', 'A/' + message['userId'] + '/' + formatted + '/' + 'WayneManor', payload)
             response = conn.getresponse()
             print response.status
