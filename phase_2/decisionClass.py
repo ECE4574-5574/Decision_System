@@ -55,8 +55,27 @@ class decisionMaking():
 
 
     def command(self, message):
-        return True        
-
+        try:
+            conn = httplib.HTTPConnection(self.storageAddress[0], self.storageAddress[1])
+            reqMethod = 'GET'
+            reqPath = 'UI/' + message['userID']
+            
+            #First, try to get the request.
+            self.outputfile.write('req ' + self.storageAddress[0] + ':' + str(self.storageAddress[1]) + ' ' + reqMethod + ' ' + reqPath + '\n')
+            conn.request(reqMethod, reqPath)
+            resp = conn.getresponse()
+            self.outputfile.write('response ' + str(resp.status))
+            body = resp.read()
+            body = json.loads(body)
+            print 'Debug: ' + body
+            for houseID in body['houseIDs']:
+                print str(houseID)
+        except:
+            self.outputfile.write('Error when trying to make a command decision!\n')
+            self.outputfile.write('Request body being handled:\n')
+            self.outputfile.write(str(message))
+            traceback.print_exc(None, self.outputfile)
+  
     def decisionThread(self, message, cleanTime,storageAdd, deviceBaseAdd, outputfile):
         #Set up connection to persistent storage
         conn = httplib.HTTPConnection(storageAdd[0],storageAdd[1])
