@@ -88,16 +88,23 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         #If there is a command from the app print the command
         elif self.path == "/CommandsFromApp":
             try:
-                print "For User " + str(message["commandUserID"])
+                print "For User " + str(message["userID"])
                 print "Latitude " + str(message["lat"])
-                print "Longitude " + str(message["long"])
+                print "Longitude " + str(message["lon"])
                 print "Altitude " + str(message["alt"])
-                print "Turn off Device ID " + str(message["commanddeviceID"])
-                print "The Device Name is " + str(message["commanddeviceName"])
-                print "The Device Type is " + str(message["commanddeviceType"])
-                print "The SpaceID is " + str(message["commandspaceID"])
-                print "The state is " + str(message["commandstateDevice"])
-                print "Timestamp of Command " + str(message["time"])
+                for field in ["lat", "lon", "alt"]:
+                    if not (isinstance(message[field], int) or isinstance(message[field], float)):
+                        self.send_response(400)
+                        self.end_headers()
+                        self.wfile.write('The field ' + field + ' must be numeric. Received: ' + str(message[field]))
+                        return
+                try:
+                    dateTimeObject = datetime.strptime(message["time"], "%Y-%m-%dT%H:%M:%SZ")
+                except ValueError:
+                    self.send_response(400)
+                    self.end_headers()
+                    self.wfile.write('Could not parse the provided timestamp as ISO8601: ' + str(message['time']))
+                print "The command is " + str(message["command-string"])
                 self.send_response(200)
                 self.end_headers()
                 handler = threading.Thread(None, self.decisionThread, 'Handler for decision', args = (message, "command"))
@@ -162,7 +169,7 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
 class HaltableHTTPServer(BaseHTTPServer.HTTPServer):
 
-    def __init__(self, server_address, persistentStorageAddress, deviceBase, RequestHandlerClass):
+    def __init__(self, server_address, persistentStorageAddress, deviceBase, RequestHandlerClass, declogname, resetlog):
         BaseHTTPServer.HTTPServer.__init__(self, server_address, RequestHandlerClass)
         self.shouldStop = False
         self.timeout = 1
@@ -170,7 +177,12 @@ class HaltableHTTPServer(BaseHTTPServer.HTTPServer):
         self.timeconfig = {}
         self.threads=[]
         self.deviceBase = deviceBase
-        self.decision = decisionMaking(persistentStorageAddress, deviceBase)
+        decisionlogger = logging.getLogger('DecisionMakingServer')
+        if resetlog:
+            decisionlogger.addHandler(logging.FileHandler(declogname, mode = 'w'))
+        else:
+            decisionlogger.addHandler(logging.FileHandler(declogname, mode = 'a'))
+        self.decision = decisionMaking(decisionlogger, persistentStorageAddress, deviceBase)
 
     def serve_forever (self):
         while not self.shouldStop:
@@ -195,6 +207,8 @@ if __name__ == "__main__":
     argparser.add_argument('-p', '--port', type=int)
     argparser.add_argument('-t', '--storage', type=str)
     argparser.add_argument('-d', '--devicebase', type=str, default='http://localhost:8082/api/devicemgr/state/')
+    argparser.add_argument('-l', '--logfile', type=str, default='server.log')
+    argparser.add_argument('-rl', '--resetlog', action='store_true')
 
     args = argparser.parse_args()
     #Validate arguments. Port number:
@@ -213,7 +227,7 @@ if __name__ == "__main__":
         print "You must enter a valid persistent storage address and port number (e.g. 127.0.0.1:8080)"
         argparser.print_help()
         sys.exit(1) 
-    server = HaltableHTTPServer(('',args.port), persistentStorageAddress, args.devicebase, ServerInfoHandler)
+    server = HaltableHTTPServer(('127.0.0.1',args.port), persistentStorageAddress, args.devicebase, ServerInfoHandler, args.logfile, args.resetlog)
     #Print the server port. We actually get this from the server object, since
     #the user can enter a port number of 0 to have the OS assign some open port.
     print "Serving on port " + str(server.socket.getsockname()[1]) + "..."
