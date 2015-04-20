@@ -1,5 +1,9 @@
 #This automatically tests that the server's handling of POST /CommandsFromApp is correct.
 
+#To run these tests: You should start the mock persistent storage server stored at testing_utils/mock_pss/persistent_storage_server.py
+#You should also start ServerIncomingData.py on port 8085. You may specify any persistent storage, server address, and output file.
+#The behavior of the decision class will be tested directly.
+
 import json
 import httplib
 import unittest
