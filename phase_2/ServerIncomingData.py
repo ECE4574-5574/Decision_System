@@ -44,12 +44,11 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 print "The weather condition is " + str(message["condition"])
                 print "The temperature is " + str(message["temperature"])
                 print "Timestamp of WeatherUpdate " + str(message["WeatherTimeStamp"])
-                if(decision.weatherDecision(message)):
-                    line = "Decision " + str(self.server.decisionCount) + ":\n"
-                    self.server.decisionCount += 1
-                    self.server.outputfile.write(line)
-                    self.send_response(200)
-                    self.end_headers()
+                self.send_response(200)
+                self.end_headers()
+                decision.weatherDecision(message, self.server.decisionCount)
+                self.server.decisionCount += 1
+                    
             except KeyError as ke:
                 self.handleMissingKey(ke)
                 return 
@@ -62,12 +61,11 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 print "The Device is enabled " + str(message["enabled"])
                 print "The setpoint is " + str(message["setpoint"])
                 print "Timestamp of DeviceState Action " + str(message["time"])
-                if(decision.deviceStateDecision(message)):
-                    line = "Decision " + str(self.server.decisionCount) + ":\n"
-                    self.server.decisionCount += 1
-                    self.server.outputfile.write(line)
-                    self.send_response(200)
-                    self.end_headers()
+                self.send_response(200)
+                self.end_headers()
+                decision.deviceStateDecision(message, self.server.decisionCount)
+                self.server.decisionCount += 1
+                    
             except KeyError as ke:
                 self.handleMissingKey(ke)
                 return
@@ -81,12 +79,11 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 print "The Longitude is  " + str(message["long"])
                 print "The Altitude is " + str(message["alt"])
                 print "Timestamp of LocationChange " + str(message["time"])
-                if(decision.locationDecision(message)):
-                    line = "Decision " + str(self.server.decisionCount) + ":\n"
-                    self.server.decisionCount += 1
-                    self.server.outputfile.write(line)
-                    self.send_response(200)
-                    self.end_headers()
+                self.send_response(200)
+                self.end_headers()
+                decision.locationDecision(message, self.server.decisionCount)
+                self.server.decisionCount += 1
+                   
             except KeyError as ke:
                 self.handleMissingKey(ke)
                 return
@@ -98,19 +95,17 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 print "Latitude " + str(message["lat"])
                 print "Longitude " + str(message["lon"])
                 print "Altitude " + str(message["alt"])
-                for field in ["lat", "lon", "alt"]:
-                    if not (isinstance(message[field], int) or isinstance(message[field], float)):
-                        self.send_response(400)
-                        self.end_headers()
-                        self.wfile.write('The field ' + field + ' must be numeric. Received: ' + str(message[field]))
-                        return
-                print "The command is " + str(message["command-string"])
-                if(decision.command(message)):
-                    line = "Decision " + str(self.server.decisionCount) + ":\n"
-                    self.server.decisionCount += 1
-                    self.server.outputfile.write(line)
-                    self.send_response(200)
-                    self.end_headers()
+                print "Turn off Device ID " + str(message["commanddeviceID"])
+                print "The Device Name is " + str(message["commanddeviceName"])
+                print "The Device Type is " + str(message["commanddeviceType"])
+                print "The SpaceID is " + str(message["commandspaceID"])
+                print "The state is " + str(message["commandstateDevice"])
+                print "Timestamp of Command " + str(message["time"])
+                self.send_response(200)
+                self.end_headers()
+                decision.command(message, self.server.decisionCount)
+                self.server.decisionCount += 1
+
             except KeyError as ke:
                 self.handleMissingKey(ke)
                 return
@@ -118,12 +113,12 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         elif self.path == "/TimeConfig":
             try:
                 print "You may choose to perform a action based on time/date, so the time/date is now" + str(message["localTime"])
-                if(decision.timeDecision(message)):
-                    line = "Decision " + str(self.server.decisionCount) + ":\n"
-                    self.server.decisionCount += 1
-                    self.server.outputfile.write(line)
-                    self.send_response(200)
-                    self.end_headers()
+                self.send_response(200)
+                self.end_headers()
+                decision.timeDecision(message, self.server.decisionCount)
+                self.server.decisionCount += 1
+                    
+                    
             except KeyError as ke:
                 self.handleMissingKey(ke)
                 return
