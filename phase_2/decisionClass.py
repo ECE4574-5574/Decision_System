@@ -66,12 +66,44 @@ class decisionMaking():
             self.outputfile.write('req ' + self.storageAddress[0] + ':' + str(self.storageAddress[1]) + ' ' + reqMethod + ' ' + reqPath + '\n')
             conn.request(reqMethod, reqPath)
             resp = conn.getresponse()
-            self.outputfile.write('response ' + str(resp.status))
+            self.outputfile.write('response ' + str(resp.status) + '\n')
             body = resp.read()
+            if (not resp.status == 200):
+                return
             body = json.loads(body)
-            print 'Debug: ' + body
+            print 'Debug: '
+            print body
+            matchingHouse = None
             for houseID in body['houseIDs']:
-                print str(houseID)
+                reqMethod = 'GET'
+                reqPath = 'HI/' + str(houseID)
+                self.outputfile.write('req ' + self.storageAddress[0] + ':' + str(self.storageAddress[1]) + ' ' + reqMethod + ' ' + reqPath + '\n')
+                conn.request(reqMethod, reqPath)
+                resp = conn.getresponse()
+                self.outputfile.write('response ' + str(resp.status) + '\n')
+                body = resp.read()
+                body = json.loads(body)
+                print 'Debug house body: '
+                print body
+                try:
+                    blob = json.loads(body['blob'])
+                    if abs(blob['lat']-message['lat']) <= 0.01 and \
+                       abs(blob['lon']-message['lon']) <= 0.01 and \
+                       abs(blob['alt']-message['alt']) <= 1:
+                        matchingHouse = houseID
+                        break
+                except ValueError:
+                    self.outputfile.write('ValueError reading blob for house ' + str(houseID) + '. Blob is likely corrupt.\n')
+                except TypeError:
+                    self.outputfile.write('TypeError reading coordinates for house ' + str(houseID) + '. Blob is likely corrupt.\n')
+                except KeyError as ke:
+                    self.outputfile.write('KeyError reading coordinates for house ' + str(houseID) + 
+                    ' . Blob is missing field: ' + ke.args[0] + '\n')
+            else:
+                self.outputfile.write('Could not find a matching house for that user and coordinates.\n')
+                return
+            assert(not matchingHouse is None)
+            self.outputfile.write('match house ' + str(matchingHouse) + '\n')
         except:
             self.outputfile.write('Error when trying to make a command decision!\n')
             self.outputfile.write('Request body being handled:\n')

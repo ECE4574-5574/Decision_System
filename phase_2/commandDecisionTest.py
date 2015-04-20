@@ -32,8 +32,8 @@ if __name__ == "__main__":
     testoutfile = open(OUTPUT_FILE, 'w')
     
     ACTUAL_USER_ID = 'bsaget'
-    ACTUAL_HOUSE_LAT = 37.23
-    ACTUAL_HOUSE_LON = -80.41
+    ACTUAL_HOUSE_LAT = 37.23512
+    ACTUAL_HOUSE_LON = -80.41352
     ACTUAL_HOUSE_ALT = 100
     ACTUAL_COMMAND_STRING = 'brightenNearMe'
     
@@ -60,7 +60,7 @@ if __name__ == "__main__":
     dmaking = decisionMaking(testoutfile, ['localhost', 8080], 'dummy')
     
     print 'Testing command decision when user does not exist.'
-    dmaking.command(good_request_no_user)
+    dmaking.command(good_request_no_user, 0)
     testoutfile.close()
     testoutfile = open(OUTPUT_FILE)
     log = testoutfile.read()
