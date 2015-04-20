@@ -10,10 +10,26 @@ def checkStatus(expected, response):
     else:
         print 'Expected status ' + str(expected) + ' but got ' + str(response.status)
         return False
+        
+def validateLog(expected, actual):
+    splitactual = actual.splitlines()
+    if not len(splitactual) == len(expected):
+        print 'Length of decision-making log is not what is expected!'
+        print 'Log is ' + str(len(splitactual)) + ' long and expected ' + str(len(expected)) + '.'
+        return False
+    for i in range(0, len(splitactual)):
+        if not splitactual[i] == expected[i]:
+            print 'Line mismatch at ' + str(i) + '! Found:'
+            print splitactual[i]
+            print 'But expected:'
+            print expected[i]
+            return False
+    return True
 
 if __name__ == "__main__":
     APP_COMMAND_PATH = '/CommandsFromApp'
     OUTPUT_FILE = 'commandtestlog.txt'
+    testoutfile = open(OUTPUT_FILE, 'w')
     
     ACTUAL_USER_ID = 'bsaget'
     ACTUAL_HOUSE_LAT = 37.23
@@ -35,13 +51,22 @@ if __name__ == "__main__":
                             'alt': ACTUAL_HOUSE_ALT,
                             'command-string':ACTUAL_COMMAND_STRING}
     
-    #For right now, only good_request_no_user should work, since the data we're looking for won't be in the database.
+    #For right now (i.e. Sunday), only good_request_no_user should work, since the data we're looking for won't be in the database.
     
     
     #First, we check the behavior of the decision class directly.
     #We do this because when the server is actually running, the decision runs asynchronously,
     #so it is a little bit harder to test directly.
-    dmaking = decisionMaking(OUTPUT_FILE, ['localhost', 8080], 'dummy')
+    dmaking = decisionMaking(testoutfile, ['localhost', 8080], 'dummy')
+    
+    print 'Testing command decision when user does not exist.'
+    dmaking.command(good_request_no_user)
+    testoutfile.close()
+    testoutfile = open(OUTPUT_FILE)
+    log = testoutfile.read()
+    expected = ['req localhost:8080 GET UI/nouser',
+                'response 404']
+    validateLog(expected, log)
     
     decision_server_port = 8085
     #Then, let's check the server's ability to sort through bad input.
