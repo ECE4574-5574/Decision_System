@@ -39,20 +39,24 @@ ACTUAL_HOUSE_LAT = 37.23512
 ACTUAL_HOUSE_LON = -80.41352
 ACTUAL_HOUSE_ALT = 100
 ACTUAL_COMMAND_STRING = 'brightenNearMe'
+EXAMPLE_TIME_STAMP = '2015-04-19T12:59:23Z'
 
 good_request_no_user = {'userID': 'nouser',
                         'lat': ACTUAL_HOUSE_LAT,
                         'lon': ACTUAL_HOUSE_LON,
                         'alt': ACTUAL_HOUSE_ALT,
-                        'command-string':ACTUAL_COMMAND_STRING}
+                        'command-string':ACTUAL_COMMAND_STRING,
+                        'time': EXAMPLE_TIME_STAMP}
 good_request_no_house = {'userID': ACTUAL_USER_ID,
                          'lat': 0, 'lon': 0, 'alt': 0,
-                         'command-string':ACTUAL_COMMAND_STRING}
+                         'command-string':ACTUAL_COMMAND_STRING,
+                         'time': EXAMPLE_TIME_STAMP}
 good_request_should_work = {'userID': ACTUAL_USER_ID,
                         'lat': ACTUAL_HOUSE_LAT,
                         'lon': ACTUAL_HOUSE_LON,
                         'alt': ACTUAL_HOUSE_ALT,
-                        'command-string':ACTUAL_COMMAND_STRING}
+                        'command-string':ACTUAL_COMMAND_STRING,
+                        'time': EXAMPLE_TIME_STAMP}
 class commandDecisionTest(unittest.TestCase):
     
     #We check the behavior of the decision class directly.
@@ -130,7 +134,10 @@ missingKeys = json.dumps({'userID':'some-user-id',
     'command-string':'brightenNearMe'})
 notANumber = json.dumps({'userID':'some-user-id',
     'lat':0.1111, 'lon':'garbage', 'alt':0.111,
-    'command-string':'brightenNearMe'})
+    'command-string':'brightenNearMe', 'time':'2015-04-19T12:59:23Z'})
+garbageTimeStamp = json.dumps({'userID':'some-user-id',
+    'lat':0.1111, 'lon':0.1111, 'alt':0.111,
+    'command-string':'brightenNearMe', 'time':'2493205901'})
 decision_server_port = 8085
 APP_COMMAND_PATH = '/CommandsFromApp'
 class serverResponseTest(unittest.TestCase):
@@ -161,6 +168,11 @@ class serverResponseTest(unittest.TestCase):
     def testBadCoords(self):
         print 'Checking response to POST with bad data in JSON fields...'
         self.conn.request('POST', APP_COMMAND_PATH, notANumber)
+        self.assertEqual(400, self.conn.getresponse().status)
+        
+    def testGarbageTimeStamp(self):
+        print 'Checking response to POST with a garbage time stamp...'
+        self.conn.request('POST', APP_COMMAND_PATH, garbageTimeStamp)
         self.assertEqual(400, self.conn.getresponse().status)
     
     def testGoodRequ(self):
