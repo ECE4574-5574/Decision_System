@@ -57,16 +57,18 @@ if __name__ == "__main__":
     #First, we check the behavior of the decision class directly.
     #We do this because when the server is actually running, the decision runs asynchronously,
     #so it is a little bit harder to test directly.
-    dmaking = decisionMaking(testoutfile, ['localhost', 8080], 'dummy')
-    
     print 'Testing command decision when user does not exist.'
+    dmaking = decisionMaking(testoutfile, ['localhost', 8080], 'dummy')
     dmaking.command(good_request_no_user, 0)
     testoutfile.close()
     testoutfile = open(OUTPUT_FILE)
     log = testoutfile.read()
     expected = ['req localhost:8080 GET UI/nouser',
                 'response 404']
-    validateLog(expected, log)
+    if validateLog(expected, log):
+        print 'OK!'
+    else:
+        print 'FAIL'
     
     decision_server_port = 8085
     #Then, let's check the server's ability to sort through bad input.
