@@ -101,6 +101,12 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                         self.end_headers()
                         self.wfile.write('The field ' + field + ' must be numeric. Received: ' + str(message[field]))
                         return
+                try:
+                    dateTimeObject = datetime.strptime(message["time"], "%Y-%m-%dT%H:%M:%SZ")
+                except ValueError:
+                    self.send_response(400)
+                    self.end_headers()
+                    self.wfile.write('Could not parse the provided timestamp as ISO8601: ' + str(message['time']))
                 print "The command is " + str(message["command-string"])
                 self.send_response(200)
                 self.end_headers()
