@@ -43,7 +43,7 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             try: 
                 print "The weather condition is " + str(message["condition"])
                 print "The temperature is " + str(message["temperature"])
-                print "Timestamp of WeatherUpdate " + str(message["WeatherTimeStamp"])
+                print "Timestamp of WeatherUpdate " + str(message["time"])
                 self.send_response(200)
                 self.end_headers()
                 handler = threading.Thread(None, self.decisionThread, 'Handler for decision', args = (message, "weather"))
