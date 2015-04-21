@@ -20,6 +20,7 @@ import argparse
 import sys
 import logging
 import socket
+import datetime
 from temporaryHolding import TemporaryHolding
 from datetime import datetime
 from decisionClass import decisionMaking
@@ -38,10 +39,12 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.send_response(400)
             self.end_headers()
             self.wfile.write("\nThe request body could not be parsed as JSON. The received request body:\n" + data)
+            self.server.serverrequestlogger.info("POST: Return 400: The request body could not be parsed as JSON")
             return
         #If a weather update is received then that information is printed and a 200 response is sent
         if self.path == "/Weather":
             try:
+                self.server.serverrequestlogger.info("POST: Received Weather Update")
                 print "The Latitude is " + str(message["lat"])
                 print "The Longitude is  " + str(message["long"])
                 print "The Altitude is " + str(message["alt"])
@@ -51,6 +54,7 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                         self.send_response(400)
                         self.end_headers()
                         self.wfile.write('The field ' + field + ' must be numeric. Received: ' + str(message[field]))
+                        self.server.serverrequestlogger.info("POST: Received Weather Update: Return 400")
                         return 
                 print "The weather condition is " + str(message["condition"])
                 print "The temperature is " + str(message["temperature"])
@@ -61,8 +65,10 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     self.send_response(400)
                     self.end_headers()
                     self.wfile.write('Could not parse the provided timestamp as ISO8601: ' + str(message['time']))
+                    self.server.serverrequestlogger.info("POST: Received Weather Update: Return 400")					
                     return
                 self.send_response(200)
+                self.server.serverrequestlogger.info("POST: Received Weather Update: Return 200")
                 self.end_headers()
                 handler = threading.Thread(None, self.decisionThread, 'Handler for decision', args = (message, "weather"))
                 handler.start()                    
@@ -73,6 +79,7 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         #If a device state update is received then that inofrmation is printed and a 200 response is sent
         elif self.path == "/DeviceState":
             try:
+                self.server.serverrequestlogger.info("POST: Received Device State Update") 
                 print "The Device Name is " + str(message["deviceName"])
                 print "The Device Type is " + str(message["deviceType"])
                 print "The Device is enabled " + str(message["enabled"])
@@ -84,8 +91,10 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     self.send_response(400)
                     self.end_headers()
                     self.wfile.write('Could not parse the provided timestamp as ISO8601: ' + str(message['time']))
+                    self.server.serverrequestlogger.info("POST: Received Device State Update: Return 400")
                     return
                 self.send_response(200)
+                self.server.serverrequestlogger.info("POST: Received Device State Update: Return 200")
                 self.end_headers()
                 handler = threading.Thread(None, self.decisionThread, 'Handler for decision', args = (message, "deviceState"))
                 handler.start()                    
@@ -97,7 +106,8 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         #and a 200 response is sent
         elif self.path == "/LocationChange":
             try:
-                print "The user ID is: " + str(message["userID"])
+                self.server.serverrequestlogger.info("POST: Received Location Change Update")
+                print "The user ID is: " + str(message["userId"])
                 print "The Latitude is " + str(message["lat"])
                 print "The Longitude is  " + str(message["long"])
                 print "The Altitude is " + str(message["alt"])
@@ -106,6 +116,7 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                         self.send_response(400)
                         self.end_headers()
                         self.wfile.write('The field ' + field + ' must be numeric. Received: ' + str(message[field]))
+                        self.server.serverrequestlogger.info("POST: Received Location Change Update: Return 400")
                         return
                 print "Timestamp of LocationChange " + str(message["time"])
                 try:
@@ -114,8 +125,10 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     self.send_response(400)
                     self.end_headers()
                     self.wfile.write('Could not parse the provided timestamp as ISO8601: ' + str(message['time']))
+                    self.server.serverrequestlogger.info("POST: Received Location Change Update: Return 400")
                     return
                 self.send_response(200)
+                self.server.serverrequestlogger.info("POST: Received Location Change Update: Return 200")
                 self.end_headers()
                 handler = threading.Thread(None, self.decisionThread, 'Handler for decision', args = (message, "location"))
                 handler.start()                   
@@ -126,6 +139,7 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         #If there is a command from the app print the command
         elif self.path == "/CommandsFromApp":
             try:
+                self.server.serverrequestlogger.info("POST: Received Command From App")
                 print "For User " + str(message["userID"])
                 print "Latitude " + str(message["lat"])
                 print "Longitude " + str(message["lon"])
@@ -135,6 +149,7 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                         self.send_response(400)
                         self.end_headers()
                         self.wfile.write('The field ' + field + ' must be numeric. Received: ' + str(message[field]))
+                        self.server.serverrequestlogger.info("POST: Received Command From App: Return 400")
                         return
                 try:
                     dateTimeObject = datetime.strptime(message["time"], "%Y-%m-%dT%H:%M:%SZ")
@@ -142,9 +157,11 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     self.send_response(400)
                     self.end_headers()
                     self.wfile.write('Could not parse the provided timestamp as ISO8601: ' + str(message['time']))
+                    self.server.serverrequestlogger.info("POST: Received Command From App: Return 400")
                     return
                 print "The command is " + str(message["command-string"])
                 self.send_response(200)
+                self.server.serverrequestlogger.info("POST: Received Command From App: Return 200")
                 self.end_headers()
                 handler = threading.Thread(None, self.decisionThread, 'Handler for decision', args = (message, "command"))
                 handler.start()
@@ -154,6 +171,7 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
         elif self.path == "/TimeConfig":
             try:
+                self.server.serverrequestlogger.info("POST: Received Time Config")
                 print "You may choose to perform a action based on time/date, so the time/date is now" + str(message["localTime"])
                 try:
                     dateTimeObject = datetime.strptime(message["time"], "%Y-%m-%dT%H:%M:%SZ")
@@ -161,7 +179,9 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     self.send_response(400)
                     self.end_headers()
                     self.wfile.write('Could not parse the provided timestamp as ISO8601: ' + str(message['time']))
+                    self.server.serverrequestlogger.info("POST: Received Time Config: Return 400")
                 self.send_response(200)
+                self.server.serverrequestlogger.info("POST: Received Time Config: Return 200")
                 self.end_headers()
                 handler = threading.Thread(None, self.decisionThread, 'Handler for decision', args = (message, "time"))
                 handler.start()                                        
@@ -171,6 +191,7 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
         elif self.path == "/LocalTime":
             try:
+                self.server.serverrequestlogger.info("POST: Received Local Time")
                 print "You may choose to perform a action based on time/date, so the time/date is now" + str(message["localTime"])
                 try:
                     dateTimeObject = datetime.strptime(message["localTime"], "%Y-%m-%dT%H:%M:%SZ")
@@ -178,10 +199,12 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     self.send_response(400)
                     self.end_headers()
                     self.wfile.write('Could not parse the provided timestamp as ISO8601: ' + str(message['time']))
+                    self.server.serverrequestlogger.info("POST: Received Local Time: Return 400")
             except KeyError as ke:
                 self.handleMissingKey(ke)
                 return
             self.send_response(200)
+            self.server.serverrequestlogger.info("POST: Received Local Time: Return 200")
             self.end_headers()
             handler = threading.Thread(None, self.decisionThread, 'Handler for decision', args = (message, "time"))
             handler.start()
@@ -192,6 +215,7 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     except:
         #We want to catch all otherwise-unhandled errors, and return a 500 error code.
         self.send_response(500)
+        self.server.serverrequestlogger.info("POST: Exception: Return 500")
         self.end_headers()
         self.wfile.write("\nAn internal error occured. Please report this to the Decision-Making API team.\n")
         self.wfile.write("Request path: " + self.path + "\n")
@@ -199,6 +223,7 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
   
   def handleMissingKey(self, keyError):
     self.send_response(400)
+    self.server.serverrequestlogger.info("POST: Missing JSON Key: Return 400")
     self.end_headers()
     self.wfile.write('\nYour request body is missing a JSON key which is necessary to handle your request.\n')
     self.wfile.write('Request path: ' + self.path + '\n')
@@ -234,6 +259,13 @@ class HaltableHTTPServer(BaseHTTPServer.HTTPServer):
             decisionlogger.addHandler(logging.FileHandler(declogname, mode = 'a'))
         decisionlogger.setLevel(logging.DEBUG)
         self.decision = decisionMaking(decisionlogger, persistentStorageAddress, deviceBase)
+        self.serverrequestlogger = logging.getLogger('ServerRequestLogger')
+        serverrequestloggerhandler = logging.FileHandler('ServerRequestLogFile', mode = 'a')
+        serverformatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+        serverrequestloggerhandler.setFormatter(serverformatter)
+        self.serverrequestlogger.addHandler(serverrequestloggerhandler)
+        self.serverrequestlogger.setLevel(logging.INFO)
+		
 
     def serve_forever (self):
         while not self.shouldStop:
