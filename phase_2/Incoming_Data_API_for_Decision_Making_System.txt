@@ -12,46 +12,43 @@ POST:
 				"alt":150.123456, 
 				"condition":"Sunny", 
 				"temperature":70, 
-				"time":"YYYY-MM-DD HH:MM:SS" 
+				"time": "2015-04-19T12:59:23Z"
 			}
 	Path "/DeviceState":		#this might have been changed to "device" # the same JSON format will be used when changing device states
 	url: "DeviceState/{houseid}/{roomid}/{deviceid}"
 		Expects a JSON string formated like:
 			{
-				"deviceName":"BedroomLight", 
-				"deviceType":3, #this will be based on the device types provided by the device API  
+				"deviceId":"BedroomLight", 
+				"deviceType":"type" 
 				"enabled":  true/false,
 				"setpoint:": int64,
 				#the device parameters will change depending upon device type
-				"time":"YYYY-MM-DD HH:MM:SS"
+				"time": "2015-04-19T12:59:23Z"
 			}
 	Path "/LocationChange":
 	url: "/LocationChange/{username}"
 		Expects a JSON string formated like:
-			{	
-				"lat":70.123456, 
-				"long":300.123456, 
-				"alt":150.123456, 
-				"time":"YYYY-MM-DD HH:MM:SS"
+			{
+			        "userID": "someuser"
+				"lat": 70.123456, 
+				"lon": 300.123456, 
+				"alt": 150.123456, 
+				"time": "2015-04-19T12:59:23Z"
 			}
 		**NOTE: A field will need to be added here with a key of "user" or something similar that will hold the user name
 	Path "/CommandsFromApp":
 	url: "/CommandsFromApp/{username}"
 		Expects a JSON string formated like:
 			{
-				"commandUserID":"Brighten", #OR "dim" etc.
-				"lat":70.123456,
-				"long":300.123456, 
-				"alt":150.123456,
-				"commanddeviceID":1, 
-				"commanddeviceName":"BedroomLight", 
-				"commanddeviceType":3, 
-				"commandspaceID": 4, 
-				"commandstateDevice":0, 
-				"time":"YYYY-MM-DD HH:MM:SS"
-			}
+				"userID": "someuser",
+		                "lat": 37.23512,
+		                "lon": 37.23512,
+		                "alt": 100.1,
+		                "command-string":"brightenNearMe",
+		                "time": "2015-04-19T12:59:23Z"
+                        }
 	Path "/LocalTime":
 		Expects a JSON string formated like:
 			{
-				"time":"YYYY-MM-DD HH:MM:SS"
+				"time":"YYYY-MM-DDTHH:MM:SSZ"
 			}
