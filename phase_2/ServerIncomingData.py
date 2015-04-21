@@ -19,6 +19,7 @@ import httplib
 import argparse
 import sys
 import logging
+import socket
 from temporaryHolding import TemporaryHolding
 from datetime import datetime
 from decisionClass import decisionMaking
@@ -227,7 +228,11 @@ if __name__ == "__main__":
         print "You must enter a valid persistent storage address and port number (e.g. 127.0.0.1:8080)"
         argparser.print_help()
         sys.exit(1) 
-    server = HaltableHTTPServer(('127.0.0.1',args.port), persistentStorageAddress, args.devicebase, ServerInfoHandler, args.logfile, args.resetlog)
+    #server = HaltableHTTPServer(('127.0.0.1',args.port), persistentStorageAddress, args.devicebase, ServerInfoHandler, args.logfile, args.resetlog)
+    tempHostName = socket.gethostname()
+    tempHostAddr = socket.gethostbyname(tempHostName)
+    server = HaltableHTTPServer((tempHostAddr,args.port), persistentStorageAddress, args.devicebase, ServerInfoHandler, outf)
+
     #Print the server port. We actually get this from the server object, since
     #the user can enter a port number of 0 to have the OS assign some open port.
     print "Serving on port " + str(server.socket.getsockname()[1]) + "..."
