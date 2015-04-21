@@ -21,6 +21,7 @@ import sys
 import logging
 import socket
 import datetime
+import os
 from temporaryHolding import TemporaryHolding
 from datetime import datetime
 from decisionClass import decisionMaking
@@ -224,6 +225,7 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
   def handleMissingKey(self, keyError):
     self.send_response(400)
     self.server.serverrequestlogger.info("POST: Missing JSON Key: Return 400")
+    self.errorlogger.error("Missing Key Information")
     self.end_headers()
     self.wfile.write('\nYour request body is missing a JSON key which is necessary to handle your request.\n')
     self.wfile.write('Request path: ' + self.path + '\n')
@@ -265,8 +267,26 @@ class HaltableHTTPServer(BaseHTTPServer.HTTPServer):
         serverrequestloggerhandler.setFormatter(serverformatter)
         self.serverrequestlogger.addHandler(serverrequestloggerhandler)
         self.serverrequestlogger.setLevel(logging.INFO)
-		
+        
+    #Begin - Prerana Rane - 4/20/2015
+        self.errorlogger = logging.getLogger('ErrorLogger')
+        errorhandler = logging.FileHandler('ErrorLogFile')
+        errorhandler.setLevel(logging.ERROR)
+        errorfrmt = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        errorhandler.setFormatter(errorfrmt)
+        self.errorlogger.addHandler(errorhandler)
+        
 
+    def handle_exception(exc_type, exc_value, exc_traceback):
+        if issubclass(exc_type, KeyboardInterrupt):
+            sys.__excepthook__(exc_type, exc_value, exc_traceback)
+            return
+
+    errorlogger.error("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
+
+    sys.excepthook = handle_exception
+    #End - Prerana Rane - 4/20/2015
+    
     def serve_forever (self):
         while not self.shouldStop:
             self.handle_request()
@@ -293,7 +313,11 @@ if __name__ == "__main__":
     argparser.add_argument('-l', '--logfile', type=str, default='decisions.log')
     argparser.add_argument('-rl', '--resetlog', action='store_true')
     argparser.add_argument('-a', '--address', action='store_true')
-
+    
+    #Begin - Prerana Rane - 4/20/2015
+    raise RuntimeError("Test unhandled")
+    #End - Prerana Rane - 4/20/2015
+     
     args = argparser.parse_args()
     #Validate arguments. Port number:
     if args.port < 0:
