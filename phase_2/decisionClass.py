@@ -55,13 +55,11 @@ class decisionMaking():
             #Set up connection to persistent storage
             conn = httplib.HTTPConnection(self.storageAddress[0], self.storageAddress[1])
             #change the format to the format required by persistent storage
-            dateTimeObject = datetime.strptime(message["time"], "%Y-%m-%d %H:%M:%S")
-            formatted = dateTimeObject.strftime("%Y-%m-%dT%H:%M:%SZ")
             payload = json.dumps({"action-type":"device state change","action-data":message})
             line = "Device State Decision " + str(self.deviceStateDecisionCount) + ":\n" + "Data sent to persistent storage: " + str(payload)
             self.deviceStateDecisionCount += 1
             self.logger.debug(line)
-            conn.request('PATCH', 'C/' + "user1" + '/' + formatted + '/' + 'WayneManor' + '/' + "aspace" + '/' + message['deviceName'], payload)
+            conn.request('PATCH', 'C/' + "user1" + '/' + message["time"] + '/' + 'WayneManor' + '/' + "aspace" + '/' + message['deviceName'], payload)
             response = conn.getresponse()
             print response.status
             print response.read()               
@@ -72,9 +70,7 @@ class decisionMaking():
 
     def locationDecision(self, message):
         try:    
-            #change the format to the format required by persistent storage
-            dateTimeObject = datetime.strptime(message["time"], "%Y-%m-%d %H:%M:%S")
-            formatted = dateTimeObject.strftime("%Y-%m-%dT%H:%M:%SZ")        
+            #change the format to the format required by persistent storage     
             #Set up connection to persistent storage
             conn = httplib.HTTPConnection(self.storageAddress[0],self.storageAddress[1])
             #Pass the JSON string to persistent storage
@@ -82,7 +78,7 @@ class decisionMaking():
             line = "Location Decision " + str(self.locationDecisionCount) + ":\n" + "Data sent to persistent storage: " + str(payload)
             self.locationDecisionCount += 1
             self.logger.debug(line)
-            conn.request('PATCH', 'A/' + message['userId'] + '/' + formatted + '/' + 'WayneManor', payload)
+            conn.request('PATCH', 'A/' + message['userId'] + '/' + message["time"] + '/' + 'WayneManor', payload)
             response = conn.getresponse()
             print response.status
             print response.read()
