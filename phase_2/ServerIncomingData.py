@@ -12,15 +12,18 @@ and  posted to the local server. The data will then be stored in temporary data 
 import BaseHTTPServer
 import SocketServer
 import json
-import decisions
 import traceback
 import threading
 import time
 import httplib
 import argparse
 import sys
+import logging
+import socket
+import datetime
 from temporaryHolding import TemporaryHolding
 from datetime import datetime
+from decisionClass import decisionMaking
 
 #Class that gets called whenever there is an HTTP request
 class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
@@ -36,111 +39,175 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.send_response(400)
             self.end_headers()
             self.wfile.write("\nThe request body could not be parsed as JSON. The received request body:\n" + data)
+            self.server.serverrequestlogger.info("POST: Return 400: The request body could not be parsed as JSON")
             return
         #If a weather update is received then that information is printed and a 200 response is sent
         if self.path == "/Weather":
-            try: 
+            try:
+                self.server.serverrequestlogger.info("POST: Received Weather Update")
+                print "The Latitude is " + str(message["lat"])
+                print "The Longitude is  " + str(message["long"])
+                print "The Altitude is " + str(message["alt"])
+                for field in ["lat", "long", "alt"]:
+                    if not (isinstance(message[field], int) or isinstance(message[field], float)):
+                        print "why"
+                        self.send_response(400)
+                        self.end_headers()
+                        self.wfile.write('The field ' + field + ' must be numeric. Received: ' + str(message[field]))
+                        self.server.serverrequestlogger.info("POST: Received Weather Update: Return 400")
+                        return 
                 print "The weather condition is " + str(message["condition"])
                 print "The temperature is " + str(message["temperature"])
-                print "Timestamp of WeatherUpdate " + str(message["WeatherTimeStamp"])
+                print "Timestamp of WeatherUpdate " + str(message["time"])
+                try:
+                    dateTimeObject = datetime.strptime(message["time"], "%Y-%m-%dT%H:%M:%SZ")
+                except ValueError:
+                    self.send_response(400)
+                    self.end_headers()
+                    self.wfile.write('Could not parse the provided timestamp as ISO8601: ' + str(message['time']))
+                    self.server.serverrequestlogger.info("POST: Received Weather Update: Return 400")					
+                    return
+                self.send_response(200)
+                self.server.serverrequestlogger.info("POST: Received Weather Update: Return 200")
+                self.end_headers()
+                handler = threading.Thread(None, self.decisionThread, 'Handler for decision', args = (message, "weather"))
+                handler.start()                    
             except KeyError as ke:
                 self.handleMissingKey(ke)
-                return
-            self.send_response(200)
-            self.end_headers()
+                return 
+                
         #If a device state update is received then that inofrmation is printed and a 200 response is sent
         elif self.path == "/DeviceState":
             try:
+                self.server.serverrequestlogger.info("POST: Received Device State Update") 
                 print "The Device Name is " + str(message["deviceName"])
                 print "The Device Type is " + str(message["deviceType"])
                 print "The Device is enabled " + str(message["enabled"])
                 print "The setpoint is " + str(message["setpoint"])
                 print "Timestamp of DeviceState Action " + str(message["time"])
-                # Begin - Prerana Rane 4/15/2015
-                #Logging the device state changes in the persistent storage 
-                #Set up connection to persistent storage
-                conn = httplib.HTTPConnection(self.server.storageAddress[0], self.server.storageAddress[1])
-                #change the format to the format required by persistent storage
-                dateTimeObject = datetime.strptime(message["time"], "%Y-%m-%d %H:%M:%S")
-                formatted = dateTimeObject.strftime("%Y-%m-%dT%H:%M:%SZ")
-                payload = json.dumps({"action-type":"device state change","action-data":message})
-                conn.request('PATCH', 'C/' + "user1" + '/' + formatted + '/' + 'WayneManor' + '/' + "aspace" + '/' + message['deviceName'], payload)
-                response = conn.getresponse()
-                print response.status
-                print response.read()                
-                #End - Prerana Rane 4/15/2015
+                try:
+                    dateTimeObject = datetime.strptime(message["time"], "%Y-%m-%dT%H:%M:%SZ")
+                except ValueError:
+                    self.send_response(400)
+                    self.end_headers()
+                    self.wfile.write('Could not parse the provided timestamp as ISO8601: ' + str(message['time']))
+                    self.server.serverrequestlogger.info("POST: Received Device State Update: Return 400")
+                    return
+                self.send_response(200)
+                self.server.serverrequestlogger.info("POST: Received Device State Update: Return 200")
+                self.end_headers()
+                handler = threading.Thread(None, self.decisionThread, 'Handler for decision', args = (message, "deviceState"))
+                handler.start()                    
             except KeyError as ke:
                 self.handleMissingKey(ke)
                 return
-            self.send_response(200)
-            self.end_headers()
+
         #If a location change update is received the information is printed and sent to persistent storage. A decision is also made based on the change of location
         #and a 200 response is sent
         elif self.path == "/LocationChange":
             try:
-                temp = TemporaryHolding()
+                self.server.serverrequestlogger.info("POST: Received Location Change Update")
                 print "The user ID is: " + str(message["userId"])
                 print "The Latitude is " + str(message["lat"])
                 print "The Longitude is  " + str(message["long"])
                 print "The Altitude is " + str(message["alt"])
+                for field in ["lat", "long", "alt"]:
+                    if not (isinstance(message[field], int) or isinstance(message[field], float)):
+                        self.send_response(400)
+                        self.end_headers()
+                        self.wfile.write('The field ' + field + ' must be numeric. Received: ' + str(message[field]))
+                        self.server.serverrequestlogger.info("POST: Received Location Change Update: Return 400")
+                        return
                 print "Timestamp of LocationChange " + str(message["time"])
-                #change the format to the format required by persistent storage
-                dateTimeObject = datetime.strptime(message["time"], "%Y-%m-%d %H:%M:%S")
-                formatted = dateTimeObject.strftime("%Y-%m-%dT%H:%M:%SZ")
-                handler = threading.Thread(None, self.decisionThread, 'Handler for POST/LocationChange', args = (message,formatted,self.server.storageAddress,self.server.deviceBase))
-                self.server.threads.append(handler)
-                handler.start()             
+                try:
+                    dateTimeObject = datetime.strptime(message["time"], "%Y-%m-%dT%H:%M:%SZ")
+                except ValueError:
+                    self.send_response(400)
+                    self.end_headers()
+                    self.wfile.write('Could not parse the provided timestamp as ISO8601: ' + str(message['time']))
+                    self.server.serverrequestlogger.info("POST: Received Location Change Update: Return 400")
+                    return
                 self.send_response(200)
+                self.server.serverrequestlogger.info("POST: Received Location Change Update: Return 200")
                 self.end_headers()
+                handler = threading.Thread(None, self.decisionThread, 'Handler for decision', args = (message, "location"))
+                handler.start()                   
             except KeyError as ke:
                 self.handleMissingKey(ke)
                 return
+
         #If there is a command from the app print the command
         elif self.path == "/CommandsFromApp":
             try:
-                print "For User " + str(message["commandUserID"])
+                self.server.serverrequestlogger.info("POST: Received Command From App")
+                print "For User " + str(message["userID"])
                 print "Latitude " + str(message["lat"])
-                print "Longitude " + str(message["long"])
+                print "Longitude " + str(message["lon"])
                 print "Altitude " + str(message["alt"])
-                print "Turn off Device ID " + str(message["commanddeviceID"])
-                print "The Device Name is " + str(message["commanddeviceName"])
-                print "The Device Type is " + str(message["commanddeviceType"])
-                print "The SpaceID is " + str(message["commandspaceID"])
-                print "The state is " + str(message["commandstateDevice"])
-                print "Timestamp of Command " + str(message["time"])
-                #Begin - Prerana Rane 4/15/2015
-                #Set up connection to persistent storage
-                #change the format to the format required by persistent storage
-                
-                #dateTimeObject = datetime.strptime(message["time"], "%Y-%m-%d %H:%M:%S")
-                
-                #formatted = dateTimeObject.strftime("%Y-%m-%dT%H:%M:%SZ")
-                #Pass the JSON file to persistent storage
-                #print "sending now"
-                #payload = json.dumps({"action-type":"verbal-command","action-data":message})
-                #conn.request('PATCH', 'C/' + message['commandUserID'] + '/' + formatted + '/' + 'WayneManor' + '/' + message['commandspaceID'] + '/' + message['commanddeviceName'], payload)
-                #print "getting response"
-                #response = conn.getresponse()
-                #print response.status
-                #print response.read()
-                #End - Prerana Rane 4/15/2015
+                for field in ["lat", "lon", "alt"]:
+                    if not (isinstance(message[field], int) or isinstance(message[field], float)):
+                        self.send_response(400)
+                        self.end_headers()
+                        self.wfile.write('The field ' + field + ' must be numeric. Received: ' + str(message[field]))
+                        self.server.serverrequestlogger.info("POST: Received Command From App: Return 400")
+                        return
+                try:
+                    dateTimeObject = datetime.strptime(message["time"], "%Y-%m-%dT%H:%M:%SZ")
+                except ValueError:
+                    self.send_response(400)
+                    self.end_headers()
+                    self.wfile.write('Could not parse the provided timestamp as ISO8601: ' + str(message['time']))
+                    self.server.serverrequestlogger.info("POST: Received Command From App: Return 400")
+                    return
+                print "The command is " + str(message["command-string"])
+                self.send_response(200)
+                self.server.serverrequestlogger.info("POST: Received Command From App: Return 200")
+                self.end_headers()
+                handler = threading.Thread(None, self.decisionThread, 'Handler for decision', args = (message, "command"))
+                handler.start()
             except KeyError as ke:
                 self.handleMissingKey(ke)
                 return
-            self.send_response(200)
-            self.end_headers()
+
         elif self.path == "/TimeConfig":
-            self.server.timeconfig = message
-            self.send_response(200)
-            self.end_headers()
+            try:
+                self.server.serverrequestlogger.info("POST: Received Time Config")
+                print "You may choose to perform a action based on time/date, so the time/date is now" + str(message["localTime"])
+                try:
+                    dateTimeObject = datetime.strptime(message["time"], "%Y-%m-%dT%H:%M:%SZ")
+                except ValueError:
+                    self.send_response(400)
+                    self.end_headers()
+                    self.wfile.write('Could not parse the provided timestamp as ISO8601: ' + str(message['time']))
+                    self.server.serverrequestlogger.info("POST: Received Time Config: Return 400")
+                self.send_response(200)
+                self.server.serverrequestlogger.info("POST: Received Time Config: Return 200")
+                self.end_headers()
+                handler = threading.Thread(None, self.decisionThread, 'Handler for decision', args = (message, "time"))
+                handler.start()                                        
+            except KeyError as ke:
+                self.handleMissingKey(ke)
+                return
+
         elif self.path == "/LocalTime":
             try:
+                self.server.serverrequestlogger.info("POST: Received Local Time")
                 print "You may choose to perform a action based on time/date, so the time/date is now" + str(message["localTime"])
+                try:
+                    dateTimeObject = datetime.strptime(message["localTime"], "%Y-%m-%dT%H:%M:%SZ")
+                except ValueError:
+                    self.send_response(400)
+                    self.end_headers()
+                    self.wfile.write('Could not parse the provided timestamp as ISO8601: ' + str(message['time']))
+                    self.server.serverrequestlogger.info("POST: Received Local Time: Return 400")
             except KeyError as ke:
                 self.handleMissingKey(ke)
                 return
             self.send_response(200)
+            self.server.serverrequestlogger.info("POST: Received Local Time: Return 200")
             self.end_headers()
+            handler = threading.Thread(None, self.decisionThread, 'Handler for decision', args = (message, "time"))
+            handler.start()
         else:
             self.send_response(400)
             self.end_headers()
@@ -148,6 +215,7 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     except:
         #We want to catch all otherwise-unhandled errors, and return a 500 error code.
         self.send_response(500)
+        self.server.serverrequestlogger.info("POST: Exception: Return 500")
         self.end_headers()
         self.wfile.write("\nAn internal error occured. Please report this to the Decision-Making API team.\n")
         self.wfile.write("Request path: " + self.path + "\n")
@@ -155,27 +223,28 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
   
   def handleMissingKey(self, keyError):
     self.send_response(400)
+    self.server.serverrequestlogger.info("POST: Missing JSON Key: Return 400")
     self.end_headers()
     self.wfile.write('\nYour request body is missing a JSON key which is necessary to handle your request.\n')
     self.wfile.write('Request path: ' + self.path + '\n')
     if not keyError is None:
         self.wfile.write('Missing key: ' + keyError.args[0])
 
-  def decisionThread(self, message, cleanTime,storageAdd,deviceBaseAdd):
-    #Set up connection to persistent storage
-    conn = httplib.HTTPConnection(self.server.storageAddress[0], self.server.storageAddress[1])
-    #Pass the JSON file to persistent storage
-    payload = json.dumps({"action-type":"location-update","action-data":message})
-    conn.request('PATCH', 'A/' + message['userId'] + '/' + cleanTime + '/' + 'WayneManor', payload)
-    response = conn.getresponse()
-    print response.status
-    print response.read()
-    #make a random decision
-    decisions.randomDecision(float(message["lat"]), float(message["long"]), float(message["alt"]), str(message["userId"]), cleanTime, storageAdd, deviceBaseAdd)
+  def decisionThread(self, message, decisionType):
+    if decisionType == "weather":
+        self.server.decision.weatherDecision(message)
+    elif decisionType == "deviceState":
+        self.server.decision.deviceStateDecision(message)
+    elif decisionType == "location":
+        self.server.decision.locationDecision(message)
+    elif decisionType == "time":
+        self.server.decision.timeDecision(message)
+    else:
+        self.server.decision.command(message)
 
 class HaltableHTTPServer(BaseHTTPServer.HTTPServer):
 
-    def __init__(self, server_address, persistentStorageAddress, deviceBase, RequestHandlerClass):
+    def __init__(self, server_address, persistentStorageAddress, deviceBase, RequestHandlerClass, declogname, resetlog):
         BaseHTTPServer.HTTPServer.__init__(self, server_address, RequestHandlerClass)
         self.shouldStop = False
         self.timeout = 1
@@ -183,6 +252,20 @@ class HaltableHTTPServer(BaseHTTPServer.HTTPServer):
         self.timeconfig = {}
         self.threads=[]
         self.deviceBase = deviceBase
+        decisionlogger = logging.getLogger('DecisionMakingServer')
+        if resetlog:
+            decisionlogger.addHandler(logging.FileHandler(declogname, mode = 'w'))
+        else:
+            decisionlogger.addHandler(logging.FileHandler(declogname, mode = 'a'))
+        decisionlogger.setLevel(logging.DEBUG)
+        self.decision = decisionMaking(decisionlogger, persistentStorageAddress, deviceBase)
+        self.serverrequestlogger = logging.getLogger('ServerRequestLogger')
+        serverrequestloggerhandler = logging.FileHandler('ServerRequestLogFile', mode = 'a')
+        serverformatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+        serverrequestloggerhandler.setFormatter(serverformatter)
+        self.serverrequestlogger.addHandler(serverrequestloggerhandler)
+        self.serverrequestlogger.setLevel(logging.INFO)
+		
 
     def serve_forever (self):
         while not self.shouldStop:
@@ -207,6 +290,10 @@ if __name__ == "__main__":
     argparser.add_argument('-p', '--port', type=int)
     argparser.add_argument('-t', '--storage', type=str)
     argparser.add_argument('-d', '--devicebase', type=str, default='http://localhost:8082/api/devicemgr/state/')
+    argparser.add_argument('-l', '--logfile', type=str, default='decisions.log')
+    argparser.add_argument('-rl', '--resetlog', action='store_true')
+    argparser.add_argument('-a', '--address', action='store_true')
+
     args = argparser.parse_args()
     #Validate arguments. Port number:
     if args.port < 0:
@@ -224,7 +311,12 @@ if __name__ == "__main__":
         print "You must enter a valid persistent storage address and port number (e.g. 127.0.0.1:8080)"
         argparser.print_help()
         sys.exit(1) 
-    server = HaltableHTTPServer(('',args.port), persistentStorageAddress, args.devicebase, ServerInfoHandler)
+    tempHostName = socket.gethostname()
+    tempHostAddr = socket.gethostbyname(tempHostName)
+    if args.address:
+	    tempHostAddr = '127.0.0.1'
+    server = HaltableHTTPServer((tempHostAddr,args.port), persistentStorageAddress, args.devicebase, ServerInfoHandler, args.logfile, args.resetlog)
+
     #Print the server port. We actually get this from the server object, since
     #the user can enter a port number of 0 to have the OS assign some open port.
     print "Serving on port " + str(server.socket.getsockname()[1]) + "..."
