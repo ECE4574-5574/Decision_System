@@ -60,6 +60,7 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     self.send_response(400)
                     self.end_headers()
                     self.wfile.write('Could not parse the provided timestamp as ISO8601: ' + str(message['time']))
+                    return
                 self.send_response(200)
                 self.end_headers()
                 handler = threading.Thread(None, self.decisionThread, 'Handler for decision', args = (message, "weather"))
@@ -82,6 +83,7 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     self.send_response(400)
                     self.end_headers()
                     self.wfile.write('Could not parse the provided timestamp as ISO8601: ' + str(message['time']))
+                    return
                 self.send_response(200)
                 self.end_headers()
                 handler = threading.Thread(None, self.decisionThread, 'Handler for decision', args = (message, "deviceState"))
@@ -111,6 +113,7 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     self.send_response(400)
                     self.end_headers()
                     self.wfile.write('Could not parse the provided timestamp as ISO8601: ' + str(message['time']))
+                    return
                 self.send_response(200)
                 self.end_headers()
                 handler = threading.Thread(None, self.decisionThread, 'Handler for decision', args = (message, "location"))
@@ -138,6 +141,7 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     self.send_response(400)
                     self.end_headers()
                     self.wfile.write('Could not parse the provided timestamp as ISO8601: ' + str(message['time']))
+                    return
                 print "The command is " + str(message["command-string"])
                 self.send_response(200)
                 self.end_headers()
