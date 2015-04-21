@@ -2,7 +2,9 @@
 
 Running the Server:
 - Running the server requires an installation of IronPython.
-- You will need to specify 
+- After installing IronPython, you must also install the requests module with pip
+- Call ipy -X:Frames ServerIncomingData.py -h to see a help message on the command-line flags.
+- You must specify the -X:Frames flag when running the server.
 
 Demo Code:
 - User's location changes will be sent by the Server API. This data is posted on a local server.
