@@ -9,11 +9,16 @@ args=parser.parse_args()
 
 connection = httplib.HTTPConnection('localhost', args.port)
 
-weather = {"condition":"sunny","temperature":72.2,"time":"2015-04-06 18:05:05"}
-deviceState = {"deviceName":"BedroomLight", "deviceType":3, "enabled":"true", "setpoint":5, "time":"2015-04-06 18:05:05"}
-locationChange = {"userId":"user1", "lat":70.123456, "long":300.123456, "alt":150.123456, "time":"2015-04-06 18:05:05"}
+weather = {"condition":"sunny","temperature":72.2,"time":"2015-04-06T18:05:05Z"}
+deviceState = {"deviceName":"BedroomLight", "deviceType":3, "enabled":"true", "setpoint":5, "time":"2015-04-06T18:05:05Z"}
+locationChange = {"userId":"user1", "lat":70.123456, "long":300.123456, "alt":150.123456, "time":"2015-04-06T18:05:05Z"}
 time = {"localTime":str(datetime.datetime.now())}
-commandsfromApp = {"commandUserID":"user1", "lat":70.123456, "long":300.123456, "alt":150.123456,"commanddeviceID":1,"commanddeviceName":"BedroomLight", "commanddeviceType":3,"commandspaceID": 4,"commandstateDevice":0,"time":"2015-04-06 18:05:05"}
+commandsfromApp = {'userID': 'nouser',
+                        'lat': 37.23512,
+                        'lon': 37.23512,
+                        'alt': 100,
+                        'command-string':'brightenNearMe',
+                        'time': '2015-04-19T12:59:23Z'}
 #Test device state change response.
 print 'Testing response to device state change'
 connection.request('POST', '/DeviceState', json.dumps(deviceState))
@@ -68,7 +73,7 @@ else:
 print "Testing an incorrect URL"
 connection.request('POST', '/CausesError', json.dumps(time))
 res = connection.getresponse()
-if (res.status == 200):
+if (res.status == 400):
     print 'PASS'
 else:
     print 'FAIL'

@@ -44,6 +44,13 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 print "The weather condition is " + str(message["condition"])
                 print "The temperature is " + str(message["temperature"])
                 print "Timestamp of WeatherUpdate " + str(message["time"])
+                try:
+                    dateTimeObject = datetime.strptime(message["time"], "%Y-%m-%dT%H:%M:%SZ")
+                except ValueError:
+                    self.send_response(400)
+                    self.end_headers()
+                    self.wfile.write('Could not parse the provided timestamp as ISO8601: ' + str(message['time']))
+                    return
                 self.send_response(200)
                 self.end_headers()
                 handler = threading.Thread(None, self.decisionThread, 'Handler for decision', args = (message, "weather"))
@@ -60,6 +67,13 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 print "The Device is enabled " + str(message["enabled"])
                 print "The setpoint is " + str(message["setpoint"])
                 print "Timestamp of DeviceState Action " + str(message["time"])
+                try:
+                    dateTimeObject = datetime.strptime(message["time"], "%Y-%m-%dT%H:%M:%SZ")
+                except ValueError:
+                    self.send_response(400)
+                    self.end_headers()
+                    self.wfile.write('Could not parse the provided timestamp as ISO8601: ' + str(message['time']))
+                    return
                 self.send_response(200)
                 self.end_headers()
                 handler = threading.Thread(None, self.decisionThread, 'Handler for decision', args = (message, "deviceState"))
@@ -77,6 +91,13 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 print "The Longitude is  " + str(message["long"])
                 print "The Altitude is " + str(message["alt"])
                 print "Timestamp of LocationChange " + str(message["time"])
+                try:
+                    dateTimeObject = datetime.strptime(message["time"], "%Y-%m-%dT%H:%M:%SZ")
+                except ValueError:
+                    self.send_response(400)
+                    self.end_headers()
+                    self.wfile.write('Could not parse the provided timestamp as ISO8601: ' + str(message['time']))
+                    return
                 self.send_response(200)
                 self.end_headers()
                 handler = threading.Thread(None, self.decisionThread, 'Handler for decision', args = (message, "location"))
@@ -104,6 +125,7 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     self.send_response(400)
                     self.end_headers()
                     self.wfile.write('Could not parse the provided timestamp as ISO8601: ' + str(message['time']))
+                    return
                 print "The command is " + str(message["command-string"])
                 self.send_response(200)
                 self.end_headers()
