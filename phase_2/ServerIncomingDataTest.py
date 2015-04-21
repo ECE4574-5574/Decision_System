@@ -85,3 +85,6 @@ if (res.status == 400):
     print 'PASS'
 else:
     print 'FAIL'
+
+log = open('decisions.log', 'r')
+print log.read()

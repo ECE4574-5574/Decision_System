@@ -40,7 +40,7 @@ class decisionMaking():
     #message should be a parsed JSON dictionary
     def weatherDecision(self, message):
         try:    
-            line = "Weather Decision " + str(self.weatherDecisionCount) + ":\n"
+            line = "Weather Decision " + str(self.weatherDecisionCount) + ":\nData to be sent to persistent storage: " + str(message) + "\n"
             self.weatherDecisionCount += 1
             self.logger.debug(line)
         except:
@@ -50,20 +50,20 @@ class decisionMaking():
     def deviceStateDecision(self, message):
         try:
             
-            # Begin - Prerana Rane 4/15/2015
+            
             #Logging the device state changes in the persistent storage 
             #Set up connection to persistent storage
             conn = httplib.HTTPConnection(self.storageAddress[0], self.storageAddress[1])
             #change the format to the format required by persistent storage
             payload = json.dumps({"action-type":"device state change","action-data":message})
-            line = "Device State Decision " + str(self.deviceStateDecisionCount) + ":\n" + "Data sent to persistent storage: " + str(payload)
-            self.deviceStateDecisionCount += 1
-            self.logger.debug(line)
+            requestPath = 'PATCH', 'C/' + "user1" + '/' + message["time"] + '/' + 'WayneManor' + '/' + "aspace" + '/' + message['deviceName']   
             conn.request('PATCH', 'C/' + "user1" + '/' + message["time"] + '/' + 'WayneManor' + '/' + "aspace" + '/' + message['deviceName'], payload)
             response = conn.getresponse()
             print response.status
-            print response.read()               
-            #End - Prerana Rane 4/15/2015
+            print response.read()
+            line = "Device State Decision " + str(self.deviceStateDecisionCount) + ":\nData sent to persistent storage: " + str(payload) + "\nRequest Path: " + str(requestPath) + "\nRequest response: " + str(response.status) + "\n"
+            self.deviceStateDecisionCount += 1
+            self.logger.debug(line)                         
         except:
             line = 'Error when trying to make a device state decision!\nRequest body being handled:\n' + str(message) + '\n'
             self.logger.warning(line)
@@ -75,21 +75,21 @@ class decisionMaking():
             conn = httplib.HTTPConnection(self.storageAddress[0],self.storageAddress[1])
             #Pass the JSON string to persistent storage
             payload = json.dumps({"action-type":"location-update","action-data":message})
-            line = "Location Decision " + str(self.locationDecisionCount) + ":\n" + "Data sent to persistent storage: " + str(payload)
-            self.locationDecisionCount += 1
-            self.logger.debug(line)
+            requestPath = 'PATCH', 'A/' + message['userId'] + '/' + message["time"] + '/' + 'WayneManor'
             conn.request('PATCH', 'A/' + message['userId'] + '/' + message["time"] + '/' + 'WayneManor', payload)
             response = conn.getresponse()
             print response.status
             print response.read()
-            #make a random decision
+            line = "Location Decision " + str(self.locationDecisionCount) + ":\n" + "Data sent to persistent storage: " + str(payload) + "\nRequest Path: " + str(requestPath) + "\nRequest Response: " + str(response.status) + "\n"
+            self.locationDecisionCount += 1
+            self.logger.debug(line) 
         except:
             line = 'Error when trying to make a location decision!\nRequest body being handled:\n' + str(message) + '\n'
             self.logger.warning(line)
 
     def timeDecision(self, message):
         try:
-            line = "Time Decision " + str(self.timeDecisionCount) + ":\n"
+            line = "Time Decision: " + str(self.timeDecisionCount) + "\nData to be sent to persistent storage: " + str(message) + "\n" 
             self.timeDecisionCount += 1
             self.logger.debug(line)
         except:
