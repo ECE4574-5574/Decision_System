@@ -40,10 +40,26 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             return
         #If a weather update is received then that information is printed and a 200 response is sent
         if self.path == "/Weather":
-            try: 
+            try:
+                print "The Latitude is " + str(message["lat"])
+                print "The Longitude is  " + str(message["long"])
+                print "The Altitude is " + str(message["alt"])
+                for field in ["lat", "long", "alt"]:
+                    if not (isinstance(message[field], int) or isinstance(message[field], float)):
+                        print "why"
+                        self.send_response(400)
+                        self.end_headers()
+                        self.wfile.write('The field ' + field + ' must be numeric. Received: ' + str(message[field]))
+                        return 
                 print "The weather condition is " + str(message["condition"])
                 print "The temperature is " + str(message["temperature"])
                 print "Timestamp of WeatherUpdate " + str(message["time"])
+                try:
+                    dateTimeObject = datetime.strptime(message["time"], "%Y-%m-%dT%H:%M:%SZ")
+                except ValueError:
+                    self.send_response(400)
+                    self.end_headers()
+                    self.wfile.write('Could not parse the provided timestamp as ISO8601: ' + str(message['time']))
                 self.send_response(200)
                 self.end_headers()
                 handler = threading.Thread(None, self.decisionThread, 'Handler for decision', args = (message, "weather"))
@@ -60,6 +76,12 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 print "The Device is enabled " + str(message["enabled"])
                 print "The setpoint is " + str(message["setpoint"])
                 print "Timestamp of DeviceState Action " + str(message["time"])
+                try:
+                    dateTimeObject = datetime.strptime(message["time"], "%Y-%m-%dT%H:%M:%SZ")
+                except ValueError:
+                    self.send_response(400)
+                    self.end_headers()
+                    self.wfile.write('Could not parse the provided timestamp as ISO8601: ' + str(message['time']))
                 self.send_response(200)
                 self.end_headers()
                 handler = threading.Thread(None, self.decisionThread, 'Handler for decision', args = (message, "deviceState"))
@@ -76,7 +98,19 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 print "The Latitude is " + str(message["lat"])
                 print "The Longitude is  " + str(message["long"])
                 print "The Altitude is " + str(message["alt"])
+                for field in ["lat", "long", "alt"]:
+                    if not (isinstance(message[field], int) or isinstance(message[field], float)):
+                        self.send_response(400)
+                        self.end_headers()
+                        self.wfile.write('The field ' + field + ' must be numeric. Received: ' + str(message[field]))
+                        return
                 print "Timestamp of LocationChange " + str(message["time"])
+                try:
+                    dateTimeObject = datetime.strptime(message["time"], "%Y-%m-%dT%H:%M:%SZ")
+                except ValueError:
+                    self.send_response(400)
+                    self.end_headers()
+                    self.wfile.write('Could not parse the provided timestamp as ISO8601: ' + str(message['time']))
                 self.send_response(200)
                 self.end_headers()
                 handler = threading.Thread(None, self.decisionThread, 'Handler for decision', args = (message, "location"))
@@ -116,6 +150,12 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         elif self.path == "/TimeConfig":
             try:
                 print "You may choose to perform a action based on time/date, so the time/date is now" + str(message["localTime"])
+                try:
+                    dateTimeObject = datetime.strptime(message["time"], "%Y-%m-%dT%H:%M:%SZ")
+                except ValueError:
+                    self.send_response(400)
+                    self.end_headers()
+                    self.wfile.write('Could not parse the provided timestamp as ISO8601: ' + str(message['time']))
                 self.send_response(200)
                 self.end_headers()
                 handler = threading.Thread(None, self.decisionThread, 'Handler for decision', args = (message, "time"))
@@ -127,6 +167,12 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         elif self.path == "/LocalTime":
             try:
                 print "You may choose to perform a action based on time/date, so the time/date is now" + str(message["localTime"])
+                try:
+                    dateTimeObject = datetime.strptime(message["time"], "%Y-%m-%dT%H:%M:%SZ")
+                except ValueError:
+                    self.send_response(400)
+                    self.end_headers()
+                    self.wfile.write('Could not parse the provided timestamp as ISO8601: ' + str(message['time']))
             except KeyError as ke:
                 self.handleMissingKey(ke)
                 return
