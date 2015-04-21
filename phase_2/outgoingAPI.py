@@ -31,16 +31,16 @@ def runOutgoingAPI(message):
         deviceState = 1;
 		
     # Modify the state for the deviceId based on decision made by the Decision Making algorithm
-"""	
-	data1_json= {
-                    "deviceId": 1,
-                    "deviceName": "LIGHT:1",
-                    "deviceType": 5,
-                    "spaceId": 4,
-                    "state": 1
-                }
-"""
-	data1_json= {
+    """
+        data1_json= {
+                        "deviceId": 1,
+                        "deviceName": "LIGHT:1",
+                        "deviceType": 5,
+                        "spaceId": 4,
+                        "state": 1
+                    }
+    """
+    data1_json= {
                     "deviceId": message["deviceID"],
                     "deviceName": message["deviceName"],
                     "deviceType": message["deviceType"],
