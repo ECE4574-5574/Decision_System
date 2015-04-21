@@ -260,6 +260,7 @@ if __name__ == "__main__":
     argparser.add_argument('-d', '--devicebase', type=str, default='http://localhost:8082/api/devicemgr/state/')
     argparser.add_argument('-l', '--logfile', type=str, default='decisions.log')
     argparser.add_argument('-rl', '--resetlog', action='store_true')
+    argparser.add_argument('-a', '--address', action='store_true')
 
     args = argparser.parse_args()
     #Validate arguments. Port number:
@@ -280,7 +281,8 @@ if __name__ == "__main__":
         sys.exit(1) 
     tempHostName = socket.gethostname()
     tempHostAddr = socket.gethostbyname(tempHostName)
-    print tempHostAddr
+    if args.address:
+	    tempHostAddr = '127.0.0.1'
     server = HaltableHTTPServer((tempHostAddr,args.port), persistentStorageAddress, args.devicebase, ServerInfoHandler, args.logfile, args.resetlog)
 
     #Print the server port. We actually get this from the server object, since
