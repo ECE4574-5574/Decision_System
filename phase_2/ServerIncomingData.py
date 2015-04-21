@@ -172,7 +172,7 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             try:
                 print "You may choose to perform a action based on time/date, so the time/date is now" + str(message["localTime"])
                 try:
-                    dateTimeObject = datetime.strptime(message["time"], "%Y-%m-%dT%H:%M:%SZ")
+                    dateTimeObject = datetime.strptime(message["localTime"], "%Y-%m-%dT%H:%M:%SZ")
                 except ValueError:
                     self.send_response(400)
                     self.end_headers()
@@ -181,7 +181,6 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.handleMissingKey(ke)
                 return
             self.send_response(200)
-            self.end_headers()
             self.end_headers()
             handler = threading.Thread(None, self.decisionThread, 'Handler for decision', args = (message, "time"))
             handler.start()
@@ -232,6 +231,7 @@ class HaltableHTTPServer(BaseHTTPServer.HTTPServer):
             decisionlogger.addHandler(logging.FileHandler(declogname, mode = 'w'))
         else:
             decisionlogger.addHandler(logging.FileHandler(declogname, mode = 'a'))
+        decisionlogger.setLevel(logging.DEBUG)
         self.decision = decisionMaking(decisionlogger, persistentStorageAddress, deviceBase)
 
     def serve_forever (self):
@@ -257,7 +257,7 @@ if __name__ == "__main__":
     argparser.add_argument('-p', '--port', type=int)
     argparser.add_argument('-t', '--storage', type=str)
     argparser.add_argument('-d', '--devicebase', type=str, default='http://localhost:8082/api/devicemgr/state/')
-    argparser.add_argument('-l', '--logfile', type=str, default='server.log')
+    argparser.add_argument('-l', '--logfile', type=str, default='decisions.log')
     argparser.add_argument('-rl', '--resetlog', action='store_true')
 
     args = argparser.parse_args()

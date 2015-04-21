@@ -13,7 +13,7 @@ connection = httplib.HTTPConnection('localhost', args.port)
 weather = {"lat":70.123456, "long":300.123456, "alt":150.123456,"condition":"sunny","temperature":72.2,"time":"2015-04-06T18:05:05Z"}
 deviceState = {"deviceName":"BedroomLight", "deviceType":3, "enabled":"true", "setpoint":5, "time":"2015-04-06T18:05:05Z"}
 locationChange = {"userId":"user1", "lat":70.123456, "long":300.123456, "alt":150.123456, "time":"2015-04-06T18:05:05Z"}
-time = {"localTime":str(datetime.datetime.now())}
+times = {"localTime":'2015-04-19T12:59:23Z'}
 commandsfromApp = {'userID': 'nouser',
                         'lat': 37.23512,
                         'lon': 37.23512,
@@ -56,7 +56,7 @@ else:
 
 #test sending the local time to us
 print "Testing response to the time"
-connection.request('POST', '/LocalTime', json.dumps(time))
+connection.request('POST', '/LocalTime', json.dumps(times))
 res = connection.getresponse()
 sleep(1)
 if (res.status == 200):
@@ -78,7 +78,7 @@ else:
 
 #Testing an in correct URL
 print "Testing an incorrect URL"
-connection.request('POST', '/CausesError', json.dumps(time))
+connection.request('POST', '/CausesError', json.dumps(times))
 res = connection.getresponse()
 sleep(1)
 if (res.status == 400):
