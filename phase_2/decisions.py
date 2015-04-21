@@ -60,7 +60,7 @@ def randomDecision(lat, longi, alt, userId, timeframe, persistent, server):
         conn.request('PATCH', 'C/' + userId + '/' + timeframe + '/' + 'WayneManor' + '/12' + '/2', json.dumps(data2_json))  #sends response to the Persistent Storage
         response2 = conn.getresponse()
         #print "Server response"
-        print response 
+        print response2
         print "Persistent storage response"                                                          #prints response
         print response2.status
         print response2.read()
