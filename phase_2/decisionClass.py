@@ -103,7 +103,7 @@ class decisionMaking():
         try:
             conn = httplib.HTTPConnection(self.storageAddress[0], self.storageAddress[1])
             reqMethod = 'GET'
-            reqPath = 'UI/' + message['userID']
+            reqPath = 'BU/' + message['userID']
             
             #First, try to get the user information.
             output.write('req ' + self.storageAddress[0] + ':' + str(self.storageAddress[1]) + ' ' + reqMethod + ' ' + reqPath + '\n')
@@ -123,17 +123,14 @@ class decisionMaking():
             matchingHouse = None
             for houseID in body['houseIDs']:
                 reqMethod = 'GET'
-                reqPath = 'HI/' + str(houseID)
+                reqPath = 'BH/' + str(houseID)
                 output.write('req ' + self.storageAddress[0] + ':' + str(self.storageAddress[1]) + ' ' + reqMethod + ' ' + reqPath + '\n')
                 conn.request(reqMethod, reqPath)
                 resp = conn.getresponse()
                 output.write('response ' + str(resp.status) + '\n')
-                body = resp.read()
-                body = json.loads(body)
-                print 'Debug house body: '
-                print body
                 try:
-                    blob = json.loads(body['blob'])
+                    blob = resp.read()
+                    blob = json.loads(blob)
                     if abs(blob['lat']-message['lat']) <= 0.01 and \
                        abs(blob['lon']-message['lon']) <= 0.01 and \
                        abs(blob['alt']-message['alt']) <= 1:

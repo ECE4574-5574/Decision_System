@@ -8,7 +8,7 @@ import mock_responses as mresp
 
 GET_FUNCTION_TOKEN_RANGES = {\
             'HD': '2', 'RD': '3', 'HT': '3', 'RT': '4',\
-            'UI': '2,3', 'HI': '2,3',\
+            'BU': '2,3', 'BH': '2,3',\
             'AL': '3-5', 'AT': '6', 'AI': '6',\
             'CL': '3-5', 'CT': '6', 'CI': '6'}
 POST_FUNCTION_TOKEN_RANGES = {'D': '6', 'R': '4', 'H': '2', 'U': '2'}
@@ -23,7 +23,7 @@ class HATSPersistentStorageRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         try:
             if self.validateGetRequest(self.path):
-                if self.path.strip('/').split('/')[0] == 'UI' and not self.path.strip('/').split('/')[1] == 'bsaget':
+                if self.path.strip('/').split('/')[0] == 'BU' and not self.path.strip('/').split('/')[1] == 'bsaget':
                     self.send_response(404)
                     self.end_headers()
                 self.send_response(200)

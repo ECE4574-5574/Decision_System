@@ -19,6 +19,7 @@ import httplib
 import argparse
 import sys
 import logging
+import socket
 from temporaryHolding import TemporaryHolding
 from datetime import datetime
 from decisionClass import decisionMaking
@@ -259,6 +260,7 @@ if __name__ == "__main__":
     argparser.add_argument('-d', '--devicebase', type=str, default='http://localhost:8082/api/devicemgr/state/')
     argparser.add_argument('-l', '--logfile', type=str, default='decisions.log')
     argparser.add_argument('-rl', '--resetlog', action='store_true')
+    argparser.add_argument('-a', '--address', action='store_true')
 
     args = argparser.parse_args()
     #Validate arguments. Port number:
@@ -277,7 +279,12 @@ if __name__ == "__main__":
         print "You must enter a valid persistent storage address and port number (e.g. 127.0.0.1:8080)"
         argparser.print_help()
         sys.exit(1) 
-    server = HaltableHTTPServer(('127.0.0.1',args.port), persistentStorageAddress, args.devicebase, ServerInfoHandler, args.logfile, args.resetlog)
+    tempHostName = socket.gethostname()
+    tempHostAddr = socket.gethostbyname(tempHostName)
+    if args.address:
+	    tempHostAddr = '127.0.0.1'
+    server = HaltableHTTPServer((tempHostAddr,args.port), persistentStorageAddress, args.devicebase, ServerInfoHandler, args.logfile, args.resetlog)
+
     #Print the server port. We actually get this from the server object, since
     #the user can enter a port number of 0 to have the OS assign some open port.
     print "Serving on port " + str(server.socket.getsockname()[1]) + "..."

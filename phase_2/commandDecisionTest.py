@@ -76,7 +76,7 @@ class commandDecisionTest(unittest.TestCase):
             testoutfile = open(TEST_LOG_FILE)
             log = testoutfile.read().strip('\n')
             expected = ['Command Decision 1:',
-                        'req localhost:8080 GET UI/nouser',
+                        'req localhost:8080 GET BU/nouser',
                         'response 404']
             self.assertTrue(validateLog(expected, log))
         except:
@@ -95,11 +95,11 @@ class commandDecisionTest(unittest.TestCase):
             testoutfile = open(TEST_LOG_FILE)
             log = testoutfile.read().strip('\n')
             expected = ['Command Decision 1:',
-                        'req localhost:8080 GET UI/'+ACTUAL_USER_ID,
+                        'req localhost:8080 GET BU/'+ACTUAL_USER_ID,
                         'response 200',
-                        'req localhost:8080 GET HI/1',
+                        'req localhost:8080 GET BH/1',
                         'response 200',
-                        'req localhost:8080 GET HI/101',
+                        'req localhost:8080 GET BH/101',
                         'response 200',
                         'Could not find a matching house for that user and coordinates.']
             self.assertTrue(validateLog(expected, log))
@@ -120,11 +120,11 @@ class commandDecisionTest(unittest.TestCase):
             testoutfile = open(TEST_LOG_FILE)
             log = testoutfile.read().strip('\n')
             expected = ['Command Decision 1:',
-                'req localhost:8080 GET UI/'+ACTUAL_USER_ID,
+                'req localhost:8080 GET BU/'+ACTUAL_USER_ID,
                 'response 200',
-                'req localhost:8080 GET HI/1',
+                'req localhost:8080 GET BH/1',
                 'response 200',
-                'req localhost:8080 GET HI/101',
+                'req localhost:8080 GET BH/101',
                 'response 200',
                 'match house 101',
                 'requesting devices']
