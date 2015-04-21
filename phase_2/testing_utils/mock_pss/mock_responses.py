@@ -12,12 +12,12 @@ def getMockResponse(query, id):
     elif query == 'RT' or query == 'RD':
         return json.dumps([{'device-id':'G7Umyvw7cUyxYx9ezuPLDw', 'device-type':'light', 'blob':MOCK_DEVICE_BLOB},
                            {'device-id':'olnQYPjfJUyijwhY71sxQw', 'device-type':'light', 'blob':MOCK_DEVICE_BLOB}])
-    elif query == 'HI':
+    elif query == 'BH':
         if id == '101':
-            return json.dumps({'version':0, 'blob':MOCK_HOUSE_BLOB_ALT})
+            return MOCK_HOUSE_BLOB_ALT
         else:
-            return json.dumps({'version':0, 'blob':MOCK_HOUSE_BLOB})
-    elif query == 'UI':
+            return MOCK_HOUSE_BLOB
+    elif query == 'BU':
         if id == 'bsaget':
             return json.dumps({'userID': 'bsaget', 'user-full-name': 'Bob Saget', 'houseIDs':[1,101]})
     elif query == 'AL' or query == 'AT' or query == 'CI' or query == 'CT' or query == 'CI':
