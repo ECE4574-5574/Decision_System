@@ -1,12 +1,12 @@
 #Tests the functions for PersistentStorageFunctions
-#Contributors : Luke Lapham
+#Contributors : Luke Lapham, Sumit Kumar
 #Date : 3/30/2015
-#
+#Last modified: 4/20/2015
 #Note: This test assumes that you have a persistent storage server running on your desktop.
 import unittest
 import PersistentStorageFunctions as PSF
 
-STATUS_CODES = { 'OK': 200, 'Bad_Request' : 400, 'Uunauthorized_Access' : 401,\
+STATUS_CODES = { 'OK': 200, 'Bad_Request' : 400, 'Unauthorized_Access' : 401,\
             'Resource_Not_Found' : 404, 'Internal_Server_Error' : 500, 'Not_Implemented' : 501}
 
 class PersistentStorageFunctionsTest(unittest.TestCase):
@@ -51,10 +51,10 @@ class PersistentStorageFunctionsTest(unittest.TestCase):
         self.assertEqual(resp.status, STATUS_CODES['OK'])
 		
     def testPostFunctionsDefaults(self):
-        resp = self.API.postDevice()
+        resp = self.API.postDevice("testHouseID","testRoomID","1")
         self.assertEqual(resp.status, STATUS_CODES['OK'])
 		
-        resp = self.API.postRoom()
+        resp = self.API.postRoom("testHouseID")
         self.assertEqual(resp.status, STATUS_CODES['OK'])
 		
         resp = self.API.postHouse()

@@ -1,7 +1,7 @@
 """API Calls to and from the Persistent Storage
 Contributors : Prerana Rane and Sumit Kumar
 Created : 3/30/2015
-Last modified : 4/6/2015
+Last modified : 4/20/2015
 Purpose : Post function will send the device, house, room and user data to the localhost, port 8080 
 Method of Testing: Run this file and then send a POST command."""
 
@@ -32,7 +32,7 @@ class PersistentInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 return False
 
             elif InputPath[0] == 'D':
-                resp = PSF.postDevice(self, houseID, version, roomID, deviceID)
+                resp = PSF.PersistentStorageFunctions.postDevice(houseID,roomID, 1)
                 if resp:
                     self.send_response(200)
                 else:
@@ -40,7 +40,7 @@ class PersistentInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
             elif InputPath[0] == 'R':
                 #send Room Data
-                resp = PSF.postRoom(self, houseID, version, roomID)
+                resp = PSF.PersistentStorageFunctions.postRoom(houseID)
                 if resp:
                     self.send_response(200)
                 else:
@@ -48,14 +48,14 @@ class PersistentInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
             elif InputPath[0] == 'H':
                 #send House Data
-                resp = PSF.postHouse(self, houseID)
+                resp = PSF.PersistentStorageFunctions.postHouse()
                 if resp:
                     self.send_response(200)
                 else:
                     raise Exception("Failed to Post.")
             elif InputPath[0] == 'U':
                 #send User Data
-                resp = PSF.postUser(self, userID)
+                resp = PSF.PersistentStorageFunctions.postUser()
                 if resp:
                     self.send_response(200)
                 else:

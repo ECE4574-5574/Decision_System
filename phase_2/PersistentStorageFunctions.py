@@ -1,6 +1,7 @@
 #Functions for Calls to and from the Persistent Storage
-#Contributors : Luke Lapham
+#Contributors : Luke Lapham, Sumit Kumar
 #Date : 3/30/2015
+#Last modified: 4/20/2015
 
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import requests
@@ -11,7 +12,7 @@ import urllib
 FUNCTION_TYPES = { 'get' : 'GET', 'post' : 'POST'}
 
 class PersistentStorageFunctions():
-    def __init__(self, ipAddress='localhost', extention=8080):
+    def __init__(self, ipAddress='172.31.26.85', extention=8080):
 	    #COnnection to the server is established
         self.conn = httplib.HTTPConnection(ipAddress, extention)
 		
@@ -31,7 +32,7 @@ class PersistentStorageFunctions():
         self.conn.request(FUNCTION_TYPES['get'],'RT/' + houseID + '/' + roomID + '/' + deviceTypeID + '/')
         return self.conn.getresponse()
 
-	#Note: since each house can have more than one user it may not make sense to return a signle user ID
+    #Note: since each house can have more than one user it may not make sense to return a signle user ID
 	#based upon a house ID.
     def getUserInformationHouse(self, houseID='testHouseID'):
         self.conn.request(FUNCTION_TYPES['get'], 'UI/' + houseID)
@@ -91,19 +92,19 @@ class PersistentStorageFunctions():
         self.conn.request(FUNCTION_TYPES['get'], tempKey)
         return self.conn.getresponse()
 		
-    def postDevice(self, houseID='testHouseID', version='0.0',roomID='testRoomID', deviceID='testDeviceID'):
+    def postDevice(self, houseID,roomID, deviceType):
         self.conn.request(FUNCTION_TYPES['post'], 'D/' + houseID +\
-            '/' + version + '/' + roomID + '/' + deviceID + '/')
+            '/' + roomID + '/' + deviceType + '/')
         return self.conn.getresponse()
 		
-    def postRoom(self, houseID='testHouseID', version='0.0',roomID='testRoomID'):
-        self.conn.request(FUNCTION_TYPES['post'], 'R/' + houseID + '/' + version + '/' + roomID + '/')
+    def postRoom(self, houseID):
+        self.conn.request(FUNCTION_TYPES['post'], 'R/' + houseID +"/")
         return self.conn.getresponse()
 		
-    def postHouse(self, houseID='testHouseID'):
-        self.conn.request(FUNCTION_TYPES['post'], 'H/' + houseID + '/')
+    def postHouse(self):
+        self.conn.request(FUNCTION_TYPES['post'], 'H/')
         return self.conn.getresponse()
 		
-    def postUser(self, userID='testUserID'):
-        self.conn.request(FUNCTION_TYPES['post'], 'U/' + userID + '/')
+    def postUser(self):
+        self.conn.request(FUNCTION_TYPES['post'], 'U/')
         return self.conn.getresponse()
