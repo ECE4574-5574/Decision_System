@@ -21,13 +21,26 @@ commandsfromApp = {'userID': 'nouser',
                         'command-string':'brightenNearMe',
                         'time': '2015-04-19T12:59:23Z'}
 #Test device state change response.
+log = open('decisions.log', 'r')
 print 'Testing response to device state change'
 connection.request('POST', '/DeviceState', json.dumps(deviceState))
 res = connection.getresponse()
 print 'Device State Change Response' + str(res.status)
-sleep(1)
+sleep(2)
+log.readline()
+line = log.readline()
+data = line.split(':',1)[1]
+data = data[1:]
+message = json.loads(data)
+check = "('PATCH', 'C/user1/2015-04-06T18:05:05Z/WayneManor/aspace/BedroomLight')\n"
+line = log.readline()
+data = line.split(':',1)[1]
+request = data[1:]
+line = log.readline()
+data = line.split(':',1)[1]
+response = data[1:]
 
-if (res.status == 200):
+if (res.status == 200 and message['action-type'] == 'device state change' and message['action-data'] == deviceState and request == check and int(response) == 200):
     print 'PASS'
 else:
     print 'FAIL'
@@ -38,8 +51,20 @@ print 'POST/LocationChange ' + json.dumps(locationChange)
 connection.request('POST', '/LocationChange', json.dumps(locationChange))
 res = connection.getresponse()
 print 'Location Change Response' + str(res.status)
-sleep(1)
-if (res.status == 200):
+sleep(2)
+log.readlines(2)
+line = log.readline()
+data = line.split(':',1)[1]
+data = data[1:]
+message = json.loads(data)
+check = "('PATCH', 'A/user1/2015-04-06T18:05:05Z/WayneManor')\n"
+line = log.readline()
+data = line.split(':',1)[1]
+request = data[1:]
+line = log.readline()
+data = line.split(':',1)[1]
+response = data[1:]
+if (res.status == 200 and message['action-type'] == 'location-update' and message['action-data'] == locationChange and request == check and int(response) == 200):
     print 'PASS'
 else:
     print 'FAIL'
@@ -48,8 +73,13 @@ else:
 print 'Testing response to app command...'
 connection.request('POST', '/CommandsFromApp', json.dumps(commandsfromApp))
 res = connection.getresponse()
-sleep(1)
-if (res.status == 200):
+sleep(2)
+log.readlines(2)
+line1 = log.readline()
+line2 = log.readline()
+check = "req localhost:8080 GET BU/nouser\n"
+check1 = "response 404\n"
+if (res.status == 200 and line1 == check and line2 == check1):
     print 'PASS'
 else:
     print 'FAIL'
@@ -58,8 +88,13 @@ else:
 print "Testing response to the time"
 connection.request('POST', '/LocalTime', json.dumps(times))
 res = connection.getresponse()
-sleep(1)
-if (res.status == 200):
+sleep(2)
+log.readlines(2)
+line = log.readline()
+data = line.split(':',1)[1]
+data = data[1:]
+check = str(times) + "\n"
+if (res.status == 200 and data == check):
     print 'PASS'
 else:
     print 'FAIL'
@@ -70,8 +105,13 @@ print 'POST/Weather ' + json.dumps(weather)
 connection.request('POST', '/Weather', json.dumps(weather))
 res = connection.getresponse()
 print 'Weather Response' + str(res.status)
-sleep(1)
-if (res.status == 200):
+sleep(2)
+log.readlines(2)
+line = log.readline()
+data = line.split(':',1)[1]
+data = data[1:]
+check = str(weather) + "\n"
+if (res.status == 200 and data == check):
     print 'PASS'
 else:
     print 'FAIL'
@@ -86,5 +126,5 @@ if (res.status == 400):
 else:
     print 'FAIL'
 
-log = open('decisions.log', 'r')
-print log.read()
+
+
