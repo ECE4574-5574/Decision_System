@@ -107,11 +107,11 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         elif self.path == "/LocationChange":
             try:
                 self.server.serverrequestlogger.info("POST: Received Location Change Update")
-                print "The user ID is: " + str(message["userId"])
+                print "The user ID is: " + str(message["userID"])
                 print "The Latitude is " + str(message["lat"])
-                print "The Longitude is  " + str(message["long"])
+                print "The Longitude is  " + str(message["lon"])
                 print "The Altitude is " + str(message["alt"])
-                for field in ["lat", "long", "alt"]:
+                for field in ["lat", "lon", "alt"]:
                     if not (isinstance(message[field], int) or isinstance(message[field], float)):
                         self.send_response(400)
                         self.end_headers()

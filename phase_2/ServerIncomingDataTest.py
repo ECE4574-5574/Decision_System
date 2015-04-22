@@ -12,7 +12,7 @@ connection = httplib.HTTPConnection('localhost', args.port)
 
 weather = {"lat":70.123456, "long":300.123456, "alt":150.123456,"condition":"sunny","temperature":72.2,"time":"2015-04-06T18:05:05Z"}
 deviceState = {"deviceName":"BedroomLight", "deviceType":3, "enabled":"true", "setpoint":5, "time":"2015-04-06T18:05:05Z"}
-locationChange = {"userId":"user1", "lat":70.123456, "long":300.123456, "alt":150.123456, "time":"2015-04-06T18:05:05Z"}
+locationChange = {"userID":"user1", "lat":70.123456, "lon":300.123456, "alt":150.123456, "time":"2015-04-06T18:05:05Z"}
 times = {"localTime":'2015-04-19T12:59:23Z'}
 commandsfromApp = {'userID': 'nouser',
                         'lat': 37.23512,
