@@ -41,10 +41,11 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write("\nThe request body could not be parsed as JSON. The received request body:\n" + data)
             self.server.serverrequestlogger.info("POST: Return 400: The request body could not be parsed as JSON")
+            self
             return
         #If a weather update is received then that information is printed and a 200 response is sent
         if self.path == "/Weather":
-            try:
+            try:                                                                                                        
                 self.server.serverrequestlogger.info("POST: Received Weather Update")
                 print "The Latitude is " + str(message["lat"])
                 print "The Longitude is  " + str(message["long"])
@@ -269,22 +270,24 @@ class HaltableHTTPServer(BaseHTTPServer.HTTPServer):
         self.serverrequestlogger.setLevel(logging.INFO)
         
     #Begin - Prerana Rane - 4/20/2015
+    #Loggng uncaught exceptions
         self.errorlogger = logging.getLogger('ErrorLogger')
         errorhandler = logging.FileHandler('ErrorLogFile')
         errorhandler.setLevel(logging.ERROR)
         errorfrmt = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         errorhandler.setFormatter(errorfrmt)
         self.errorlogger.addHandler(errorhandler)
-        
+        sys.excepthook = handle_exception
+        self.errorlogger.info('Testing exception logging') 
+        self.errorlogger.error("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
+        raise RuntimeError('Uncaught Exception') 
 
     def handle_exception(exc_type, exc_value, exc_traceback):
-        if issubclass(exc_type, KeyboardInterrupt):
-            sys.__excepthook__(exc_type, exc_value, exc_traceback)
-            return
+        msg = "Uncaught %s: %s" % (exc_type, exc_value) 
+        errorlogger.exception(msg) 
+        sys.__excepthook__(exc_type, exc_value, exc_traceback) 
+        return
 
-    errorlogger.error("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
-
-    sys.excepthook = handle_exception
     #End - Prerana Rane - 4/20/2015
     
     def serve_forever (self):
@@ -313,10 +316,6 @@ if __name__ == "__main__":
     argparser.add_argument('-l', '--logfile', type=str, default='decisions.log')
     argparser.add_argument('-rl', '--resetlog', action='store_true')
     argparser.add_argument('-a', '--address', action='store_true')
-    
-    #Begin - Prerana Rane - 4/20/2015
-    raise RuntimeError("Test unhandled")
-    #End - Prerana Rane - 4/20/2015
      
     args = argparser.parse_args()
     #Validate arguments. Port number:
