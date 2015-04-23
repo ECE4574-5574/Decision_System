@@ -15,35 +15,34 @@ class PersistentStorageFunctions():
 	    #COnnection to the server is established
         self.conn = httplib.HTTPConnection(ipAddress, extention)
 		
-    def getAllItemsInHouse(self, houseID='testHouseID'):
+    def getAllItemsInHouse(self, houseID):
         self.conn.request(FUNCTION_TYPES['get'],'HD/' + houseID + '/')
         return self.conn.getresponse()
 
-    def getAllItemsInRoom(self, houseID='testHouseID', roomID='testRoomID'):
+    def getAllItemsInRoom(self, houseID, roomID):
         self.conn.request(FUNCTION_TYPES['get'],'RD/' + houseID + '/' + roomID + '/')
         return self.conn.getresponse()
 
-    def getHouseDeviceType(self, houseID='testHouseID', deviceTypeID='testDeviceID'):
+    def getHouseDeviceType(self, houseID, deviceTypeID):
         self.conn.request(FUNCTION_TYPES['get'],'HT/' + houseID + '/' + deviceTypeID + '/')
         return self.conn.getresponse()
 		
-    def getHouseRoomDeviceType(self, houseID='testHouseID', roomID='testRoomID', deviceTypeID='testDeviceID'):
+    def getHouseRoomDeviceType(self, houseID, roomID, deviceTypeID):
         self.conn.request(FUNCTION_TYPES['get'],'RT/' + houseID + '/' + roomID + '/' + deviceTypeID + '/')
         return self.conn.getresponse()
 
 	#Note: since each house can have more than one user it may not make sense to return a signle user ID
 	#based upon a house ID.
-    def getUserInformationHouse(self, houseID='testHouseID'):
+    def getUserInformationHouse(self, houseID):
         self.conn.request(FUNCTION_TYPES['get'], 'UI/' + houseID)
         return self.conn.getresponse()
 
-    def getUserInformationUserID(self, userID='testUserID'):
+    def getUserInformationUserID(self, userID):
         self.conn.request(FUNCTION_TYPES['get'], 'UI/' + userID)
         return self.conn.getresponse()        
 
     #The HouseID and roomID are optional fields.
-    def getAllLogEntries(self, userID='testUserID', timeframe='testTimeFrame',\
-	    houseID= None, roomID= None):
+    def getAllLogEntries(self, userID, timeframe,houseID= None, roomID= None):
 		
         if houseID is None:
             tempKey = 'AL/' + userID + '/' + timeframe + '/'
@@ -56,54 +55,49 @@ class PersistentStorageFunctions():
             self.conn.request(FUNCTION_TYPES['get'], tempKey)
         return self.conn.getresponse()
 		
-    def getAllLogEntriesDeviceType(self, userID='testUserID', timeframe='testTimeFrame',\
-        deviceType='testDeviceType', houseID='testRoomID', roomID='testRoomdID'):
+    def getAllLogEntriesDeviceType(self, userID, timeframe, deviceType, houseID, roomID):
     
         tempKey = 'AT/' + userID + '/' + timeframe + '/' + deviceType + '/' + houseID + '/' + roomID + '/'
         self.conn.request(FUNCTION_TYPES['get'], tempKey)
         return self.conn.getresponse()
 		
-    def getAllLogEntriesDeviceID(self, userID='testUserID', timeframe='testTimeFrame',\
-        deviceID='testDeviceID', houseID='testRoomID', roomID='testRoomdID'):
+    def getAllLogEntriesDeviceID(self, userID, timeframe, deviceID, houseID, roomID):
     
         tempKey = 'AI/' + userID + '/' + timeframe + '/' + deviceID + '/' + houseID + '/' + roomID + '/'
         self.conn.request(FUNCTION_TYPES['get'], tempKey)
         return self.conn.getresponse()
 		
-    def getAllComputerByLocation(self, userID='testUserID', timeframe='testTimeFrame',\
-        houseID='testRoomID', roomID='testRoomdID'):
+    def getAllComputerByLocation(self, userID, timeframe, houseID, roomID):
 		
         tempKey = 'CL/' + userID + '/' + timeframe + '/' + houseID + '/' + roomID + '/'
         self.conn.request(FUNCTION_TYPES['get'], tempKey)
         return self.conn.getresponse()
 		
-    def getAllComputerByType(self, userID='testUserID', timeframe='testTimeFrame',\
-	    deviceType='testDeviceType', houseID='testRoomID', roomID='testRoomdID'):
+    def getAllComputerByType(self, userID, timeframe, deviceType, houseID, roomID):
 
         tempKey = 'CT/' + userID + '/' + timeframe + '/' + deviceType + '/' + houseID + '/' + roomID + '/'
         self.conn.request(FUNCTION_TYPES['get'], tempKey)
         return self.conn.getresponse()
 		
-    def getComputerbyDeviceID(self, userID='testUserID', timeframe='testTimeFrame',\
-        deviceID='testDeviceID', houseID='testRoomID', roomID='testRoomdID'):
+    def getComputerbyDeviceID(self, userID, timeframe, deviceID, houseID, roomID):
 
         tempKey = 'CI/' + userID + '/' + timeframe + '/' + deviceID + '/' + houseID + '/' + roomID + '/'
         self.conn.request(FUNCTION_TYPES['get'], tempKey)
         return self.conn.getresponse()
 		
-    def postDevice(self, houseID='testHouseID', version='0.0',roomID='testRoomID', deviceID='testDeviceID'):
+    def postDevice(self, houseID, version, roomID, deviceID):
         self.conn.request(FUNCTION_TYPES['post'], 'D/' + houseID +\
             '/' + version + '/' + roomID + '/' + deviceID + '/')
         return self.conn.getresponse()
 		
-    def postRoom(self, houseID='testHouseID', version='0.0',roomID='testRoomID'):
+    def postRoom(self, houseID, version, roomID):
         self.conn.request(FUNCTION_TYPES['post'], 'R/' + houseID + '/' + version + '/' + roomID + '/')
         return self.conn.getresponse()
 		
-    def postHouse(self, houseID='testHouseID'):
+    def postHouse(self, houseID):
         self.conn.request(FUNCTION_TYPES['post'], 'H/' + houseID + '/')
         return self.conn.getresponse()
 		
-    def postUser(self, userID='testUserID'):
+    def postUser(self, userID):
         self.conn.request(FUNCTION_TYPES['post'], 'U/' + userID + '/')
         return self.conn.getresponse()
