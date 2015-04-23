@@ -11,6 +11,13 @@
  *   Jason Ziglar <jpz@vt.edu>
 */
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Windows.Forms;
 
 namespace api
 {
@@ -37,6 +44,7 @@ public class LightSwitch : Device, IEnableable, IReadable<Light>
 			if(value)
 			{
 				_light.Brightness = 1.0;
+                System.Windows.Forms.MessageBox.Show("Light Enabled!");
 			}
 			else
 			{
