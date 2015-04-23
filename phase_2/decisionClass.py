@@ -161,7 +161,7 @@ class decisionMaking():
             for oneDevice in devices:
                 if devapiu.canBrighten(oneDevice):
                     print 'found a brightenable'
-                    oneDevice.set_Enabled(True)
+                    oneDevice.Enabled = True
             print output.getvalue()
             self.logger.info(output.getvalue())
             
