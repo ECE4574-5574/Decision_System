@@ -75,8 +75,8 @@ class decisionMaking():
             conn = httplib.HTTPConnection(self.storageAddress[0],self.storageAddress[1])
             #Pass the JSON string to persistent storage
             payload = json.dumps({"action-type":"location-update","action-data":message})
-            requestPath = 'PATCH', 'A/' + message['userId'] + '/' + message["time"] + '/' + 'WayneManor'
-            conn.request('PATCH', 'A/' + message['userId'] + '/' + message["time"] + '/' + 'WayneManor', payload)
+            requestPath = 'PATCH', 'A/' + message['userID'] + '/' + message["time"] + '/' + 'WayneManor'
+            conn.request('PATCH', 'A/' + message['userID'] + '/' + message["time"] + '/' + 'WayneManor', payload)
             response = conn.getresponse()
             print response.status
             print response.read()
@@ -161,7 +161,7 @@ class decisionMaking():
             for oneDevice in devices:
                 if devapiu.canBrighten(oneDevice):
                     print 'found a brightenable'
-                    oneDevice.set_Enabled(True)
+                    oneDevice.Enabled = True
             print output.getvalue()
             self.logger.info(output.getvalue())
             
