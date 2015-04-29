@@ -14,3 +14,12 @@ def randomDecision(lat, longi, alt, userId, timeframe, persistent, server, logge
     conn = httplib.HTTPConnection(persistent[0], persistent[1])                       #IP Address for Persistent Storage
     # Header for JSON data objects
     headers = {'Content-type': 'application/json'}
+    
+# Check the room user is in at present, ie if the lat and lon map to a room
+
+# Get the snapshot of devices last time the user was in the room
+
+# If there are any manual overrides by the user, update the snapshot entry
+
+# If user moves to another room, take snapshot of the room and store in persistent storage
+
