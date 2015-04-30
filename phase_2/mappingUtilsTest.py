@@ -7,7 +7,7 @@ class testIsInRoom(unittest.TestCase):
     def setUp(self):
         self.BASIC_GOOD_ROOM = {
         'corner1':[37.229874, -80.417754],
-        'corner2':[37.229874, -80.417704],
+        'corner2':[37.229874, -80.417724],
         'corner3':[37.229824, -80.417704],
         'corner4':[37.229824, -80.417754],
         'alt':2080}
@@ -23,6 +23,9 @@ class testIsInRoom(unittest.TestCase):
     
     def test_inRoom(self):
         self.assertTrue(dm.isInRoom(json.dumps(self.BASIC_GOOD_ROOM), 37.229854, -80.417724, 2085))
+    
+    def test_clippedCorner(self):
+        self.assertFalse(dm.isInRoom(json.dumps(self.BASIC_GOOD_ROOM), 37.229874, -80.417704, 2085))
     
     def test_completelyOutThere(self):
         self.assertFalse(dm.isInRoom(json.dumps(self.BASIC_GOOD_ROOM), 0, 0, 0))
