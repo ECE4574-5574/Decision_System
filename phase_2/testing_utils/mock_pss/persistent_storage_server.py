@@ -8,9 +8,9 @@ import mock_responses as mresp
 
 GET_FUNCTION_TOKEN_RANGES = {\
             'HD': '2', 'RD': '3', 'HT': '3', 'RT': '4',\
-            'BU': '2,3', 'BH': '2,3',\
+            'BU': '2,3', 'BH': '2,3', 'BR':'3',\
             'AL': '3-5', 'AT': '6', 'AI': '6',\
-            'CL': '3-5', 'CT': '6', 'CI': '6'}
+            'CL': '3-5', 'CT': '6', 'CI': '6', 'HR': '2'}
 POST_FUNCTION_TOKEN_RANGES = {'D': '6', 'R': '4', 'H': '2', 'U': '2'}
 PATCH_FUNCTION_TOKEN_RANGES = {'A': '4-6', 'C': '4-6'}
 DELETE_FUNCTION_TOKEN_RANGES = {'A': '2', 'D': '5', 'R': '4', 'H': '2', 'U': '2'}
@@ -29,10 +29,13 @@ class HATSPersistentStorageRequestHandler(BaseHTTPRequestHandler):
                 self.send_response(200)
                 self.send_header('Content-Type', 'applcation/json')
                 self.end_headers()
-                if len(self.path.strip('/').split('/')) > 1:
-                    self.wfile.write(mresp.getMockResponse(self.path.strip('/').split('/')[0], self.path.strip('/').split('/')[1]))
+                tokens = self.path.strip('/').split('/')
+                if len(tokens) == 2:
+                    self.wfile.write(mresp.getMockResponse(tokens[0], tokens[1]))
+                elif len(tokens) == 3:
+                    self.wfile.write(mresp.getMockResponse(tokens[0], [tokens[1], tokens[2]]))
                 else:
-                    self.wfile.write(mresp.getMockResponse(self.path.strip('/').split('/')[0]), 0)
+                    self.wfile.write(mresp.getMockResponse(tokens[0]), 0)
             else:
                 self.stubResponseBadReq()
         except:
