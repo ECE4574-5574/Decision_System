@@ -1,8 +1,10 @@
 import clr
 clr.AddReferenceToFileAndPath("DeviceDLL/DeviceDLL/bin/Debug/DeviceDLL.dll")
+clr.AddReferenceToFile("Newtonsoft.Json.dll")
 clr.AddReference("System")
 import api as devapi
 import System
+import Newtonsoft.Json as nsoft
 
 #Returns true if device can be brightened.
 def canBrighten(device):
@@ -31,3 +33,9 @@ def canBrighten(device):
     
     return True
     """
+    
+def makeSnapshot(devapiInterfaces, houseID, roomID):
+    return createSnapshotString(devapiInterfaces.getDevices(houseID, roomID))
+
+def createSnapshotString(deviceList):
+    return nsoft.JsonConvert.SerializeObject(deviceList)
