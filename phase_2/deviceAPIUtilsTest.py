@@ -120,7 +120,111 @@ class deviceAPIUtilsTest(unittest.TestCase):
             print deviceSnapshotDict[deviceFullIDTuple]
         else:
             print "Uh-oh..."
-            
+    
+    def testMakeAndExtractSnapshotNoMatch(self):
+        #Tests the entire snapshot-making process with no match at the end.
+        #Build a list of dummy device objects.
+        #This test
+        fan = devapi.CeilingFan(None, None)
+        id = devapi.FullID()
+        id.HouseID = 101
+        id.RoomID = 3
+        id.DeviceID = 1
+        fan.ID = id
+        
+        light = devapi.LightSwitch(None, None)
+        id = devapi.FullID()
+        id.HouseID = 101
+        id.RoomID = 3
+        id.DeviceID = 2
+        light.ID = id
+        light.Enabled = True
+        
+        light2 = devapi.LightSwitch(None, None)
+        id = devapi.FullID()
+        id.HouseID = 101
+        id.RoomID = 3
+        id.DeviceID = 3
+        light2.ID = id
+        
+        devlist = List[devapi.Device]()
+        devlist.Add(fan)
+        devlist.Add(light)
+        devlist.Add(light2)
+        
+        #Create a snapshot string (in actual use this would be stored in and retrieved from persistent storage)
+        snapshotString = deviceAPIUtils.createSnapshotString(devlist)
+        
+        #Use convertSnapshotToDict to produce the snapshot
+        snapshotDict = deviceAPIUtils.convertSnapshotToDict(devlist)
+        self.AssertIsNotNone(snapshotDict)
+        self.AssertTrue(len(snapshotDict) > 0)
+        
+        #Create a device with an ID not in the list.
+        missingDevice = devapi.LightSwitch(None, None)
+        id = devapi.FullID()
+        id.HouseID = 101
+        id.RoomID = 3
+        id.DeviceID = 400
+        missingDevice.ID = id
+        
+        #Try to extract its device from the room snapshot string. Should return none.
+        self.AssertIsNone(deviceAPIUtils.extractDeviceSnapshot(missingDevice, snapshotDict))
+    
+    def testMakeAndExtractSnapshotNoMatch(self):
+        #Tests the entire snapshot-making process with no match at the end.
+        #Build a list of dummy device objects
+        fan = devapi.CeilingFan(None, None)
+        id = devapi.FullID()
+        id.HouseID = 101
+        id.RoomID = 3
+        id.DeviceID = 1
+        fan.ID = id
+        
+        light = devapi.LightSwitch(None, None)
+        id = devapi.FullID()
+        id.HouseID = 101
+        id.RoomID = 3
+        id.DeviceID = 2
+        light.ID = id
+        light.Enabled = True
+        
+        light2 = devapi.LightSwitch(None, None)
+        id = devapi.FullID()
+        id.HouseID = 101
+        id.RoomID = 3
+        id.DeviceID = 3
+        light2.ID = id
+        
+        devlist = List[devapi.Device]()
+        devlist.Add(fan)
+        devlist.Add(light)
+        devlist.Add(light2)
+        
+        #Create a snapshot string (in actual use this would be stored in and retrieved from persistent storage)
+        snapshotString = deviceAPIUtils.createSnapshotString(devlist)
+        
+        #Use convertSnapshotToDict to produce the snapshot
+        snapshotDict = deviceAPIUtils.convertSnapshotToDict(snapshotString)
+        self.assertIsNotNone(snapshotDict)
+        self.assertTrue(len(snapshotDict) > 0)
+        
+        #Create a device with an ID not in the list.
+        missingDevice = devapi.LightSwitch(None, None)
+        id = devapi.FullID()
+        id.HouseID = 101
+        id.RoomID = 3
+        id.DeviceID = 400
+        missingDevice.ID = id
+        
+        #Try to extract its device from the room snapshot string. Should not return none.
+        devsnapshot = deviceAPIUtils.extractDeviceSnapshot(light, snapshotDict)
+        self.assertIsNotNone(devsnapshot)
+        devsnapshotTestDict = json.loads(devsnapshot)
+        
+        self.assertEquals(devsnapshotTestDict['ID']['HouseID'], 101)
+        self.assertEquals(devsnapshotTestDict['ID']['RoomID'], 3)
+        self.assertEquals(devsnapshotTestDict['ID']['DeviceID'], 2)
         
 if __name__ == '__main__':
     unittest.main()
