@@ -13,6 +13,14 @@ import httplib
 import argparse
 import sys
 from datetime import datetime
+import codecs
+
+#This monkey-patch is NECESSARY to make sympy work.
+#It's a dangerous hack, but we're only using some limited parts of sympy...
+def my_unicode_escape_decode(x):
+    return x
+codecs.unicode_escape_decode = my_unicode_escape_decode
+from sympy import Point, Polygon
 import decisions
 import logging
 import StringIO
@@ -21,6 +29,8 @@ import clr
 import deviceAPIUtils
 clr.AddReferenceToFileAndPath("DeviceDLL/DeviceDLL/bin/Debug/DeviceDLL.dll")
 clr.AddReference('System')
+clr.AddReference('System.Drawing')
+clr.AddReference('System.Windows.Forms')
 import api as devapi
 import deviceAPIUtils as devapiu
 import System
@@ -164,16 +174,78 @@ class decisionMaking():
                     oneDevice.Enabled = True
             print output.getvalue()
             self.logger.info(output.getvalue())
-            
+        
         except:
             output.write('Error when trying to make a command decision!\n')
             output.write('Request body being handled:\n')
             output.write(str(message) + '\n')
             traceback.print_exc(None, output)
             self.logger.error(output.getvalue())
-              
-    
+            
+    def findMatchingRoom(self, userid, lat, lon, alt):
+        conn = httplib.HTTPConnection(self.storageAddress[0], self.storageAddress[1])
+        reqMethod = 'GET'
+        reqPath = 'BU/' + str(userid)
         
+        #First, try to get the user information.
+        conn.request(reqMethod, reqPath)
+        resp = conn.getresponse()
+        body = resp.read()
+        if (not resp.status == 200):
+            raise KeyError('That userID does not exist.')
+            return
+        body = json.loads(body)
+        
+        print 'Debug: '
+        print body
+        
+        matchingRoom = None
+        for houseID in body['houseIDs']:
+            print 'Debug: house ' + str(houseID)
+            reqMethod = 'GET'
+            reqPath = 'HR/' + str(houseID)
+            conn.request(reqMethod, reqPath)
+            resp = conn.getresponse()
+            if not resp.status == 200:
+                continue
+            try:
+                oneHouseBody = json.loads(resp.read())
+            except (ValueError, KeyError):
+                continue
+            #Looping for all rooms...
+            for roomID in oneHouseBody['roomIDs']:
+                print 'Debug: room ' + str(roomID)
+                #Trying to get room info. Should be replaced once that library is ready.
+                reqMethod = 'GET'
+                reqPath = 'BR/'+str(houseID)+'/'+str(roomID)
+                conn.request(reqMethod, reqPath)
+                resp = conn.getresponse()
+                if not resp.status == 200:
+                    continue
+                
+                respMSG = resp.read()
+                print respMSG
+                #Check if room matches or not.
+                try:
+                    if isInRoom(respMSG, lat, lon, alt):
+                        matchingRoom = (houseID, roomID)
+                        return matchingRoom
+                        break
+                except (ValueError, KeyError):
+                    continue
 
+#Utility function: takes a room blob from persistent storage, and checks if the coordinates
+#are within it.
+def isInRoom(roomBlob, lat, lon, alt):
+    roomJson = json.loads(roomBlob)
+    if (alt - roomJson['alt'] > 10 or alt < roomJson['alt']):
+        return False
+    p1 = Point(roomJson['corner1'][1], roomJson['corner1'][0])
+    p2 = Point(roomJson['corner2'][1], roomJson['corner2'][0])
+    p3 = Point(roomJson['corner3'][1], roomJson['corner3'][0])
+    p4 = Point(roomJson['corner4'][1], roomJson['corner4'][0])
+    pn = Point(lon, lat)
+    poly = Polygon(p1, p2, p3, p4)
+    return poly.encloses_point(pn)
 
 
