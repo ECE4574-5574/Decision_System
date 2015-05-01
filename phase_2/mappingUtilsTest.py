@@ -77,5 +77,14 @@ class testFindMatchingRoom(unittest.TestCase):
         dmaking = decisionMaking(testLogger, ['localhost', 8080], 'http://localhost:8082')
         self.assertRaises(KeyError, dmaking.findMatchingRoom, 'nouser', 37.229854, -80.417724, 2085)
         
+    def testNoMatchingRoom(self):
+        TEST_LOG_FILE = 'room_testnoroom.log'
+        testLogger = logging.getLogger('noroom')
+        testHandler = logging.FileHandler(TEST_LOG_FILE, mode='w')
+        testHandler.setFormatter(logging.Formatter('%(message)'))
+        testLogger.addHandler(logging.FileHandler(TEST_LOG_FILE, mode='w'))
+        dmaking = decisionMaking(testLogger, ['localhost', 8080], 'http://localhost:8082')
+        self.assertEquals(dmaking.findMatchingRoom('bsaget', 38.229854, -81.417724, 2085), None)
+        
 if __name__ == '__main__':
     unittest.main()
