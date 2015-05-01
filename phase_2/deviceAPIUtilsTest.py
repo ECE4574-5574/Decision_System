@@ -172,7 +172,8 @@ class deviceAPIUtilsTest(unittest.TestCase):
         self.AssertIsNone(deviceAPIUtils.extractDeviceSnapshot(missingDevice, snapshotDict))
     
     def testMakeAndExtractSnapshotNoMatch(self):
-        #Tests the entire snapshot-making process with no match at the end.
+        #This is copypasted, which is bad...I will break out the setup into another function as a cleanup later on.
+        #Tests the entire snapshot-making process with a good match at the end.
         #Build a list of dummy device objects
         fan = devapi.CeilingFan(None, None)
         id = devapi.FullID()
