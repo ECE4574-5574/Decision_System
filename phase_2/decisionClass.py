@@ -46,7 +46,7 @@ class decisionMaking():
         self.locationDecisionCount = 1
         self.timeDecisionCount = 1
         self.commandCount = 1
-        self.logger = logger = None
+        self.logger = logger
         self.UserPrevLocation = None 
         
 
