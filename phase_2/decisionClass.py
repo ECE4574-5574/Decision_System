@@ -181,6 +181,15 @@ class decisionMaking():
             output.write(str(message) + '\n')
             traceback.print_exc(None, output)
             self.logger.error(output.getvalue())
+	
+    def restoreRoomState(self, userid, roomID, houseID):
+        conn = httplib.HTTPConnection(self.storageAddress[0], self.storageAddress[1])
+
+        #change time to one week prior to get the snapshot of the state of devices in the room.
+    
+		#GET AL/USERID/TIMEFRAME/HOUSEID*/ROOMID*         #Query for each of the actions logged by this user before the provided time.
+        reqMethod = 'GET'
+        reqPath = 'AL/' + str(userid) + message["time"] + '/' + str(houseID) + '/' + str(roomID) 
             
     def findMatchingRoom(self, userid, lat, lon, alt):
         conn = httplib.HTTPConnection(self.storageAddress[0], self.storageAddress[1])
