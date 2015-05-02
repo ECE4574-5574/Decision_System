@@ -4,7 +4,6 @@
 #Last modified: 4/20/2015
 
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
-import requests
 import json
 import httplib
 import urllib
@@ -13,60 +12,56 @@ import logging
 FUNCTION_TYPES = { 'get' : 'GET', 'post' : 'POST'}
 
 class PersistentStorageFunctions():
-    def __init__(self, storageAddress='172.31.26.85', extention=0):
+    def __init__(self, storageAddress='172.31.26.85', port=0):
         #COnnection to the server is established
-        self.url = "http://" + str(storageAddress)
-        if(extention != 0):
-            self.url = self.url + ':' + str(extention) + '/'
-        else: 
-        self.url = self.url + '/'
-        self.logger = logging.getLogger('ServerRequestLogger')
-        loggerhandler = logging.FileHandler('ServerRequestLogFile', mode = 'a')
-        serverformatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-        serverrequestloggerhandler.setFormatter(serverformatter)
-        self.serverrequestlogger.addHandler(serverrequestloggerhandler)
-        self.serverrequestlogger.setLevel(logging.INFO)
+        self.conn = httplib.HTTPConnection(storageAddress, port)
+        self.logger = logging.getLogger("PersistentStorageFunctionsLogger.log")
+        self.logger.setLevel(logging.DEBUG)
+        # create file handler which logs even debug messages
+        fh = logging.FileHandler('getRequests.log', mode='w')
+        fh.setLevel(logging.DEBUG) 
+        self.logger.addHandler(fh) 
         
-    def getDevicesInHouse(self, houseID='testHouseID'):
+    def getDevicesInHouse(self, houseID=123):
+        try:
+            path = "/HD/" + str(houseID) + "/" 
+            self.logger.debug(path)   
+            self.conn.request("GET", path)
+            response = self.conn.getresponse()
+            parsed = json.loads(response.read())
+            return parsed
+        except:
+            print "Error with Persistent Storage request"
+
+    def getDevicesInRoom(self, houseID=123, roomID=123):
         try:    
-            request = self.url + 'HD/' + str(houseID) + '/'
-            print request
-            r = requests.get(request)
-            print r.status_code
-            parsed = json.loads(r.json())
+            path = "/RD/" + str(houseID) + "/" + str(roomID) + "/"
+            self.logger.debug(path)       
+            self.conn.request("GET", path)
+            response = self.conn.getresponse()
+            parsed = json.loads(response.read())
             return parsed
         except:
             print "Error with request"
 
-    def getDevicesInRoom(self, houseID='testHouseID', roomID='testRoomID'):
+    def getDevice(self, houseID=123, roomID=132, deviceID=123):
         try:    
-            request = self.url + 'RD/' + str(houseID) + '/' + str(roomID) + '/'
-            print request
-            r = requests.get(request)
-            print r.status_code
-            parsed = json.loads(r.json())
-            return parsed
-        except:
-            print "Error with request"
-
-    def getDevice(self, houseID='testHouseID', roomID='testRoomID', deviceTypeID='testDeviceID'):
-        try:    
-            request = self.url + 'DD/' + str(houseID) + '/' + str(roomID) + '/' + str(deviceTypeID) + '/'
-            print request
-            r = requests.get(request)
-            print r.status_code
-            parsed = json.loads(r.json())
+            path = "/DD/" + str(houseID) + "/" + str(roomID) + "/" + str(deviceID) + "/"
+            self.logger.debug(path)     
+            self.conn.request("GET", path)
+            response = self.conn.getresponse()
+            parsed = json.loads(response.read())
             return parsed
         except:
             print "Error with request"
         
     def getDevicesInHouseOfType(self, houseID='testHouseID', deviceType='light'):
         try:    
-            request = self.url + 'HT/' + str(houseID) + '/' + str(deviceType) + '/'
-            print request
-            r = requests.get(request)
-            print r.status_code
-            parsed = json.loads(r.json())
+            path = "/HT/" + str(houseID) + "/" + str(deviceType) + "/"
+            self.logger.debug(path)      
+            self.conn.request("GET", path)
+            response = self.conn.getresponse()
+            parsed = json.loads(response.read())
             return parsed
         except:
             print "Error with request"
@@ -75,22 +70,22 @@ class PersistentStorageFunctions():
     #based upon a house ID.
     def getDevicesInRoomOfType(self, houseID = 'testHouseID', roomID = 'testRoomID', deviceType = 'light'):
         try:    
-            request = self.url + 'RT/' + str(houseID) + '/' + str(roomID) + '/' + str(deviceType) + '/'
-            print request
-            r = requests.get(request)
-            print r.status_code
-            parsed = json.loads(r.json())
+            path = "/RT/" + str(houseID) + "/" + str(roomID) + "/" + str(deviceType) + "/"
+            self.logger.debug(path)     
+            self.conn.request("GET", path)
+            response = self.conn.getresponse()
+            parsed = json.loads(response.read())
             return parsed
         except:
             print "Error with request"
     #TODO: UPDATE COMMENTS
     def getUserInfo(self, userID = 'testUserID'):
         try:    
-            request = self.url + 'BU/' + str(userID) + '/'
-            print request
-            r = requests.get(request)
-            print r.status_code
-            parsed = json.loads(r.json())
+            path = "/BU/" + str(userID) + "/"
+            self.logger.debug(path) 
+            self.conn.request("GET", path)
+            response = self.conn.getresponse()
+            parsed = json.loads(response.read())
             return parsed
         except:
             print "Error with request"       
@@ -98,149 +93,145 @@ class PersistentStorageFunctions():
     #The HouseID and roomID are optional fields.
     def getRoomInfo(self, houseID = 'testHouseID',roomID = 'testRoomID'):
         try:    
-            request = self.url + 'BR/' + str(houseID) + '/' + str(roomID) + '/'
-            print request
-            r = requests.get(request)
-            print r.status_code
-            parsed = json.loads(r.json())
+            path = "/BR/" + str(houseID) + "/" + str(roomID) + "/"
+            self.logger.debug(path)      
+            self.conn.request("GET", path)
+            response = self.conn.getresponse()
+            parsed = json.loads(response.read())
             return parsed
         except:
             print "Error with request" 
         
     def getDeviceInfo(self, houseID = 'testHouseID', roomID = 'testRoomID', deviceID = 'testDeviceID'):
         try:    
-            request = self.url + 'BD/' + str(houseID) + '/' + str(roomID) + '/' + str(deviceID) + '/'
-            print request
-            r = requests.get(request)
-            print r.status_code
-            parsed = json.loads(r.json())
+            path = "/BD/" + str(houseID) + "/" + str(roomID) + "/" + str(deviceID) + "/"
+            self.logger.debug(path)     
+            self.conn.request("GET", path)
+            response = self.conn.getresponse()
+            parsed = json.loads(response.read())
             return parsed
         except:
             print "Error with request"
         
     def getAuthentication(self, userName='testUserName', pw = 'testPW'):
         try:    
-            request = self.url + 'IU/' + str(userName) + '/' + str(pw) + '/'
-            print request
-            r = requests.get(request)
-            print r.status_code
-            parsed = json.loads(r.json())
+            path = "/IU/" + str(userName) + "/" + str(pw) + "/"
+            self.logger.debug(path)      
+            self.conn.request("GET", path)
+            response = self.conn.getresponse()
+            parsed = json.loads(response.read())
             return parsed
         except:
             print "Error with request"
         
     def getUserDeviceToken(self, userID='testUserID'):
         try:    
-            request = self.url + 'TU/' + str(userID) + '/'
-            print request
-            r = requests.get(request)
-            print r.status_code
-            parsed = json.loads(r.json())
+            path = "/TU/" + str(userID) + "/"
+            self.logger.debug(path)     
+            self.conn.request("GET", path)
+            response = self.conn.getresponse() 
+            parsed = json.loads(response.read())
             return parsed
         except:
             print "Error with request"
 
     def getUserActions(self, userID='testUserID', timeFrame='testTimeFrame', houseID='testHouseID', roomID='testRoomID'):
         try:    
-            request = self.url + 'AL/' + str(userID) + '/' + str(timeFrame) + '/'
+            path = "/AL/" + str(userID) + "/" + str(timeFrame) + "/" 
             if houseID != 'testHouseID':
-                request = request + houseID + '/'
+                path = path + str(houseID) + "/"
             else:
-                request = reqest + '0' + '/'
+                path = path + "0/"
             if roomID != 'testRoomID':
-                request = request + roomID + '/'
+                path = path + str(roomID) + '/'
             else:
-                request = reqest + '0' + '/'
-            print request
-            r = requests.get(request)
-            print r.status_code
-            parsed = json.loads(r.json())
+                path = path + "0/"
+            self.logger.debug(path)     
+            self.conn.request("GET", path)
+            response = self.conn.getresponse() 
+            parsed = json.loads(response.read())
             return parsed
         except:
             print "Error with request"
 
-    def getUserActionsDeviceType(self, userID='testUserID', timeFrame='testTimeFrame',\
+    def getUserActionsDeviceType(self, userID='testUserID', timeFrame='testTimeFrame',
         deviceType='light', houseID='testRoomID', roomID='testRoomdID'):
         try:    
-            request = self.url + 'AT/' + str(userID) + '/' + str(timeFrame) + '/' + str(deviceType) + '/' + str(houseID) + '/'
+            path = "/AT/" + str(userID) + "/" + str(timeFrame) + "/" + str(deviceType) + "/" + str(houseID) + "/"
             if roomID != 'testRoomID':
-                request = request + roomID + '/'
+                path = path + str(roomID) + '/'
             else:
-                request = reqest + '0' + '/'
-            print request
-            r = requests.get(request)
-            print r.status_code
-            parsed = json.loads(r.json())
+                path = path + "0/" 
+            self.logger.debug(path)           
+            self.conn.request("GET", path)
+            response = self.conn.getresponse()
+            parsed = json.loads(response.read())
             return parsed
         except:
             print "Error with request"
 
     def getUserActionsDeviceID(self, userID='testUserID', timeFrame='testTimeFrame', deviceID='testDeviceID', houseID = 'testHouseID', roomID = 'testRoomID'):
         try:    
-            request = self.url + 'AI/' + str(userID) + '/' + str(timeFrame) + '/' + str(deviceID) + '/' + str(houseID) + '/'
+            path = "/AI/" + str(userID) + "/" + str(timeFrame) + "/" + str(deviceID) + "/" + str(houseID) + "/"
             if roomID != 'testRoomID':
-                request = request + roomID + '/'
+                path = path + str(roomID) + '/'
             else:
-                request = reqest + '0' + '/'
-            print request
-            r = requests.get(request)
-            print r.status_code
-            parsed = json.loads(r.json())
+                path = path + "0/"
+            self.logger.debug(path)
+            self.conn.request("GET", path)
+            response = self.conn.getresponse()
+            parsed = json.loads(response.read())
             return parsed
         except:
             print "Error with request"
 
     def getComputerActions(self, compID='testCompID', timeFrame='testTimeFrame', houseID='testHouseID', roomID='testRoomID'):
         try:    
-            request = self.url + 'CL/' + str(compID) + '/' + str(timeFrame) + '/'
+            path = "/CL/" + str(compID) + "/" + str(timeFrame) + "/"
             if houseID != 'testHouseID':    
-                request = request + houseID + '/'
+                path = path + str(houseID) + '/'
             else:
-                request = reqest + '0' + '/'
+                path = path + "0/"
             if roomID != 'testRoomID':
-                request = request + roomID + '/'
+                path = path + str(roomID) + '/'
             else:
-                request = reqest + '0' + '/'
-            print request
-            r = requests.get(request)
-            print status_code
-            parsed = json.loads(r.json())
+                path = path + "0 /"
+            self.logger.debug(path)
+            self.conn.request("GET", path)
+            response = self.conn.getresponse()
+            parsed = json.loads(response.read())
             return parsed
         except:
             print "Error with request"
 
-    def getCompActionsDeviceType(self, compID='testUserID', timeFrame='testTimeFrame',
+    def getComputerActionsDeviceType(self, compID='testUserID', timeFrame='testTimeFrame',
         deviceType='light', houseID='testRoomID', roomID='testRoomdID'):
         try:    
-            request = self.url + 'CT/' + str(userID) + '/' + str(timeFrame) + '/' + str(deviceType) + '/' + str(houseID) + '/'
-            if houseID != 'testHouseID':    
-                request = request + houseID + '/'
-            else:
-                request = reqest + '0' + '/'
+            path = "/CT/" + str(compID) + "/" + str(timeFrame) + "/" + str(deviceType) + "/" + str(houseID) + "/"
             if roomID != 'testRoomID':
-                request = request + roomID + '/'
+                path = path + str(roomID) + '/'
             else:
-                request = reqest + '0' + '/'
-            print request
-            r = requests.get(request)
-            print r.status_code
-            parsed = json.loads(r.json())
+                path = path + "0/"
+            self.logger.debug(path)
+            self.conn.request("GET", path)
+            response = self.conn.getresponse()
+            parsed = json.loads(response.read())
             return parsed
         except:
             print "Error with request"
 
-    def getCompActionsDeviceID(self, compID='testUserID', timeFrame='testTimeFrame',
+    def getComputerActionsDeviceID(self, compID='testUserID', timeFrame='testTimeFrame',
         deviceID='testDeviceID', houseID='testRoomID', roomID='testRoomdID'):
         try:    
-            request = self.url + 'CT/' + str(userID) + '/' + str(timeFrame) + '/' + str(deviceID) + '/' + str(houseID) + '/'
+            path = "/CI/" + str(compID) + "/" + str(timeFrame) + "/" + str(deviceID) + "/" + str(houseID) + "/"
             if roomID != 'testRoomID':
-                request = request + roomID + '/'
+                path = path + str(roomID) + '/'
             else:
-                request = reqest + '0' + '/'
-            print request
-            r = requests.get(request)
-            print r.status_code
-            parsed = json.loads(r.json())
+                path = path + "0/"
+            self.logger.debug(path)
+            self.conn.request("GET", path)
+            response = self.conn.getresponse()
+            parsed = json.loads(response.read())
             return parsed
         except:
             print "Error with request"    
@@ -248,18 +239,18 @@ class PersistentStorageFunctions():
     def postDevice(self, houseID,roomID, deviceType):
         self.conn.request(FUNCTION_TYPES['post'], 'D/' + houseID +\
             '/' + roomID + '/' + deviceType + '/')
-        return self.conn.getresponse()
+        return self.self.conn.getresponse()
         
     def postRoom(self, houseID):
         self.conn.request(FUNCTION_TYPES['post'], 'R/' + houseID +"/")
-        return self.conn.getresponse()
+        return self.self.conn.getresponse()
         
     def postHouse(self):
         self.conn.request(FUNCTION_TYPES['post'], 'H/')
-        return self.conn.getresponse()
+        return self.self.conn.getresponse()
         
     def postUser(self):
         self.conn.request(FUNCTION_TYPES['post'], 'U/')
-        return self.conn.getresponse()
+        return self.self.conn.getresponse()
 
 thing = PersistentStorageFunctions()

@@ -6,106 +6,133 @@
 import unittest
 import PersistentStorageFunctions as PSF
 import argparse
+from time import sleep
 
-'''STATUS_CODES = { 'OK': 200, 'Bad_Request' : 400, 'Unauthorized_Access' : 401,\
-            'Resource_Not_Found' : 404, 'Internal_Server_Error' : 500, 'Not_Implemented' : 501}
-
-class PersistentStorageFunctionsTest(unittest.TestCase):
-    def setUp(self):
-        self.API = PSF.PersistentStorageFunctions()
-        
-    def testGetFunctionsDefaults(self):
-        resp = self.API.getAllItemsInHouse()
-        self.assertEqual(resp.status, STATUS_CODES['OK'])
-        
-        resp = self.API.getAllItemsInRoom()
-        self.assertEqual(resp.status, STATUS_CODES['OK'])
-        
-        resp = self.API.getHouseDeviceType()
-        self.assertEqual(resp.status, STATUS_CODES['OK'])
-        
-        resp = self.API.getHouseRoomDeviceType()
-        self.assertEqual(resp.status, STATUS_CODES['OK'])
-        
-        resp = self.API.getUserInformationHouse()
-        self.assertEqual(resp.status, STATUS_CODES['OK'])
-        
-        resp = self.API.getUserInformationUserID()
-        self.assertEqual(resp.status, STATUS_CODES['OK'])
-        
-        resp = self.API.getAllLogEntries()
-        self.assertEqual(resp.status, STATUS_CODES['OK'])
-        
-        resp = self.API.getAllLogEntriesDeviceType()
-        self.assertEqual(resp.status, STATUS_CODES['OK'])
-        
-        resp = self.API.getAllLogEntriesDeviceID()
-        self.assertEqual(resp.status, STATUS_CODES['OK'])
-        
-        resp = self.API.getAllComputerByLocation()
-        self.assertEqual(resp.status, STATUS_CODES['OK'])
-        
-        resp = self.API.getAllComputerByType()
-        self.assertEqual(resp.status, STATUS_CODES['OK'])
-        
-        resp = self.API.getComputerbyDeviceID()
-        self.assertEqual(resp.status, STATUS_CODES['OK'])
-        
-    def testPostFunctionsDefaults(self):
-        resp = self.API.postDevice("testHouseID","testRoomID","1")
-        self.assertEqual(resp.status, STATUS_CODES['OK'])
-        
-        resp = self.API.postRoom("testHouseID")
-        self.assertEqual(resp.status, STATUS_CODES['OK'])
-        
-        resp = self.API.postHouse()
-        self.assertEqual(resp.status, STATUS_CODES['OK'])
-        
-        resp = self.API.postUser()
-        self.assertEqual(resp.status, STATUS_CODES['OK'])
-        
-if __name__ == '__main__':
-    unittest.main()'''
+open('getRequests.log', 'w').close()
 
 argparser = argparse.ArgumentParser()
 argparser.add_argument('-t', '--storage', type=str)
+argparser.add_argument('-p', '--port', type=int)
 
 args = argparser.parse_args()
 
-DUT = PSF.PersistentStorageFunctions(args.storage, 0)
+
+DUT = PSF.PersistentStorageFunctions(args.storage, args.port)
+DUT.getDevicesInHouse(54321)
+DUT.getDevicesInRoom(54321, 12345)
+DUT.getDevice(54321, 12345, 67890)
+DUT.getDevicesInHouseOfType(12345, "light")
+DUT.getDevicesInRoomOfType(12345, 54321, "light")
+DUT.getUserInfo(12)
+DUT.getRoomInfo(12345, 54321)
+DUT.getDeviceInfo(12345, 54321, 67890)
+DUT.getAuthentication("bob", "thePW")
+DUT.getUserDeviceToken(12)
+DUT.getUserActions(12, "2015-04-06T18:05:05Z", 12345, 54321)
+DUT.getUserActionsDeviceType(12, "2015-04-06T18:05:05Z", "light", 12345, 54321)
+DUT.getUserActionsDeviceID(12, "2015-04-06T18:05:05Z", 67890, 12345, 54321)
+DUT.getComputerActions(21, "2015-04-06T18:05:05Z", 12345, 54321)
+DUT.getComputerActionsDeviceType(21, "2015-04-06T18:05:05Z", 'light', 12345, 54321)
+DUT.getComputerActionsDeviceID(21, "2015-04-06T18:05:05Z", 67890, 12345, 54321)
+
+
+
+log = open('getRequests.log', 'r')
 print "getDevicesInHouse()"
-print DUT.getDevicesInHouse()
-print '\n'
+line = log.readline()
+if line == "/HD/54321/\n":
+    print "PASS\n"
+else:
+    print "FAIL"
 print "getDevicesInRoom()"
-print DUT.getDevicesInRoom()
-print '\n'
+line = log.readline()
+if line == "/RD/54321/12345/\n":
+    print "PASS\n"
+else:
+    print "FAIL"
 print "getDevice()"
-print DUT.getDevice()
-print '\n'
+line = log.readline()
+if line == "/DD/54321/12345/67890/\n":
+    print "PASS\n"
+else:
+    print "FAIL"
 print "getDevicesInHouseOfType()"
-print DUT.getDevicesInHouseOfType()
-print '\n'
-print "getDevicesInRoomOfType()"
-print DUT.getDevicesInRoomOfType()
-print '\n'
+line = log.readline()
+if line == "/HT/12345/light/\n":
+    print "PASS\n"
+else:
+    print "FAIL"
+print "getDevicesInRoomOfType()"    
+line = log.readline()
+if line == "/RT/12345/54321/light/\n":
+    print "PASS\n"
+else:
+    print "FAIL"
 print "getUserInfo()"
-print DUT.getUserInfo()
-print '\n'
+line = log.readline()
+if line == "/BU/12/\n":
+    print "PASS\n"
+else:
+    print "FAIL"
 print "getRoomInfo()"
-print DUT.getRoomInfo()
-print '\n'
+line = log.readline()
+if line == "/BR/12345/54321/\n":
+    print "PASS\n"
+else:
+    print "FAIL"
 print "getDeviceInfo()"
-print DUT.getDeviceInfo()
-print '\n'
+line = log.readline()
+if line == "/BD/12345/54321/67890/\n":
+    print "PASS\n"
+else:
+    print "FAIL"
 print "getAuthentication()"
-print DUT.getAuthentication()
-print '\n'
+line = log.readline()
+if line == "/IU/bob/thePW/\n":
+    print "PASS\n"
+else:
+    print "FAIL"
 print "getUserDeviceToken()"
-print DUT.getUserDeviceToken()
-print '\n'
+line = log.readline()
+if line == "/TU/12/\n":
+    print "PASS\n"
+else:
+    print "FAIL"
 print "getUserActions()"
-print DUT.getUserActions()
-print '\n'
+line = log.readline()
+if line == "/AL/12/2015-04-06T18:05:05Z/12345/54321/\n":
+    print "PASS\n"
+else:
+    print "FAIL"
 print "getUserActionsDeviceType()"
-print DUT.getUserActionsDeviceType()
-print '\n'
+line = log.readline()
+if line == "/AT/12/2015-04-06T18:05:05Z/light/12345/54321/\n":
+    print "PASS\n"
+else:
+    print "FAIL"
+print "getUserActionsDeviceID()"
+line = log.readline()
+if line == "/AI/12/2015-04-06T18:05:05Z/67890/12345/54321/\n":
+    print "PASS\n"
+else:
+    print "FAIL"
+print "getComputerActions()"
+line = log.readline()
+if line == "/CL/21/2015-04-06T18:05:05Z/12345/54321/\n":
+    print "PASS\n"
+else:
+    print "FAIL"
+print "getComputerActionsDeviceType()"
+line = log.readline()
+if line == "/CT/21/2015-04-06T18:05:05Z/light/12345/54321/\n":
+    print "PASS\n"
+else:
+    print "FAIL"
+print "getComputerActionsDeviceID()"
+line = log.readline()
+if line == "/CI/21/2015-04-06T18:05:05Z/67890/12345/54321/\n":
+    print "PASS\n"
+else:
+    print "FAIL"
+
+
