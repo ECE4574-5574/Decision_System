@@ -2,7 +2,7 @@ import unittest
 import deviceAPIUtils
 import clr
 import json
-clr.AddReferenceToFileAndPath("DeviceDLL/DeviceDLL/bin/Debug/DeviceDLL.dll")
+clr.AddReferenceToFileAndPath("../../Devices/api/bin/Debug/api.dll")
 clr.AddReferenceToFile("Newtonsoft.Json.dll")
 clr.AddReference("System")
 import api as devapi

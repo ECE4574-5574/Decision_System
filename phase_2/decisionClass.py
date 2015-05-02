@@ -27,7 +27,7 @@ import StringIO
 
 import clr
 import deviceAPIUtils
-clr.AddReferenceToFileAndPath("DeviceDLL/DeviceDLL/bin/Debug/DeviceDLL.dll")
+clr.AddReferenceToFileAndPath("../../Devices/api/bin/Debug/api.dll")
 clr.AddReference('System')
 clr.AddReference('System.Drawing')
 clr.AddReference('System.Windows.Forms')
