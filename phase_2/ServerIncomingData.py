@@ -65,7 +65,7 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     self.send_response(400)
                     self.end_headers()
                     self.wfile.write('Could not parse the provided timestamp as ISO8601: ' + str(message['time']))
-                    self.server.serverrequestlogger.info("POST: Received Weather Update: Return 400")					
+                    self.server.serverrequestlogger.info("POST: Received Weather Update: Return 400")                    
                     return
                 self.send_response(200)
                 self.server.serverrequestlogger.info("POST: Received Weather Update: Return 200")
@@ -265,7 +265,7 @@ class HaltableHTTPServer(BaseHTTPServer.HTTPServer):
         serverrequestloggerhandler.setFormatter(serverformatter)
         self.serverrequestlogger.addHandler(serverrequestloggerhandler)
         self.serverrequestlogger.setLevel(logging.INFO)
-		
+        
 
     def serve_forever (self):
         while not self.shouldStop:
@@ -314,7 +314,7 @@ if __name__ == "__main__":
     tempHostName = socket.gethostname()
     tempHostAddr = socket.gethostbyname(tempHostName)
     if args.address:
-	    tempHostAddr = '127.0.0.1'
+        tempHostAddr = '127.0.0.1'
     server = HaltableHTTPServer((tempHostAddr,args.port), persistentStorageAddress, args.devicebase, ServerInfoHandler, args.logfile, args.resetlog)
 
     #Print the server port. We actually get this from the server object, since
