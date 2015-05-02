@@ -1,4 +1,4 @@
-import requests
+#import requests
 import json
 import os
 import httplib
@@ -117,7 +117,7 @@ class decisionMaking():
             line = "Location Decision " + str(self.locationDecisionCount) + ":\n" + "Data sent to persistent storage: " + str(payload) + "\nRequest Path: " + str(requestPath) + "\nRequest Response: " + str(response.status) + "\n"
             self.locationDecisionCount += 1
             self.logger.debug(line) 
-        except:
+	except:
             line = 'Error when trying to make a location decision!\nRequest body being handled:\n' + str(message) + '\n'
             self.logger.warning(line)
 
@@ -257,7 +257,59 @@ class decisionMaking():
                         break
                 except (ValueError, KeyError):
                     continue
+					
+					
+    #Method for sending general information or errors to the user				
+    def sendUserMessage(message, msgType):
+	#Set up JSON message
+	if (msgType == "error"):
+		msg = { 
+			"Type":	 "error",
+			"Error": message 
+		      }
+	
+	elif (msgType == "info"):
+		msg = {
+			"Type":  "information",
+			"Information": message
+		      }
+	elif (msgType == "both"):
+		msg = {
+			"Type": "both",
+			"Error": msg[0],
+			"Information": msg[1]
+		      } 
+	
+	try:	
+		serverConn = httplib.HTTPConnection(deviceBase)
+		data = json.dumps(msg)
+		requestPath = 'POST', 'api/decision/app'
+		serverConn.request = ('POST', 'api/decision/app', data)
+		serverResponse = serverConn.getresponse()
+		print serverResponse.status
+		print serverResponse.read()
+		line = "Location Decision " + str(self.locationDecisionCount) + ":\n" + "Data sent to persistent storage: " + str(data) + "\nRequest Path: " + str(requestPath) + "\nRequest Response: " + str(serverResponse.status) + "\n"
+		self.logger.debug(line)
+	except:
+		line = 'Error when trying to make a location decision!\nRequest body being handled:\n' + str(message) + '\n'
+		self.logger.warning(line)
 
+    #Method for sending the decision about the device to the server api
+    def sendDeviceDecision(self, decision, message):
+	try: 	
+		serverConn = httplib.HTTPConnection(deviceBase)
+		data = json.dumps({"deviceID": message['deviceID'], "houseID": message['userID'][0], "roomID": message['userID'][1], "Decision": decision})
+		requestPath = 'POST', 'api/decision/device'
+		serverConn.request = ('POST', 'api/decision/device', data)
+		serverResponse = serverConn.getresponse()
+		print serverResponse.status
+		print serverResponse.read()
+		line = "Location Decision:\n" + "Data sent to persistent storage: " + str(data) + "\nRequest Path: " + str(requestPath) + "\nRequest Response: " + str(serverResponse.status) + "\n"
+		self.logger.debug(line)
+	except:
+		line = 'Error when trying to make a location decision!\nRequest body being handled:\n' + str(message) + '\n'
+		self.logger.warning(line)
+			
 #Utility function: takes a room blob from persistent storage, and checks if the coordinates
 #are within it.
 def isInRoom(roomBlob, lat, lon, alt):
