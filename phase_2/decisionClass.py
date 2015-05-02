@@ -93,7 +93,18 @@ class decisionMaking():
             line = "Location Decision " + str(self.locationDecisionCount) + ":\n" + "Data sent to persistent storage: " + str(payload) + "\nRequest Path: " + str(requestPath) + "\nRequest Response: " + str(response.status) + "\n"
             self.locationDecisionCount += 1
             self.logger.debug(line) 
-        except:
+			#Location Mapping Code
+			serverConn = httplib.HTTPConnection(deviceBase)
+			decision = "state change"
+			data = json.dumps({"deviceID": message['deviceID'], "houseID": message['houseID'], "roomID": message['roomID'], "Decision": decision})
+			requestPath = 'POST', 'api/decision/device'
+			serverConn.request = ('POST', 'api/decision/device', data)
+			serverResponse = serverConn.getresponse()
+			print serverResponse.status
+			print serverResponse.read()
+			line = "Location Decision " + str(self.locationDecisionCount) + ":\n" + "Data sent to persistent storage: " + str(data) + "\nRequest Path: " + str(requestPath) + "\nRequest Response: " + str(serverResponse.status) + "\n"
+			self.logger.debug(line)
+		except:
             line = 'Error when trying to make a location decision!\nRequest body being handled:\n' + str(message) + '\n'
             self.logger.warning(line)
 
@@ -233,6 +244,35 @@ class decisionMaking():
                         break
                 except (ValueError, KeyError):
                     continue
+					
+	def sendUserMessage(self, message, type):
+		#Set up JSON message
+		if (type == "error"):
+			msg = { 
+					"Type":	 "error",
+					"Error": message 
+				  }
+	
+			elif (type == "info"):
+				msg = {
+						"Type":        "information",
+						"Information": message
+					  }
+			elif (type == "both"):
+				msg = {
+						"Type":        "both",
+						"Error":   	   msg[0],
+						"Information": msg[1]
+					  } 
+			serverConn = httplib.HTTPConnection(deviceBase)
+			data = json.dumps(msg)
+			requestPath = 'POST', 'api/decision/app'
+			serverConn.request = ('POST', 'api/decision/app', data)
+			serverResponse = serverConn.getresponse()
+			print serverResponse.status
+			print serverResponse.read()
+			line = "Location Decision " + str(self.locationDecisionCount) + ":\n" + "Data sent to persistent storage: " + str(data) + "\nRequest Path: " + str(requestPath) + "\nRequest Response: " + str(serverResponse.status) + "\n"
+			self.logger.debug(line)
 
 #Utility function: takes a room blob from persistent storage, and checks if the coordinates
 #are within it.
