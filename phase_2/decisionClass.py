@@ -189,7 +189,7 @@ class decisionMaking():
     
 		#GET AL/USERID/TIMEFRAME/HOUSEID*/ROOMID*         #Query for each of the actions logged by this user before the provided time.
         reqMethod = 'GET'
-        reqPath = 'AL/' + str(userid) + message["time"] + '/' + str(houseID) + '/' + str(roomID) 
+        reqPath = 'AL/' + str(userid) + message["time"] + message["time"] + '/' + str(houseID) + '/' + str(roomID) 
             
     def findMatchingRoom(self, userid, lat, lon, alt):
         conn = httplib.HTTPConnection(self.storageAddress[0], self.storageAddress[1])
