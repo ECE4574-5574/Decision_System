@@ -1,4 +1,4 @@
-import requests
+#import requests
 import json
 import os
 import httplib
@@ -21,7 +21,7 @@ def my_unicode_escape_decode(x):
     return x
 codecs.unicode_escape_decode = my_unicode_escape_decode
 from sympy import Point, Polygon
-import decisions
+#import decisions
 import logging
 import StringIO
 
