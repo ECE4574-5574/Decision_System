@@ -100,6 +100,7 @@ class decisionMaking():
                 self.UserPrevLocation[str(message['userID'])] = (CurrentLocation[0],CurrentLocation[1])
 				# make a call to the decision algo : Jigar 
 				# make a call to the server api : Braedon
+		sendUserMessage("Location Changed: Devices Being Set", "information")
             #change the format to the format required by persistent storage     
             #Set up connection to persistent storage
             conn = httplib.HTTPConnection(self.storageAddress[0],self.storageAddress[1])
@@ -298,7 +299,7 @@ class decisionMaking():
     def sendDeviceDecision(self, decision, message):
 	try: 	
 		serverConn = httplib.HTTPConnection(deviceBase)
-		data = json.dumps({"deviceID": message['deviceID'], "houseID": message['userID'][0], "roomID": message['userID'][1], "Decision": decision})
+		data = json.dumps({"deviceID": message['deviceID'], "houseID": message['houseID'], "roomID": message['roomID'], "Decision": decision})
 		requestPath = 'POST', 'api/decision/device'
 		serverConn.request = ('POST', 'api/decision/device', data)
 		serverResponse = serverConn.getresponse()
