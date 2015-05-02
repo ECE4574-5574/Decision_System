@@ -12,6 +12,7 @@ import time
 import httplib
 import argparse
 import sys
+import deviceAPIUtils
 from datetime import datetime
 import codecs
 
@@ -45,7 +46,9 @@ class decisionMaking():
         self.locationDecisionCount = 1
         self.timeDecisionCount = 1
         self.commandCount = 1
-        self.logger = logger
+        self.logger = logger = None
+        self.UserPrevLocation = None 
+        
 
     #message should be a parsed JSON dictionary
     def weatherDecision(self, message):
@@ -80,13 +83,34 @@ class decisionMaking():
 
     def locationDecision(self, message):
         try:    
+			#map user to a house and room
+			#the current location should be stored in persistent storage
+            CurrentLocation = findMatchingRoom(message['userID'], message['lat'],message['lon'],message['alt'])
+            PreviousLocation = self.UserPrevLocation.get(str(message['userID']),None)
+            #save new location if user location is not available in   UserPrevLocation
+            if ((PreviousLocation is None) and (CurrentLocation is not None)):
+                self.UserPrevLocation[str(message['userID'])] = (CurrentLocation[0],CurrentLocation[1])
+				#make no decisions, as the previous room data for user was not logged
+            if ((PreviousLocation is not None) and (CurrentLocation is not None) and (PreviousLocation != CurrentLocation)):
+                #make and log a snapshot of the previous room
+                devInterface = devapi.Interfaces(System.Uri("http://dummy.devapi.not"))
+                previousRoomSnapshot = deviceAPIUtils.makeSnapshot(devInterface, PreviousLocation[0], PreviousLocation[1])
+                #add call to log the snapshot in persistent storage  				
+				#update the self.UserPrevLocation key value pair with current location
+                self.UserPrevLocation[str(message['userID'])] = (CurrentLocation[0],CurrentLocation[1])
+				# make a call to the decision algo : Jigar 
+				# make a call to the server api : Braedon
             #change the format to the format required by persistent storage     
             #Set up connection to persistent storage
             conn = httplib.HTTPConnection(self.storageAddress[0],self.storageAddress[1])
             #Pass the JSON string to persistent storage
             payload = json.dumps({"action-type":"location-update","action-data":message})
-            requestPath = 'PATCH', 'A/' + message['userID'] + '/' + message["time"] + '/' + 'WayneManor'
-            conn.request('PATCH', 'A/' + message['userID'] + '/' + message["time"] + '/' + 'WayneManor', payload)
+            if (CurrentHouse is None):
+                localUserHouse = "NotInAnyHouse"
+            else:
+                localUserHouse = CurrentHouse
+            requestPath = 'PATCH', 'A/' + message['userID'] + '/' + message["time"] + '/' + localUserHouse
+            conn.request('PATCH', 'A/' + message['userID'] + '/' + message["time"] + '/' + localUserHouse, payload)
             response = conn.getresponse()
             print response.status
             print response.read()
