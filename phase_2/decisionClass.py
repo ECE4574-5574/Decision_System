@@ -14,6 +14,7 @@ import argparse
 import sys
 from datetime import datetime
 import codecs
+import urllib2
 
 #This monkey-patch is NECESSARY to make sympy work.
 #It's a dangerous hack, but we're only using some limited parts of sympy...
@@ -196,10 +197,41 @@ class decisionMaking():
         prev_time = temp4 + 'T' + sec
     
 	    #GET AL/USERID/TIMEFRAME/HOUSEID*/ROOMID*  Query for each of the actions logged by this user before the provided time.
-        reqMethod = 'GET'
-        reqPath = 'AL/' + str(userid) + message["prev_time"] + message["prev_time"] + '/' + str(houseID) + '/' + str(roomID) 
 
-        
+        reqPath = 'AL/' + str(userid) + self.message["time"] + self.message["time"] + '/' + str(houseID) + '/' + str(roomID)
+        path_url = self.storageAddress[0] + "/"+self.storageAddress[1]+"/"+reqPath
+        resp = urllib2.urlopen(path_url).read()
+        if not resp.status == 200:
+            raise Exception("Did not receive response")
+        else:
+            # This creates a list of dictionaries from the JSON
+
+            """
+            Demo: Extract from Snapshot
+                    Extracting from snapshot string:
+                    [{"Enabled":false,"State":0,"ID":{"HouseID":101,"RoomID":3,"DeviceID":1},"LastUp
+                    date":"2015-05-03T23:22:44.3282415Z","Name":null},{"Enabled":true,"Value":1.0,"I
+                    D":{"HouseID":101,"RoomID":3,"DeviceID":2},"LastUpdate":"2015-05-03T23:22:44.343
+                    2424Z","Name":null},{"Enabled":false,"Value":0.0,"ID":{"HouseID":101,"RoomID":3,
+                    "DeviceID":3},"LastUpdate":"2015-05-03T23:22:45.2762958Z","Name":null}]
+            """
+
+            json_list = json.loads(resp)
+
+            for x in json_list:
+                boolValue = x["Enabled"]
+                if boolValue == "false":
+                    boolValue = False
+                elif boolValue == "true":
+                    boolValue = True
+
+                # x is a dictionary
+                ID = x["ID"]
+                # ID is a dictionary
+                device = ID["DeviceID"]
+                #device contains the Device ID
+                devapiu.updateDeviceState(device,boolValue)
+
     def findMatchingRoom(self, userid, lat, lon, alt):
         conn = httplib.HTTPConnection(self.storageAddress[0], self.storageAddress[1])
         reqMethod = 'GET'
