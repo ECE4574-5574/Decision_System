@@ -193,7 +193,7 @@ class decisionMaking():
 	temp2 = temp1 - datetime.timedelta(days=7)
 	temp3 = temp2.strftime("%Y %m %d")
 	temp4 = temp3.replace(" ","-")
-	prev_time = temp4 + 'T' + t2
+	prev_time = temp4 + 'T' + sec
     
 	#GET AL/USERID/TIMEFRAME/HOUSEID*/ROOMID*  Query for each of the actions logged by this user before the provided time.
         reqMethod = 'GET'
