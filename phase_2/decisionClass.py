@@ -93,14 +93,16 @@ class decisionMaking():
 				#make no decisions, as the previous room data for user was not logged
             if ((PreviousLocation is not None) and (CurrentLocation is not None) and (PreviousLocation != CurrentLocation)):
                 #make and log a snapshot of the previous room
+				#currently assuminga a dummy device api location
                 devInterface = devapi.Interfaces(System.Uri("http://dummy.devapi.not"))
                 previousRoomSnapshot = deviceAPIUtils.makeSnapshot(devInterface, PreviousLocation[0], PreviousLocation[1])
-                #add call to log the snapshot in persistent storage  				
+                #add call to log the snapshot in persistent storage  
+                #				
 				#update the self.UserPrevLocation key value pair with current location
                 self.UserPrevLocation[str(message['userID'])] = (CurrentLocation[0],CurrentLocation[1])
 				# make a call to the decision algo : Jigar 
 				# make a call to the server api : Braedon
-		sendUserMessage("Location Changed: Devices Being Set", "information")
+                sendUserMessage("Location Changed: Devices Being Set", "information")
             #change the format to the format required by persistent storage     
             #Set up connection to persistent storage
             conn = httplib.HTTPConnection(self.storageAddress[0],self.storageAddress[1])
@@ -118,7 +120,7 @@ class decisionMaking():
             line = "Location Decision " + str(self.locationDecisionCount) + ":\n" + "Data sent to persistent storage: " + str(payload) + "\nRequest Path: " + str(requestPath) + "\nRequest Response: " + str(response.status) + "\n"
             self.locationDecisionCount += 1
             self.logger.debug(line) 
-	except:
+        except:
             line = 'Error when trying to make a location decision!\nRequest body being handled:\n' + str(message) + '\n'
             self.logger.warning(line)
 
@@ -262,38 +264,26 @@ class decisionMaking():
 					
     #Method for sending general information or errors to the user				
     def sendUserMessage(message, msgType):
-	#Set up JSON message
-	if (msgType == "error"):
-		msg = { 
-			"Type":	 "error",
-			"Error": message 
-		      }
-	
-	elif (msgType == "info"):
-		msg = {
-			"Type":  "information",
-			"Information": message
-		      }
-	elif (msgType == "both"):
-		msg = {
-			"Type": "both",
-			"Error": msg[0],
-			"Information": msg[1]
-		      } 
-	
-	try:	
-		serverConn = httplib.HTTPConnection(deviceBase)
-		data = json.dumps(msg)
-		requestPath = 'POST', 'api/decision/app'
-		serverConn.request = ('POST', 'api/decision/app', data)
-		serverResponse = serverConn.getresponse()
-		print serverResponse.status
-		print serverResponse.read()
-		line = "Location Decision " + str(self.locationDecisionCount) + ":\n" + "Data sent to persistent storage: " + str(data) + "\nRequest Path: " + str(requestPath) + "\nRequest Response: " + str(serverResponse.status) + "\n"
-		self.logger.debug(line)
-	except:
-		line = 'Error when trying to make a location decision!\nRequest body being handled:\n' + str(message) + '\n'
-		self.logger.warning(line)
+        #Set up JSON message
+        if (msgType == "error"):
+            msg = { "Type":"error", "Error": message }	
+        elif (msgType == "info"):
+            msg = { "Type":  "information", "Information": message}
+        elif (msgType == "both"):
+            msg = {"Type": "both", "Error": msg[0], "Information": msg[1]} 
+        try:	
+            serverConn = httplib.HTTPConnection(deviceBase)
+            data = json.dumps(msg)
+            requestPath = 'POST', 'api/decision/app'
+            serverConn.request = ('POST', 'api/decision/app', data)
+            serverResponse = serverConn.getresponse()
+            print serverResponse.status
+            print serverResponse.read()
+            line = "Location Decision " + str(self.locationDecisionCount) + ":\n" + "Data sent to persistent storage: " + str(data) + "\nRequest Path: " + str(requestPath) + "\nRequest Response: " + str(serverResponse.status) + "\n"
+            self.logger.debug(line)
+        except:
+            line = 'Error when trying to make a location decision!\nRequest body being handled:\n' + str(message) + '\n'
+            self.logger.warning(line)
 
     #Method for sending the decision about the device to the server api
     def sendDeviceDecision(self, decision, message):
