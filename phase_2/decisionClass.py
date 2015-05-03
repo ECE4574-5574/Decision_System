@@ -186,10 +186,18 @@ class decisionMaking():
         conn = httplib.HTTPConnection(self.storageAddress[0], self.storageAddress[1])
 
         #change time to one week prior to get the snapshot of the state of devices in the room.
+        t1 = self.message["time"]
+	temp = t1.split('T', 1)[0]
+	temp1 = datetime.datetime.strptime(temp, "\%Y-\%m-\%d")
+	sec = t1.split('T', 1)[-1]
+	temp2 = temp1 - datetime.timedelta(days=7)
+	temp3 = temp2.strftime("%Y %m %d")
+	temp4 = temp3.replace(" ","-")
+	prev_time = temp4 + 'T' + t2
     
-		#GET AL/USERID/TIMEFRAME/HOUSEID*/ROOMID*         #Query for each of the actions logged by this user before the provided time.
+	#GET AL/USERID/TIMEFRAME/HOUSEID*/ROOMID*  Query for each of the actions logged by this user before the provided time.
         reqMethod = 'GET'
-        reqPath = 'AL/' + str(userid) + message["time"] + message["time"] + '/' + str(houseID) + '/' + str(roomID) 
+        reqPath = 'AL/' + str(userid) + message["prev_time"] + message["prev_time"] + '/' + str(houseID) + '/' + str(roomID) 
             
     def findMatchingRoom(self, userid, lat, lon, alt):
         conn = httplib.HTTPConnection(self.storageAddress[0], self.storageAddress[1])
