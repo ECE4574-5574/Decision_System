@@ -63,7 +63,6 @@ class decisionMaking():
     def deviceStateDecision(self, message):
         try:
             
-            
             #Logging the device state changes in the persistent storage 
             #Set up connection to persistent storage
             conn = httplib.HTTPConnection(self.storageAddress[0], self.storageAddress[1])
@@ -138,69 +137,83 @@ class decisionMaking():
         output.write('Command Decision ' + str(self.commandCount) + ':\n')
         self.commandCount += 1
         try:
-            conn = httplib.HTTPConnection(self.storageAddress[0], self.storageAddress[1])
-            reqMethod = 'GET'
-            reqPath = 'BU/' + message['userID']
-            
-            #First, try to get the user information.
-            output.write('req ' + self.storageAddress[0] + ':' + str(self.storageAddress[1]) + ' ' + reqMethod + ' ' + reqPath + '\n')
-            conn.request(reqMethod, reqPath)
-            resp = conn.getresponse()
-            output.write('response ' + str(resp.status) + '\n')
-            body = resp.read()
-            if (not resp.status == 200):
-                self.logger.warning(output.getvalue())
-                return
-            body = json.loads(body)
-            
-            print 'Debug: '
-            print body
-            
-            #Next, try to find a matching house.
-            matchingHouse = None
-            for houseID in body['houseIDs']:
+            if (str(message["command-string"]) == 'manualDeviceUpdate'):
+			    #Set up connection to persistent storage
+                conn = httplib.HTTPConnection(self.storageAddress[0], self.storageAddress[1])
+                #change the format to the format required by persistent storage
+                payload = json.dumps({"action-type":"device state change","action-data":message})
+                requestPath = 'PATCH', 'A/' + message['userID'] + '/' + message["time"] + '/' + message["houseID"]+ '/' + message["roomID"] + '/' + message["deviceID"] + '/' + message["deviceType"]
+                conn.request('PATCH', 'A/' + message['userID'] + '/' + message["time"] + '/' + message["houseID"]+ '/' + message["roomID"] + '/' + message["deviceID"] + '/' + message["deviceType"], payload)
+                response = conn.getresponse()
+                print response.status
+                print response.read()
+                line = "Location Decision " + str(self.locationDecisionCount) + ":\n" + "Data sent to persistent storage: " + str(payload) + "\nRequest Path: " + str(requestPath) + "\nRequest Response: " + str(response.status) + "\n"
+                self.locationDecisionCount += 1
+                self.logger.debug(line) 
+            else:
+                conn = httplib.HTTPConnection(self.storageAddress[0], self.storageAddress[1])
                 reqMethod = 'GET'
-                reqPath = 'BH/' + str(houseID)
+                reqPath = 'BU/' + message['userID']
+                
+                #First, try to get the user information.
                 output.write('req ' + self.storageAddress[0] + ':' + str(self.storageAddress[1]) + ' ' + reqMethod + ' ' + reqPath + '\n')
                 conn.request(reqMethod, reqPath)
                 resp = conn.getresponse()
                 output.write('response ' + str(resp.status) + '\n')
-                try:
-                    blob = resp.read()
-                    blob = json.loads(blob)
-                    if abs(blob['lat']-message['lat']) <= 0.01 and \
-                       abs(blob['lon']-message['lon']) <= 0.01 and \
-                       abs(blob['alt']-message['alt']) <= 1:
-                        matchingHouse = houseID
-                        break
-                except ValueError:
-                    output.write('ValueError reading blob for house ' + str(houseID) + '. Blob is likely corrupt.\n')
-                except TypeError:
-                    output.write('TypeError reading coordinates for house ' + str(houseID) + '. Blob is likely corrupt.\n')
-                except KeyError as ke:
-                    output.write('KeyError reading coordinates for house ' + str(houseID) + 
-                    ' . Blob is missing field: ' + ke.args[0] + '\n')
-            else:
-                output.write('Could not find a matching house for that user and coordinates.\n')
-                self.logger.warning(output.getvalue())
-                return
-            assert(not matchingHouse is None)
-            output.write('match house ' + str(matchingHouse) + '\n')
+                body = resp.read()
+                if (not resp.status == 200):
+                    self.logger.warning(output.getvalue())
+                    return
+                body = json.loads(body)
             
-            #Now, request all devices in that house.
-            output.write('requesting devices\n')
-            devinterface = devapi.Interfaces(System.Uri(self.deviceBaseAdd))
-            devices = devinterface.getDevices(matchingHouse)
+                print 'Debug: '
+                print body
+                
+                #Next, try to find a matching house.
+                matchingHouse = None
+                for houseID in body['houseIDs']:
+                    reqMethod = 'GET'
+                    reqPath = 'BH/' + str(houseID)
+                    output.write('req ' + self.storageAddress[0] + ':' + str(self.storageAddress[1]) + ' ' + reqMethod + ' ' + reqPath + '\n')
+                    conn.request(reqMethod, reqPath)
+                    resp = conn.getresponse()
+                    output.write('response ' + str(resp.status) + '\n')
+                    try:
+                        blob = resp.read()
+                        blob = json.loads(blob)
+                        if abs(blob['lat']-message['lat']) <= 0.01 and \
+                           abs(blob['lon']-message['lon']) <= 0.01 and \
+                           abs(blob['alt']-message['alt']) <= 1:
+                            matchingHouse = houseID
+                            break
+                    except ValueError:
+                        output.write('ValueError reading blob for house ' + str(houseID) + '. Blob is likely corrupt.\n')
+                    except TypeError:
+                        output.write('TypeError reading coordinates for house ' + str(houseID) + '. Blob is likely corrupt.\n')
+                    except KeyError as ke:
+                        output.write('KeyError reading coordinates for house ' + str(houseID) + 
+                        ' . Blob is missing field: ' + ke.args[0] + '\n')
+                else:
+                    output.write('Could not find a matching house for that user and coordinates.\n')
+                    self.logger.warning(output.getvalue())
+                    return
+                assert(not matchingHouse is None)
+                output.write('match house ' + str(matchingHouse) + '\n')
             
-            print 'Debug:'
-            print devices
+                #Now, request all devices in that house.
+                output.write('requesting devices\n')
+                devinterface = devapi.Interfaces(System.Uri(self.deviceBaseAdd))
+                devices = devinterface.getDevices(matchingHouse)
             
-            for oneDevice in devices:
-                if devapiu.canBrighten(oneDevice):
-                    print 'found a brightenable'
-                    oneDevice.Enabled = True
-            print output.getvalue()
-            self.logger.info(output.getvalue())
+                print 'Debug:'
+                print devices
+            
+                for oneDevice in devices:
+                    if devapiu.canBrighten(oneDevice):
+                        print 'found a brightenable'
+                        oneDevice.Enabled = True
+                print output.getvalue()
+                self.logger.info(output.getvalue())
         
         except:
             output.write('Error when trying to make a command decision!\n')
