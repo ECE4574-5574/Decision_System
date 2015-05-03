@@ -96,7 +96,8 @@ class decisionMaking():
                 devInterface = devapi.Interfaces(System.Uri("http://dummy.devapi.not"))
                 previousRoomSnapshot = deviceAPIUtils.makeSnapshot(devInterface, PreviousLocation[0], PreviousLocation[1])
                 #add call to log the snapshot in persistent storage  
-                #				
+                requestPath = 'PATCH', 'A/' + message['userID'] + '/' + message["time"] + '/' + localUserHouse
+				conn.request('PATCH', 'A/' + message['userID'] + '/' + message["time"] + '/' + localUserHouse, previousRoomSnapshot)
 				#update the self.UserPrevLocation key value pair with current location
                 self.UserPrevLocation[str(message['userID'])] = (CurrentLocation[0],CurrentLocation[1])
 				# make a call to the decision algo : Jigar 
