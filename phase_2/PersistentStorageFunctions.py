@@ -11,7 +11,7 @@ import urllib
 FUNCTION_TYPES = { 'get' : 'GET', 'post' : 'POST'}
 
 class PersistentStorageFunctions():
-    def __init__(self, ipAddress='localhost', extention=8080):
+    def __init__(self, ipAddress = 'localhost', extention = 8080):
 	    #COnnection to the server is established
         self.conn = httplib.HTTPConnection(ipAddress, extention)
 		
