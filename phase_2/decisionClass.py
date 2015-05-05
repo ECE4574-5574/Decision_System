@@ -48,9 +48,7 @@ class decisionMaking():
             self.logger.warning(line)
 
     def deviceStateDecision(self, message):
-        try:
-            
-            
+        try:    
             #Logging the device state changes in the persistent storage 
             #Set up connection to persistent storage
             conn = httplib.HTTPConnection(self.storageAddress[0], self.storageAddress[1])
@@ -172,8 +170,22 @@ class decisionMaking():
             traceback.print_exc(None, output)
             self.logger.error(output.getvalue())
               
-    
-        
+    def houseUpdate(self, message):
+        #PUT THE THING IN PERSISTENT STORAGE HERE
+        #DO WHATEVER JIGAR WANTS TO DO WITH IT
+        print "Do the decision stuff"
 
-
+#Utility function: takes a room blob from persistent storage, and checks if the coordinates
+#are within it.
+def isInRoom(roomBlob, lat, lon, alt):
+    roomJson = json.loads(roomBlob)
+    if (alt - roomJson['alt'] > 10 or alt < roomJson['alt']):
+        return False
+    p1 = Point(roomJson['corner1'][1], roomJson['corner1'][0])
+    p2 = Point(roomJson['corner2'][1], roomJson['corner2'][0])
+    p3 = Point(roomJson['corner3'][1], roomJson['corner3'][0])
+    p4 = Point(roomJson['corner4'][1], roomJson['corner4'][0])
+    pn = Point(lon, lat)
+    poly = Polygon(p1, p2, p3, p4)
+    return poly.encloses_point(pn)
 

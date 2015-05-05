@@ -140,31 +140,50 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         elif self.path == "/CommandsFromApp":
             try:
                 self.server.serverrequestlogger.info("POST: Received Command From App")
-                print "For User " + str(message["userID"])
-                print "Latitude " + str(message["lat"])
-                print "Longitude " + str(message["lon"])
-                print "Altitude " + str(message["alt"])
-                for field in ["lat", "lon", "alt"]:
-                    if not (isinstance(message[field], int) or isinstance(message[field], float)):
+                if message["command-string"] == "manualChange":
+                    print "User: " + str(message["userID"])
+                    print "command-string: " + str(message["command-string"])
+                    print "time: " + str(message["time"]) 
+                    print "device: " + str(message["device-blob"])
+                    try:
+                        dateTimeObject = datetime.strptime(message["time"], "%Y-%m-%dT%H:%M:%SZ")
+                    except ValueError:
                         self.send_response(400)
                         self.end_headers()
-                        self.wfile.write('The field ' + field + ' must be numeric. Received: ' + str(message[field]))
+                        self.wfile.write('Could not parse the provided timestamp as ISO8601: ' + str(message['time']))
                         self.server.serverrequestlogger.info("POST: Received Command From App: Return 400")
                         return
-                try:
-                    dateTimeObject = datetime.strptime(message["time"], "%Y-%m-%dT%H:%M:%SZ")
-                except ValueError:
-                    self.send_response(400)
+                    self.send_response(200)
+                    self.server.serverrequestlogger.info("POST: Received Command From App: Return 200")
                     self.end_headers()
-                    self.wfile.write('Could not parse the provided timestamp as ISO8601: ' + str(message['time']))
-                    self.server.serverrequestlogger.info("POST: Received Command From App: Return 400")
-                    return
-                print "The command is " + str(message["command-string"])
-                self.send_response(200)
-                self.server.serverrequestlogger.info("POST: Received Command From App: Return 200")
-                self.end_headers()
-                handler = threading.Thread(None, self.decisionThread, 'Handler for decision', args = (message, "command"))
-                handler.start()
+                    handler = threading.Thread(None, self.decisionThread, 'Handler for decision', args = (message, "houseUpdate"))
+                    handler.start()
+                else:
+                    print "For User " + str(message["userID"])
+                    print "Latitude " + str(message["lat"])
+                    print "Longitude " + str(message["lon"])
+                    print "Altitude " + str(message["alt"])
+                    for field in ["lat", "lon", "alt"]:
+                        if not (isinstance(message[field], int) or isinstance(message[field], float)):
+                            self.send_response(400)
+                            self.end_headers()
+                            self.wfile.write('The field ' + field + ' must be numeric. Received: ' + str(message[field]))
+                            self.server.serverrequestlogger.info("POST: Received Command From App: Return 400")
+                            return
+                    try:
+                        dateTimeObject = datetime.strptime(message["time"], "%Y-%m-%dT%H:%M:%SZ")
+                    except ValueError:
+                        self.send_response(400)
+                        self.end_headers()
+                        self.wfile.write('Could not parse the provided timestamp as ISO8601: ' + str(message['time']))
+                        self.server.serverrequestlogger.info("POST: Received Command From App: Return 400")
+                        return
+                    print "The command is " + str(message["command-string"])
+                    self.send_response(200)
+                    self.server.serverrequestlogger.info("POST: Received Command From App: Return 200")
+                    self.end_headers()
+                    handler = threading.Thread(None, self.decisionThread, 'Handler for decision', args = (message, "command"))
+                    handler.start()
             except KeyError as ke:
                 self.handleMissingKey(ke)
                 return
@@ -172,19 +191,19 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         elif self.path == "/TimeConfig":
             try:
                 self.server.serverrequestlogger.info("POST: Received Time Config")
-                print "You may choose to perform a action based on time/date, so the time/date is now" + str(message["localTime"])
+                '''print "You may choose to perform a action based on time/date, so the time/date is now" + str(message["localTime"])
                 try:
                     dateTimeObject = datetime.strptime(message["time"], "%Y-%m-%dT%H:%M:%SZ")
                 except ValueError:
                     self.send_response(400)
                     self.end_headers()
                     self.wfile.write('Could not parse the provided timestamp as ISO8601: ' + str(message['time']))
-                    self.server.serverrequestlogger.info("POST: Received Time Config: Return 400")
+                    self.server.serverrequestlogger.info("POST: Received Time Config: Return 400")'''
                 self.send_response(200)
                 self.server.serverrequestlogger.info("POST: Received Time Config: Return 200")
                 self.end_headers()
-                handler = threading.Thread(None, self.decisionThread, 'Handler for decision', args = (message, "time"))
-                handler.start()                                        
+                '''handler = threading.Thread(None, self.decisionThread, 'Handler for decision', args = (message, "time"))
+                handler.start()'''                                        
             except KeyError as ke:
                 self.handleMissingKey(ke)
                 return
@@ -239,8 +258,11 @@ class ServerInfoHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.server.decision.locationDecision(message)
     elif decisionType == "time":
         self.server.decision.timeDecision(message)
+    elif decisionType == "houseUpdate":
+        self.server.decision.houseUpdate(message)
     else:
         self.server.decision.command(message)
+
 
 class HaltableHTTPServer(BaseHTTPServer.HTTPServer):
 
