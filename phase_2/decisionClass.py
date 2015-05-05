@@ -59,9 +59,7 @@ class decisionMaking():
             self.logger.warning(line)
 
     def deviceStateDecision(self, message):
-        try:
-            
-            
+        try:    
             #Logging the device state changes in the persistent storage 
             #Set up connection to persistent storage
             conn = httplib.HTTPConnection(self.storageAddress[0], self.storageAddress[1])
@@ -182,6 +180,11 @@ class decisionMaking():
             output.write(str(message) + '\n')
             traceback.print_exc(None, output)
             self.logger.error(output.getvalue())
+              
+    def houseUpdate(self, message):
+        #PUT THE THING IN PERSISTENT STORAGE HERE
+        #DO WHATEVER JIGAR WANTS TO DO WITH IT
+        print "Do the decision stuff"
 	
     def restoreRoomState(self, userid, roomID, houseID):
         conn = httplib.HTTPConnection(self.storageAddress[0], self.storageAddress[1])
