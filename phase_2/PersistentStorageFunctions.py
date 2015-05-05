@@ -1,7 +1,6 @@
 #Functions for Calls to and from the Persistent Storage
-#Contributors : Luke Lapham, Sumit Kumar, Jigar Patel
+#Contributors : Luke Lapham
 #Date : 3/30/2015
-#Last modified: 4/20/2015
 
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import json
@@ -235,20 +234,19 @@ class PersistentStorageFunctions():
         except:
             print "Error with request"    
 
-    def postDevice(self, houseID,roomID, deviceType):
+    def postDevice(self, houseID, version, roomID, deviceID):
         self.conn.request(FUNCTION_TYPES['post'], 'D/' + houseID +\
-            '/' + roomID + '/' + deviceType + '/')
-        return self.self.conn.getresponse()
-        
-    def postRoom(self, houseID):
-        self.conn.request(FUNCTION_TYPES['post'], 'R/' + houseID +"/")
-        return self.self.conn.getresponse()
-        
-    def postHouse(self):
-        self.conn.request(FUNCTION_TYPES['post'], 'H/')
-        return self.self.conn.getresponse()
-        
-    def postUser(self):
-        self.conn.request(FUNCTION_TYPES['post'], 'U/')
-        return self.self.conn.getresponse()
-
+            '/' + version + '/' + roomID + '/' + deviceID + '/')
+        return self.conn.getresponse()
+		
+    def postRoom(self, houseID, version, roomID):
+        self.conn.request(FUNCTION_TYPES['post'], 'R/' + houseID + '/' + version + '/' + roomID + '/')
+        return self.conn.getresponse()
+		
+    def postHouse(self, houseID):
+        self.conn.request(FUNCTION_TYPES['post'], 'H/' + houseID + '/')
+        return self.conn.getresponse()
+		
+    def postUser(self, userID):
+        self.conn.request(FUNCTION_TYPES['post'], 'U/' + userID + '/')
+        return self.conn.getresponse()
