@@ -1,4 +1,4 @@
-import requests
+#import requests
 import json
 import os
 import httplib
@@ -13,7 +13,16 @@ import httplib
 import argparse
 import sys
 from datetime import datetime
-import decisions
+import codecs
+import urllib2
+
+#This monkey-patch is NECESSARY to make sympy work.
+#It's a dangerous hack, but we're only using some limited parts of sympy...
+def my_unicode_escape_decode(x):
+    return x
+codecs.unicode_escape_decode = my_unicode_escape_decode
+from sympy import Point, Polygon
+#import decisions
 import logging
 import StringIO
 
@@ -21,6 +30,8 @@ import clr
 import deviceAPIUtils
 clr.AddReferenceToFileAndPath("DeviceDLL/DeviceDLL/bin/Debug/DeviceDLL.dll")
 clr.AddReference('System')
+clr.AddReference('System.Drawing')
+clr.AddReference('System.Windows.Forms')
 import api as devapi
 import deviceAPIUtils as devapiu
 import System
@@ -162,7 +173,7 @@ class decisionMaking():
                     oneDevice.Enabled = True
             print output.getvalue()
             self.logger.info(output.getvalue())
-            
+        
         except:
             output.write('Error when trying to make a command decision!\n')
             output.write('Request body being handled:\n')
@@ -174,6 +185,107 @@ class decisionMaking():
         #PUT THE THING IN PERSISTENT STORAGE HERE
         #DO WHATEVER JIGAR WANTS TO DO WITH IT
         print "Do the decision stuff"
+	
+    def restoreRoomState(self, userid, roomID, houseID):
+        conn = httplib.HTTPConnection(self.storageAddress[0], self.storageAddress[1])
+
+        #change time to one week prior to get the snapshot of the state of devices in the room.
+        t1 = self.message["time"]
+        temp = t1.split('T', 1)[0]
+        temp1 = datetime.datetime.strptime(temp, "\%Y-\%m-\%d")
+        sec = t1.split('T', 1)[-1]
+        temp2 = temp1 - datetime.timedelta(days=7)
+        temp3 = temp2.strftime("%Y %m %d")
+        temp4 = temp3.replace(" ","-")
+        prev_time = temp4 + 'T' + sec
+    
+	    #GET AL/USERID/TIMEFRAME/HOUSEID*/ROOMID*  Query for each of the actions logged by this user before the provided time.
+
+        reqPath = 'AL/' + str(userid) + self.message["time"] + self.message["time"] + '/' + str(houseID) + '/' + str(roomID)
+        path_url = self.storageAddress[0] + "/"+self.storageAddress[1]+"/"+reqPath
+        resp = urllib2.urlopen(path_url).read()
+        if not resp.status == 200:
+            raise Exception("Did not receive response")
+        else:
+            # This creates a list of dictionaries from the JSON
+
+            """
+            Demo: Extract from Snapshot
+                    Extracting from snapshot string:
+                    [{"Enabled":false,"State":0,"ID":{"HouseID":101,"RoomID":3,"DeviceID":1},"LastUp
+                    date":"2015-05-03T23:22:44.3282415Z","Name":null},{"Enabled":true,"Value":1.0,"I
+                    D":{"HouseID":101,"RoomID":3,"DeviceID":2},"LastUpdate":"2015-05-03T23:22:44.343
+                    2424Z","Name":null},{"Enabled":false,"Value":0.0,"ID":{"HouseID":101,"RoomID":3,
+                    "DeviceID":3},"LastUpdate":"2015-05-03T23:22:45.2762958Z","Name":null}]
+            """
+
+            json_list = json.loads(resp)
+
+            for x in json_list:
+                boolValue = x["Enabled"]
+                if boolValue == "false":
+                    boolValue = False
+                elif boolValue == "true":
+                    boolValue = True
+
+                # x is a dictionary
+                ID = x["ID"]
+                # ID is a dictionary
+                device = ID["DeviceID"]
+                #device contains the Device ID
+                devapiu.updateDeviceState(device,boolValue)
+
+    def findMatchingRoom(self, userid, lat, lon, alt):
+        conn = httplib.HTTPConnection(self.storageAddress[0], self.storageAddress[1])
+        reqMethod = 'GET'
+        reqPath = 'BU/' + str(userid)
+        
+        #First, try to get the user information.
+        conn.request(reqMethod, reqPath)
+        resp = conn.getresponse()
+        body = resp.read()
+        if (not resp.status == 200):
+            raise KeyError('That userID does not exist.')
+            return
+        body = json.loads(body)
+        
+        print 'Debug: '
+        print body
+        
+        matchingRoom = None
+        for houseID in body['houseIDs']:
+            print 'Debug: house ' + str(houseID)
+            reqMethod = 'GET'
+            reqPath = 'HR/' + str(houseID)
+            conn.request(reqMethod, reqPath)
+            resp = conn.getresponse()
+            if not resp.status == 200:
+                continue
+            try:
+                oneHouseBody = json.loads(resp.read())
+            except (ValueError, KeyError):
+                continue
+            #Looping for all rooms...
+            for roomID in oneHouseBody['roomIDs']:
+                print 'Debug: room ' + str(roomID)
+                #Trying to get room info. Should be replaced once that library is ready.
+                reqMethod = 'GET'
+                reqPath = 'BR/'+str(houseID)+'/'+str(roomID)
+                conn.request(reqMethod, reqPath)
+                resp = conn.getresponse()
+                if not resp.status == 200:
+                    continue
+                
+                respMSG = resp.read()
+                print respMSG
+                #Check if room matches or not.
+                try:
+                    if isInRoom(respMSG, lat, lon, alt):
+                        matchingRoom = (houseID, roomID)
+                        return matchingRoom
+                        break
+                except (ValueError, KeyError):
+                    continue
 
 #Utility function: takes a room blob from persistent storage, and checks if the coordinates
 #are within it.
@@ -188,4 +300,5 @@ def isInRoom(roomBlob, lat, lon, alt):
     pn = Point(lon, lat)
     poly = Polygon(p1, p2, p3, p4)
     return poly.encloses_point(pn)
+
 

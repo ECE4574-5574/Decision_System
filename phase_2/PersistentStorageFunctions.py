@@ -1,5 +1,5 @@
 #Functions for Calls to and from the Persistent Storage
-#Contributors : Luke Lapham, Sumit Kumar
+#Contributors : Luke Lapham, Sumit Kumar, Jigar Patel
 #Date : 3/30/2015
 #Last modified: 4/20/2015
 
@@ -78,7 +78,7 @@ class PersistentStorageFunctions():
             return parsed
         except:
             print "Error with request"
-    #TODO: UPDATE COMMENTS
+
     def getUserInfo(self, userID = 'testUserID'):
         try:    
             path = "/BU/" + str(userID) + "/"
@@ -90,7 +90,6 @@ class PersistentStorageFunctions():
         except:
             print "Error with request"       
 
-    #The HouseID and roomID are optional fields.
     def getRoomInfo(self, houseID = 'testHouseID',roomID = 'testRoomID'):
         try:    
             path = "/BR/" + str(houseID) + "/" + str(roomID) + "/"
@@ -253,4 +252,3 @@ class PersistentStorageFunctions():
         self.conn.request(FUNCTION_TYPES['post'], 'U/')
         return self.self.conn.getresponse()
 
-thing = PersistentStorageFunctions()
