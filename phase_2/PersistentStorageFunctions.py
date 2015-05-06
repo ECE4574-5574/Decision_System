@@ -1,5 +1,5 @@
 #Functions for Calls to and from the Persistent Storage
-#Contributors : Luke Lapham, Sumit Kumar
+#Contributors : Luke Lapham, Sumit Kumar, Jigar Patel
 #Date : 3/30/2015
 #Last modified: 4/20/2015
 
@@ -53,7 +53,7 @@ class PersistentStorageFunctions():
             tempKey = 'AL/' + userID + '/' + timeframe + '/' + houseID + '/'
             self.conn.request(FUNCTION_TYPES['get'], tempKey)		
         else:
-            tempKey = 'AL/' + userID + '/' + timeframe + '/' + houseID + '/' + roomID
+            tempKey = 'AL/' + userID + '/' + timeframe + '/' + timeframe + '/' + houseID + '/' + roomID
             self.conn.request(FUNCTION_TYPES['get'], tempKey)
         return self.conn.getresponse()
 		

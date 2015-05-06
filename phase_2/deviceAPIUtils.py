@@ -20,22 +20,31 @@ def canBrighten(device):
     methods = {}
     for method in clr.GetClrType(type(device)).GetMethods():
         methods[method.Name] = method.ReturnType.Name
-    
+
     return ('set_Enabled' in methods) and 'get_Value' in methods and methods['get_Value'] == 'Light'
-    
+
     """
     #We can uncomment this block if they actually make those interfaces public...
     #Establish that it is IEnableable
     if not clr.GetClrType(type(device)).IsAssignableFrom(clr.GetClrType(devapi.IEnableable)):
         return False
-        
+
     if not clr.GetClrType(type(device)).IsAssignableFrom(clr.GetClrType(devapi.IReadable[Light])):
         return False
-    
+
     return True
     """
 
-    
+def updateDeviceState(device, boolValue):
+    if not isinstance(device, devapi.Device):
+        return False
+
+    if not clr.GetClrType(devapi.UpdateDevice(device, boolValue)):
+        return False
+
+    return True
+
+
 #Functions to make a snapshot from the device API.
 #Takes an instance of the device API Interfaces class, and
 #returns a string to be stored in persistent storage as the room snapshot.
@@ -44,7 +53,7 @@ def makeSnapshot(devapiInterfaces, houseID, roomID):
 
 def createSnapshotString(deviceList):
     return nsoft.JsonConvert.SerializeObject(deviceList)
-    
+
 #Takes the string from persistent storage and returns a dictionary containing the device snapshot.
 #To avoid having to recreate this dictionary for every extractDeviceSnapshot, make sure to run
 #this function once and store the dictionary.
