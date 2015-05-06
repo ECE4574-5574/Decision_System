@@ -36,9 +36,9 @@ def validateLog(expected, actual):
 OUTPUT_FILE = 'commandtestlog.txt'
 
 ACTUAL_USER_ID = 'bsaget'
-ACTUAL_HOUSE_LAT = 37.23512
-ACTUAL_HOUSE_LON = -80.41352
-ACTUAL_HOUSE_ALT = 2050
+ACTUAL_HOUSE_LAT = 37.229854
+ACTUAL_HOUSE_LON = -80.417724
+ACTUAL_HOUSE_ALT = 2085
 ACTUAL_COMMAND_STRING = 'brightenNearMe'
 EXAMPLE_TIME_STAMP = '2015-04-19T12:59:23Z'
 
@@ -76,8 +76,7 @@ class commandDecisionTest(unittest.TestCase):
             testoutfile = open(TEST_LOG_FILE)
             log = testoutfile.read().strip('\n')
             expected = ['Command Decision 1:',
-                        'req localhost:8080 GET BU/nouser',
-                        'response 404']
+                        'nonexistent user']
             self.assertTrue(validateLog(expected, log))
         except:
             raise
@@ -95,13 +94,7 @@ class commandDecisionTest(unittest.TestCase):
             testoutfile = open(TEST_LOG_FILE)
             log = testoutfile.read().strip('\n')
             expected = ['Command Decision 1:',
-                        'req localhost:8080 GET BU/'+ACTUAL_USER_ID,
-                        'response 200',
-                        'req localhost:8080 GET BH/1',
-                        'response 200',
-                        'req localhost:8080 GET BH/101',
-                        'response 200',
-                        'Could not find a matching house for that user and coordinates.']
+                        'no matching room']
             self.assertTrue(validateLog(expected, log))
         except:
             raise
@@ -120,13 +113,7 @@ class commandDecisionTest(unittest.TestCase):
             testoutfile = open(TEST_LOG_FILE)
             log = testoutfile.read().strip('\n')
             expected = ['Command Decision 1:',
-                'req localhost:8080 GET BU/'+ACTUAL_USER_ID,
-                'response 200',
-                'req localhost:8080 GET BH/1',
-                'response 200',
-                'req localhost:8080 GET BH/101',
-                'response 200',
-                'match house 101',
+                'matched room (101, 3)',
                 'requesting devices']
             self.assertTrue(validateLog(expected, log))
         except:
