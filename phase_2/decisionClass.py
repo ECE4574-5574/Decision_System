@@ -103,6 +103,8 @@ class decisionMaking():
 				#update the self.UserPrevLocation key value pair with current location
                 self.UserPrevLocation[str(message['userID'])] = (CurrentLocation[0],CurrentLocation[1])
 				# make a call to the decision algo : Jigar 
+                #restoreRoomState(self, userid, roomID, houseID, message)
+                restoreRoomState(str(message['userID']), CurrentLocation[1], CurrentLocation[0],message)
 				# make a call to the server api : Braedon
                 sendUserMessage("Location Changed: Devices Being Set", "information")
             #change the format to the format required by persistent storage     
