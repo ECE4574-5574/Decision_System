@@ -131,6 +131,11 @@ class commandDecisionTest(unittest.TestCase):
             self.assertTrue(validateLog(expected, log))
         except:
             raise
+            
+    def testDemoRestoreSnapshot(self):
+        print 'Running restore snapshot demo'
+        dmaking = decisionMaking(None, ['localhost', 8080], 'http://localhost:8082')
+        dmaking.restoreRoomState(None, None, None, None)
 
 notJson = "this is some garbage that isn't json"
 
