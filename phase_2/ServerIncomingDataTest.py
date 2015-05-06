@@ -77,10 +77,8 @@ res = connection.getresponse()
 sleep(2)
 log.readlines(2)
 line1 = log.readline()
-line2 = log.readline()
-check = "req localhost:8080 GET BU/nouser\n"
-check1 = "response 404\n"
-if (res.status == 200 and line1 == check and line2 == check1):
+check = "nonexistent user\n"
+if (res.status == 200 and line1 == check):
     print 'PASS'
 else:
     print 'FAIL'

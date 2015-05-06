@@ -116,14 +116,14 @@ class decisionMaking():
                 matchRoom = self.findMatchingRoom(message['userID'], message['lat'], message['lon'], message['alt'])
             except KeyError as ke:
                 if ke.args[0] == 'That userID does not exist.':
-                    output.write('nonexistent user')
+                    output.write('nonexistent user\n')
                     self.logger.warning(output.getvalue())
                     return
                 else:
                     raise
             
             if matchRoom is None:
-                output.write('no matching room')
+                output.write('no matching room\n')
                 self.logger.warning(output.getvalue())
                 return
             #Now, request all devices in that house.
@@ -154,7 +154,7 @@ class decisionMaking():
         #DO WHATEVER JIGAR WANTS TO DO WITH IT
         print "Do the decision stuff"
 	
-    def restoreRoomState(self, userid, roomID, houseID):
+    def restoreRoomState(self, userid, roomID, houseID, message):
         conn = httplib.HTTPConnection(self.storageAddress[0], self.storageAddress[1])
 
         #change time to one week prior to get the snapshot of the state of devices in the room.
