@@ -27,10 +27,12 @@ class PersistentStorageFunctions():
             self.logger.debug(path)   
             self.conn.request("GET", path)
             response = self.conn.getresponse()
+            print response.status
             parsed = json.loads(response.read())
             return parsed
         except:
-            print "Error with Persistent Storage request"
+            print "Error with getDevicesInHouse request"
+            raise
 
     def getDevicesInRoom(self, houseID=123, roomID=123):
         try:    
@@ -38,32 +40,39 @@ class PersistentStorageFunctions():
             self.logger.debug(path)       
             self.conn.request("GET", path)
             response = self.conn.getresponse()
+            print response.status
             parsed = json.loads(response.read())
             return parsed
         except:
-            print "Error with request"
+            print "Error with getDevicesInRoom request"
+            raise
 
+            print "Error with  request"
     def getDevice(self, houseID=123, roomID=132, deviceID=123):
         try:    
             path = "/DD/" + str(houseID) + "/" + str(roomID) + "/" + str(deviceID) + "/"
             self.logger.debug(path)     
             self.conn.request("GET", path)
             response = self.conn.getresponse()
+            print response.status
             parsed = json.loads(response.read())
             return parsed
         except:
-            print "Error with request"
+            print "Error with getDevice request"
+            raise
         
-    def getDevicesInHouseOfType(self, houseID='testHouseID', deviceType='light'):
+    def getDevicesInHouseOfType(self, houseID='testHouseID', deviceType='testDeviceID'):
         try:    
             path = "/HT/" + str(houseID) + "/" + str(deviceType) + "/"
             self.logger.debug(path)      
             self.conn.request("GET", path)
             response = self.conn.getresponse()
+            print response.status
             parsed = json.loads(response.read())
             return parsed
         except:
-            print "Error with request"
+            print "Error with getDevicesInHouseOfType request"
+            raise
 
     #Note: since each house can have more than one user it may not make sense to return a signle user ID
     #based upon a house ID.
@@ -73,10 +82,12 @@ class PersistentStorageFunctions():
             self.logger.debug(path)     
             self.conn.request("GET", path)
             response = self.conn.getresponse()
+            print response.status
             parsed = json.loads(response.read())
             return parsed
         except:
-            print "Error with request"
+            print "Error with getDevicesInRoomOfType request"
+            raise
 
     def getUserInfo(self, userID = 'testUserID'):
         try:    
@@ -84,10 +95,12 @@ class PersistentStorageFunctions():
             self.logger.debug(path) 
             self.conn.request("GET", path)
             response = self.conn.getresponse()
+            print response.status
             parsed = json.loads(response.read())
             return parsed
         except:
-            print "Error with request"       
+            print "Error with getUserInfo request"
+            raise       
 
     def getRoomInfo(self, houseID = 'testHouseID',roomID = 'testRoomID'):
         try:    
@@ -95,10 +108,12 @@ class PersistentStorageFunctions():
             self.logger.debug(path)      
             self.conn.request("GET", path)
             response = self.conn.getresponse()
+            print response.status
             parsed = json.loads(response.read())
             return parsed
         except:
-            print "Error with request" 
+            print "Error with getRoomInfo request" 
+            raise
         
     def getDeviceInfo(self, houseID = 'testHouseID', roomID = 'testRoomID', deviceID = 'testDeviceID'):
         try:    
@@ -106,10 +121,12 @@ class PersistentStorageFunctions():
             self.logger.debug(path)     
             self.conn.request("GET", path)
             response = self.conn.getresponse()
+            print response.status
             parsed = json.loads(response.read())
             return parsed
         except:
-            print "Error with request"
+            print "Error with getDeviceInfo request"
+            raise
         
     def getAuthentication(self, userName='testUserName', pw = 'testPW'):
         try:    
@@ -117,23 +134,27 @@ class PersistentStorageFunctions():
             self.logger.debug(path)      
             self.conn.request("GET", path)
             response = self.conn.getresponse()
+            print response.status
             parsed = json.loads(response.read())
             return parsed
         except:
-            print "Error with request"
+            print "Error with getAuthentication request"
+            raise
         
     def getUserDeviceToken(self, userID='testUserID'):
         try:    
             path = "/TU/" + str(userID) + "/"
             self.logger.debug(path)     
             self.conn.request("GET", path)
-            response = self.conn.getresponse() 
+            response = self.conn.getresponse()
+            print response.status 
             parsed = json.loads(response.read())
             return parsed
         except:
-            print "Error with request"
+            print "Error with getUserDeviceToken request"
+            raise
 
-    def getUserActions(self, userID='testUserID', timeFrame='testTimeFrame', houseID='testHouseID', roomID='testRoomID'):
+    def getUserActions(self, userID='testUserID', timeFrame='testTimeFrame', houseID='testHouseID', roomID='testRoomID', deviceID='testDeviceID', deviceType = '0'):
         try:    
             path = "/AL/" + str(userID) + "/" + str(timeFrame) + "/" 
             if houseID != 'testHouseID':
@@ -144,46 +165,26 @@ class PersistentStorageFunctions():
                 path = path + str(roomID) + '/'
             else:
                 path = path + "0/"
-            self.logger.debug(path)     
-            self.conn.request("GET", path)
-            response = self.conn.getresponse() 
-            parsed = json.loads(response.read())
-            return parsed
-        except:
-            print "Error with request"
-
-    def getUserActionsDeviceType(self, userID='testUserID', timeFrame='testTimeFrame',
-        deviceType='light', houseID='testRoomID', roomID='testRoomdID'):
-        try:    
-            path = "/AT/" + str(userID) + "/" + str(timeFrame) + "/" + str(deviceType) + "/" + str(houseID) + "/"
-            if roomID != 'testRoomID':
-                path = path + str(roomID) + '/'
-            else:
-                path = path + "0/" 
-            self.logger.debug(path)           
-            self.conn.request("GET", path)
-            response = self.conn.getresponse()
-            parsed = json.loads(response.read())
-            return parsed
-        except:
-            print "Error with request"
-
-    def getUserActionsDeviceID(self, userID='testUserID', timeFrame='testTimeFrame', deviceID='testDeviceID', houseID = 'testHouseID', roomID = 'testRoomID'):
-        try:    
-            path = "/AI/" + str(userID) + "/" + str(timeFrame) + "/" + str(deviceID) + "/" + str(houseID) + "/"
-            if roomID != 'testRoomID':
-                path = path + str(roomID) + '/'
+            if deviceID != "testDeviceID":
+                path = path + str(deviceID) + '/'
             else:
                 path = path + "0/"
-            self.logger.debug(path)
+            if deviceType != '0':
+                path = path + deviceType + '/'
+            else:
+                path = path + "0/"
+            self.logger.debug(path)     
             self.conn.request("GET", path)
             response = self.conn.getresponse()
+            print response.status 
             parsed = json.loads(response.read())
             return parsed
         except:
-            print "Error with request"
+            print "Error with getUserActions request"
+            raise
 
-    def getComputerActions(self, compID='testCompID', timeFrame='testTimeFrame', houseID='testHouseID', roomID='testRoomID'):
+
+    def getComputerActions(self, compID='testCompID', timeFrame='testTimeFrame', houseID='testHouseID', roomID='testRoomID', deviceID='testDeviceID', deviceType = '0'):
         try:    
             path = "/CL/" + str(compID) + "/" + str(timeFrame) + "/"
             if houseID != 'testHouseID':    
@@ -194,45 +195,23 @@ class PersistentStorageFunctions():
                 path = path + str(roomID) + '/'
             else:
                 path = path + "0 /"
-            self.logger.debug(path)
-            self.conn.request("GET", path)
-            response = self.conn.getresponse()
-            parsed = json.loads(response.read())
-            return parsed
-        except:
-            print "Error with request"
-
-    def getComputerActionsDeviceType(self, compID='testUserID', timeFrame='testTimeFrame',
-        deviceType='light', houseID='testRoomID', roomID='testRoomdID'):
-        try:    
-            path = "/CT/" + str(compID) + "/" + str(timeFrame) + "/" + str(deviceType) + "/" + str(houseID) + "/"
-            if roomID != 'testRoomID':
-                path = path + str(roomID) + '/'
+            if deviceID != "testDeviceID":
+                path = path + str(deviceID) + '/'
+            else:
+                path = path + "0/"
+            if deviceType != '0':
+                path = path + deviceType + '/'
             else:
                 path = path + "0/"
             self.logger.debug(path)
             self.conn.request("GET", path)
             response = self.conn.getresponse()
+            print response.status
             parsed = json.loads(response.read())
             return parsed
         except:
-            print "Error with request"
-
-    def getComputerActionsDeviceID(self, compID='testUserID', timeFrame='testTimeFrame',
-        deviceID='testDeviceID', houseID='testRoomID', roomID='testRoomdID'):
-        try:    
-            path = "/CI/" + str(compID) + "/" + str(timeFrame) + "/" + str(deviceID) + "/" + str(houseID) + "/"
-            if roomID != 'testRoomID':
-                path = path + str(roomID) + '/'
-            else:
-                path = path + "0/"
-            self.logger.debug(path)
-            self.conn.request("GET", path)
-            response = self.conn.getresponse()
-            parsed = json.loads(response.read())
-            return parsed
-        except:
-            print "Error with request"    
+            print "Error with getComputerActions request"
+            raise
 
     def postDevice(self, houseID, version, roomID, deviceID):
         self.conn.request(FUNCTION_TYPES['post'], 'D/' + houseID +\

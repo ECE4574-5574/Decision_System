@@ -16,26 +16,58 @@ argparser.add_argument('-p', '--port', type=int)
 
 args = argparser.parse_args()
 
-
-DUT = PSF.PersistentStorageFunctions(args.storage, args.port)
-DUT.getDevicesInHouse(54321)
-DUT.getDevicesInRoom(54321, 12345)
-DUT.getDevice(54321, 12345, 67890)
-DUT.getDevicesInHouseOfType(12345, "light")
-DUT.getDevicesInRoomOfType(12345, 54321, "light")
-DUT.getUserInfo(12)
-DUT.getRoomInfo(12345, 54321)
-DUT.getDeviceInfo(12345, 54321, 67890)
-DUT.getAuthentication("bob", "thePW")
-DUT.getUserDeviceToken(12)
-DUT.getUserActions(12, "2015-04-06T18:05:05Z", 12345, 54321)
-DUT.getUserActionsDeviceType(12, "2015-04-06T18:05:05Z", "light", 12345, 54321)
-DUT.getUserActionsDeviceID(12, "2015-04-06T18:05:05Z", 67890, 12345, 54321)
-DUT.getComputerActions(21, "2015-04-06T18:05:05Z", 12345, 54321)
-DUT.getComputerActionsDeviceType(21, "2015-04-06T18:05:05Z", 'light', 12345, 54321)
-DUT.getComputerActionsDeviceID(21, "2015-04-06T18:05:05Z", 67890, 12345, 54321)
-
-
+try: 
+    DUT = PSF.PersistentStorageFunctions(args.storage, args.port)
+except:
+   print "\n"
+try: 
+    DUT.getDevicesInHouse(54321)
+except:
+    print "\n"
+try:
+    DUT.getDevicesInRoom(54321, 12345)
+except:
+    print "\n"
+try:
+    DUT.getDevice(54321, 12345, 67890)
+except:
+    print "\n"
+try:
+    DUT.getDevicesInHouseOfType(12345, "light")
+except:
+    print "\n"
+try:
+    DUT.getDevicesInRoomOfType(12345, 54321, "light")
+except:
+    print "\n"
+try:
+    DUT.getUserInfo(12)
+except:
+    print "\n"
+try:
+    DUT.getRoomInfo(12345, 54321)
+except:
+    print "\n"
+try:
+    DUT.getDeviceInfo(12345, 54321, 67890)
+except:
+    print "\n"
+try:
+    DUT.getAuthentication("bob", "thePW")
+except:
+    print "\n"
+try:
+    DUT.getUserDeviceToken(12)
+except:
+    print "\n"
+try:
+    DUT.getUserActions(12, "2015-04-06T18:05:05Z/2015-04-06T18:05:05Z", 12345, 54321)
+except:
+    print "\n"
+try:
+    DUT.getComputerActions(21, "2015-04-06T18:05:05Z/2015-04-06T18:05:05Z", 12345, 54321)
+except:
+    print "\n"
 
 log = open('getRequests.log', 'r')
 print "getDevicesInHouse()"
@@ -100,39 +132,16 @@ else:
     print "FAIL"
 print "getUserActions()"
 line = log.readline()
-if line == "/AL/12/2015-04-06T18:05:05Z/12345/54321/\n":
-    print "PASS\n"
-else:
-    print "FAIL"
-print "getUserActionsDeviceType()"
-line = log.readline()
-if line == "/AT/12/2015-04-06T18:05:05Z/light/12345/54321/\n":
-    print "PASS\n"
-else:
-    print "FAIL"
-print "getUserActionsDeviceID()"
-line = log.readline()
-if line == "/AI/12/2015-04-06T18:05:05Z/67890/12345/54321/\n":
+if line == "/AL/12/2015-04-06T18:05:05Z/2015-04-06T18:05:05Z/12345/54321/0/0/\n":
     print "PASS\n"
 else:
     print "FAIL"
 print "getComputerActions()"
 line = log.readline()
-if line == "/CL/21/2015-04-06T18:05:05Z/12345/54321/\n":
+if line == "/CL/21/2015-04-06T18:05:05Z/2015-04-06T18:05:05Z/12345/54321/0/0/\n":
     print "PASS\n"
 else:
     print "FAIL"
-print "getComputerActionsDeviceType()"
-line = log.readline()
-if line == "/CT/21/2015-04-06T18:05:05Z/light/12345/54321/\n":
-    print "PASS\n"
-else:
-    print "FAIL"
-print "getComputerActionsDeviceID()"
-line = log.readline()
-if line == "/CI/21/2015-04-06T18:05:05Z/67890/12345/54321/\n":
-    print "PASS\n"
-else:
-    print "FAIL"
+    
 
 
