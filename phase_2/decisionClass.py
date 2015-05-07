@@ -120,11 +120,13 @@ class decisionMaking():
             #Pass the JSON string to persistent storage
             payload = json.dumps({"action-type":"location-update","action-data":message})
             if (CurrentLocation is None):
-                localUserHouse = "NotInAnyHouse"
+                localUserHouse = 0
+                localUserRoom = 0
             else:
-                localUserHouse = str(CurrentLocation[0])
-            requestPath = 'PATCH', 'A/' + message['userID'] + '/' + message["time"] + '/' + localUserHouse
-            conn.request('PATCH', 'A/' + message['userID'] + '/' + message["time"] + '/' + localUserHouse, payload)
+                localUserHouse = CurrentLocation[0]
+                localUserRoom = CurrentLocation[1]
+            requestPath = 'A/' + message['userID'] + '/' + message["time"] + '/' + str(localUserHouse) + '/' + str(localUserRoom) + '/0/0'
+            conn.request('PATCH', requestPath, payload)
             response = conn.getresponse()
             print response.status
             print response.read()
