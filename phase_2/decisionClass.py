@@ -92,9 +92,9 @@ class decisionMaking():
             #save new location if user location is not available in   UserPrevLocation
             if ((PreviousLocation is None) and (CurrentLocation is not None)):
                 print "no prev location"
-                print self.UserPrevLocation.get(str(message['userID']), None)
+                #print self.UserPrevLocation.get(str(message['userID']), None)
                 self.UserPrevLocation[str(message['userID'])] = (CurrentLocation[0],CurrentLocation[1])
-                print self.UserPrevLocation.get(str(message['userID']), None)
+                #print self.UserPrevLocation.get(str(message['userID']), None)
 				#make no decisions, as the previous room data for user was not logged
             if ((PreviousLocation is not None) and (CurrentLocation is not None) and (PreviousLocation == CurrentLocation)):
                 print "no room change"		
