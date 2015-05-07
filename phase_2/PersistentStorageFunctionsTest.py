@@ -14,53 +14,57 @@ class PersistentStorageFunctionsTest(unittest.TestCase):
         self.API = PSF.PersistentStorageFunctions()
 		
     def testGetFunctionsDefaults(self):
-        resp = self.API.getAllItemsInHouse()
+        resp = self.API.getAllItemsInHouse('houseID')
         self.assertEqual(resp.status, STATUS_CODES['OK'])
 		
-        resp = self.API.getAllItemsInRoom()
+        resp = self.API.getAllItemsInRoom('houseID', 'roomID')
         self.assertEqual(resp.status, STATUS_CODES['OK'])
 		
-        resp = self.API.getHouseDeviceType()
+        resp = self.API.getHouseDeviceType('houseID', 'deviceTypeID')
         self.assertEqual(resp.status, STATUS_CODES['OK'])
 		
-        resp = self.API.getHouseRoomDeviceType()
+        resp = self.API.getHouseRoomDeviceType('houseID', 'roomID', 'deviceTypeID')
         self.assertEqual(resp.status, STATUS_CODES['OK'])
 		
-        resp = self.API.getUserInformationHouse()
+        resp = self.API.getUserInformationHouse('houseID')
         self.assertEqual(resp.status, STATUS_CODES['OK'])
 		
-        resp = self.API.getUserInformationUserID()
+        resp = self.API.getUserInformationUserID('userID')
         self.assertEqual(resp.status, STATUS_CODES['OK'])
 		
-        resp = self.API.getAllLogEntries()
+        resp = self.API.getAllLogEntries('userID', 'testTimeFriame')
         self.assertEqual(resp.status, STATUS_CODES['OK'])
 		
-        resp = self.API.getAllLogEntriesDeviceType()
+        resp = self.API.getAllLogEntriesDeviceType('testuserID', 'testtimeframe',\
+                                                   'testdeviceType', 'testhouseID', 'testroomID')
         self.assertEqual(resp.status, STATUS_CODES['OK'])
 		
-        resp = self.API.getAllLogEntriesDeviceID()
+        resp = self.API.getAllLogEntriesDeviceID('testuserID', 'testtimeframe',\
+                                                   'testdeviceID', 'testhouseID', 'testroomID')
         self.assertEqual(resp.status, STATUS_CODES['OK'])
 		
-        resp = self.API.getAllComputerByLocation()
+        resp = self.API.getAllComputerByLocation('testuserID', 'testtimeframe', 'testhouseID', 'testroomID')
         self.assertEqual(resp.status, STATUS_CODES['OK'])
 		
-        resp = self.API.getAllComputerByType()
+        resp = self.API.getAllComputerByType('testuserID', 'testtimeframe', 'testdeviceType',\
+                                            'testhouseID', 'testroomID')
         self.assertEqual(resp.status, STATUS_CODES['OK'])
 		
-        resp = self.API.getComputerbyDeviceID()
+        resp = self.API.getComputerbyDeviceID('testuserID', 'testtimeframe', 'testdeviceID', 'testhouseID',\
+                                                'testroomID')
         self.assertEqual(resp.status, STATUS_CODES['OK'])
 		
     def testPostFunctionsDefaults(self):
-        resp = self.API.postDevice()
+        resp = self.API.postDevice('testHouseID', '1.0', 'roomID', 'deviceID')
         self.assertEqual(resp.status, STATUS_CODES['OK'])
 		
-        resp = self.API.postRoom()
+        resp = self.API.postRoom('testHouseID', '1.0', 'roomID')
         self.assertEqual(resp.status, STATUS_CODES['OK'])
 		
-        resp = self.API.postHouse()
+        resp = self.API.postHouse('houseID')
         self.assertEqual(resp.status, STATUS_CODES['OK'])
 		
-        resp = self.API.postUser()
+        resp = self.API.postUser('userID')
         self.assertEqual(resp.status, STATUS_CODES['OK'])
 		
 if __name__ == '__main__':
