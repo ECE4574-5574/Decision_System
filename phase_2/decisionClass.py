@@ -189,7 +189,7 @@ class decisionMaking():
 
         #change time to one week prior to get the snapshot of the state of devices in the room.
         #COMMENTED BLOCK: get the snapshot blob from persistent storage.
-        """
+        
         t1 = message["time"]
         temp = t1.split('T', 1)[0]
         temp1 = datetime.datetime.strptime(temp, "\%Y-\%m-\%d")
@@ -208,7 +208,7 @@ class decisionMaking():
             raise Exception("Did not receive response")
         else:
             # This creates a list of dictionaries from the JSON
-        """
+        
         
         #Instead, use a static string as a proof of concept.
         exampleSnapshotString=\
