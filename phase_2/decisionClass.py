@@ -113,7 +113,7 @@ class decisionMaking():
                 #restoreRoomState(self, userid, roomID, houseID, message)
                 self.restoreRoomState(str(message['userID']), CurrentLocation[1], CurrentLocation[0],message)
 				# make a call to the server api : Braedon
-                self.sendUserMessage("Location Changed: Devices Being Set", "information")
+                #self.sendUserMessage("Location Changed: Devices Being Set", "information")
             #change the format to the format required by persistent storage     
             #Set up connection to persistent storage
             conn = httplib.HTTPConnection(self.storageAddress[0],self.storageAddress[1])
@@ -125,7 +125,7 @@ class decisionMaking():
             else:
                 localUserHouse = CurrentLocation[0]
                 localUserRoom = CurrentLocation[1]
-            requestPath = 'A/' + message['userID'] + '/' + message["time"] + '/' + str(localUserHouse) + '/' + str(localUserRoom) + '/0/0'
+            requestPath = 'A/' + message['userID'] + '/' + message["time"].replace("-", " ") + '/' + str(localUserHouse) + '/' + str(localUserRoom) + '/0/0'
             conn.request('PATCH', requestPath, payload)
             response = conn.getresponse()
             print response.status
@@ -368,7 +368,7 @@ class decisionMaking():
         elif (msgType == "both"):
             msg = {"Type": "both", "Error": msg[0], "Information": msg[1]} 
         try:	
-            serverConn = httplib.HTTPConnection(deviceBase)
+            serverConn = httplib.HTTPConnection(self.deviceBaseAdd)
             data = json.dumps(msg)
             requestPath = 'POST', 'api/decision/app'
             serverConn.request = ('POST', 'api/decision/app', data)
@@ -378,6 +378,7 @@ class decisionMaking():
             line = "Location Decision " + str(self.locationDecisionCount) + ":\n" + "Data sent to persistent storage: " + str(data) + "\nRequest Path: " + str(requestPath) + "\nRequest Response: " + str(serverResponse.status) + "\n"
             self.logger.debug(line)
         except:
+            traceback.print_exc()
             line = 'Error when trying to make a location decision!\nRequest body being handled:\n' + str(message) + '\n'
             self.logger.warning(line)
 

@@ -1,7 +1,7 @@
 import httplib
 import json
 
-ACTUAL_USER_ID = '21'
+ACTUAL_USER_ID = 'bsaget'
 ACTUAL_HOUSE_LAT = 37.229854
 ACTUAL_HOUSE_LON = -80.417724
 ACTUAL_HOUSE_ALT = 2085
@@ -63,7 +63,14 @@ raw_input()
 print ''
 
 print 'Demo: Location change, stage one.'
-conn.request('POST', '/LocationChange', json.dumps(good_request_should_work))
+conn.request('POST', '/LocationChange', json.dumps(good_location_message))
+print 'Response:' + str(conn.getresponse().status)
+print 'PAUSE'
+raw_input()
+print ''
+
+print 'Demo: Location change, stage two.'
+conn.request('POST', '/LocationChange', json.dumps(change_location_message))
 print 'Response:' + str(conn.getresponse().status)
 print 'PAUSE'
 raw_input()
