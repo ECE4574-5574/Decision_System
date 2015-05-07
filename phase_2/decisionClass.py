@@ -12,6 +12,7 @@ import time
 import httplib
 import argparse
 import sys
+import deviceAPIUtils
 from datetime import datetime
 import codecs
 import urllib2
@@ -48,6 +49,8 @@ class decisionMaking():
         self.timeDecisionCount = 1
         self.commandCount = 1
         self.logger = logger
+        self.UserPrevLocation = {'DummyUser':(0,0)} 
+        
 
     #message should be a parsed JSON dictionary
     def weatherDecision(self, message):
@@ -80,13 +83,48 @@ class decisionMaking():
 
     def locationDecision(self, message):
         try:    
+			#map user to a house and room
+			#the current location should be stored in persistent storage
+            CurrentLocation = self.findMatchingRoom(message['userID'], message['lat'],message['lon'],message['alt'])
+            print str(message['userID'])
+            PreviousLocation = self.UserPrevLocation.get(str(message['userID']),None)
+            #save new location if user location is not available in   UserPrevLocation
+            if ((PreviousLocation is None) and (CurrentLocation is not None)):
+                print "no prev location"
+                #print self.UserPrevLocation.get(str(message['userID']), None)
+                self.UserPrevLocation[str(message['userID'])] = (CurrentLocation[0],CurrentLocation[1])
+                #print self.UserPrevLocation.get(str(message['userID']), None)
+				#make no decisions, as the previous room data for user was not logged
+            if ((PreviousLocation is not None) and (CurrentLocation is not None) and (PreviousLocation == CurrentLocation)):
+                print "no room change"		
+            if ((PreviousLocation is not None) and (CurrentLocation is not None) and (PreviousLocation != CurrentLocation)):
+                print "user room change"			
+                #make and log a snapshot of the previous room
+				#currently assuminga a dummy device api location
+                devInterface = devapi.Interfaces(System.Uri("http://dummy.devapi.not"))
+                previousRoomSnapshot = deviceAPIUtils.makeSnapshot(devInterface, PreviousLocation[0], PreviousLocation[1])
+                #add call to log the snapshot in persistent storage  
+                conn = httplib.HTTPConnection(self.storageAddress[0],self.storageAddress[1])
+                requestPath = 'PATCH', 'A/' + message['userID'] + '/' + message["time"] + '/' + str(PreviousLocation[0])
+                conn.request('PATCH', 'A/' + message['userID'] + '/' + message["time"] + '/' + str(PreviousLocation[0]), previousRoomSnapshot)
+				#update the self.UserPrevLocation key value pair with current location
+                self.UserPrevLocation[str(message['userID'])] = (CurrentLocation[0],CurrentLocation[1])
+				# make a call to the decision algo : Jigar 
+                #restoreRoomState(self, userid, roomID, houseID, message)
+                self.restoreRoomState(str(message['userID']), CurrentLocation[1], CurrentLocation[0],message)
+				# make a call to the server api : Braedon
+                self.sendUserMessage("Location Changed: Devices Being Set", "information")
             #change the format to the format required by persistent storage     
             #Set up connection to persistent storage
             conn = httplib.HTTPConnection(self.storageAddress[0],self.storageAddress[1])
             #Pass the JSON string to persistent storage
             payload = json.dumps({"action-type":"location-update","action-data":message})
-            requestPath = 'PATCH', 'A/' + message['userID'] + '/' + message["time"] + '/' + 'WayneManor'
-            conn.request('PATCH', 'A/' + message['userID'] + '/' + message["time"] + '/' + 'WayneManor', payload)
+            if (CurrentLocation is None):
+                localUserHouse = "NotInAnyHouse"
+            else:
+                localUserHouse = str(CurrentLocation[0])
+            requestPath = 'PATCH', 'A/' + message['userID'] + '/' + message["time"] + '/' + localUserHouse
+            conn.request('PATCH', 'A/' + message['userID'] + '/' + message["time"] + '/' + localUserHouse, payload)
             response = conn.getresponse()
             print response.status
             print response.read()
@@ -94,6 +132,7 @@ class decisionMaking():
             self.locationDecisionCount += 1
             self.logger.debug(line) 
         except:
+            traceback.print_exc()
             line = 'Error when trying to make a location decision!\nRequest body being handled:\n' + str(message) + '\n'
             self.logger.warning(line)
 
@@ -111,36 +150,50 @@ class decisionMaking():
         output.write('Command Decision ' + str(self.commandCount) + ':\n')
         self.commandCount += 1
         try:
-            matchRoom = None
-            try:
-                matchRoom = self.findMatchingRoom(message['userID'], message['lat'], message['lon'], message['alt'])
-            except KeyError as ke:
-                if ke.args[0] == 'That userID does not exist.':
-                    output.write('nonexistent user\n')
+            if (str(message["command-string"]) == 'manualDeviceUpdate'):
+			    #Set up connection to persistent storage
+                conn = httplib.HTTPConnection(self.storageAddress[0], self.storageAddress[1])
+                #change the format to the format required by persistent storage
+                payload = json.dumps({"action-type":"device state change","action-data":message})
+                requestPath = 'PATCH', 'A/' + message['userID'] + '/' + message["time"] + '/' + message["houseID"]+ '/' + message["roomID"] + '/' + message["deviceID"] + '/' + message["deviceType"]
+                conn.request('PATCH', 'A/' + message['userID'] + '/' + message["time"] + '/' + message["houseID"]+ '/' + message["roomID"] + '/' + message["deviceID"] + '/' + message["deviceType"], payload)
+                response = conn.getresponse()
+                print response.status
+                print response.read()
+                line = "Location Decision " + str(self.locationDecisionCount) + ":\n" + "Data sent to persistent storage: " + str(payload) + "\nRequest Path: " + str(requestPath) + "\nRequest Response: " + str(response.status) + "\n"
+                self.locationDecisionCount += 1
+                self.logger.debug(line) 
+            else:
+                matchRoom = None
+                try:
+                    matchRoom = self.findMatchingRoom(message['userID'], message['lat'], message['lon'], message['alt'])
+                except KeyError as ke:
+                    if ke.args[0] == 'That userID does not exist.':
+                        output.write('nonexistent user\n')
+                        self.logger.warning(output.getvalue())
+                        return
+                    else:
+                        raise
+                
+                if matchRoom is None:
+                    output.write('no matching room\n')
                     self.logger.warning(output.getvalue())
                     return
-                else:
-                    raise
+                #Now, request all devices in that house.
+                output.write('matched room ' + str(matchRoom) + '\n')
+                output.write('requesting devices\n')
+                devinterface = devapi.Interfaces(System.Uri(self.deviceBaseAdd))
+                devices = devinterface.getDevices(matchRoom[0], matchRoom[1])
             
-            if matchRoom is None:
-                output.write('no matching room\n')
-                self.logger.warning(output.getvalue())
-                return
-            #Now, request all devices in that house.
-            output.write('matched room ' + str(matchRoom) + '\n')
-            output.write('requesting devices\n')
-            devinterface = devapi.Interfaces(System.Uri(self.deviceBaseAdd))
-            devices = devinterface.getDevices(matchRoom[0], matchRoom[1])
+                print 'Debug:'
+                print devices
             
-            print 'Debug:'
-            print devices
-            
-            for oneDevice in devices:
-                if devapiu.canBrighten(oneDevice):
-                    print 'found a brightenable'
-                    oneDevice.Enabled = True
-            print output.getvalue()
-            self.logger.info(output.getvalue())
+                for oneDevice in devices:
+                    if devapiu.canBrighten(oneDevice):
+                        print 'found a brightenable'
+                        oneDevice.Enabled = True
+                print output.getvalue()
+                self.logger.info(output.getvalue())
         
         except:
             output.write('Error when trying to make a command decision!\n')
@@ -156,7 +209,7 @@ class decisionMaking():
 	
     def restoreRoomState(self, userid, roomID, houseID, message):
         conn = httplib.HTTPConnection(self.storageAddress[0], self.storageAddress[1])
-
+        print "restore room"
         #change time to one week prior to get the snapshot of the state of devices in the room.
         #COMMENTED BLOCK: get the snapshot blob from persistent storage.
         """
@@ -301,7 +354,47 @@ class decisionMaking():
                         break
                 except (ValueError, KeyError):
                     continue
+					
+					
+    #Method for sending general information or errors to the user				
+    def sendUserMessage(self,message, msgType):
+        #Set up JSON message
+        if (msgType == "error"):
+            msg = { "Type":"error", "Error": message }	
+        elif (msgType == "info"):
+            msg = { "Type":  "information", "Information": message}
+        elif (msgType == "both"):
+            msg = {"Type": "both", "Error": msg[0], "Information": msg[1]} 
+        try:	
+            serverConn = httplib.HTTPConnection(deviceBase)
+            data = json.dumps(msg)
+            requestPath = 'POST', 'api/decision/app'
+            serverConn.request = ('POST', 'api/decision/app', data)
+            serverResponse = serverConn.getresponse()
+            print serverResponse.status
+            print serverResponse.read()
+            line = "Location Decision " + str(self.locationDecisionCount) + ":\n" + "Data sent to persistent storage: " + str(data) + "\nRequest Path: " + str(requestPath) + "\nRequest Response: " + str(serverResponse.status) + "\n"
+            self.logger.debug(line)
+        except:
+            line = 'Error when trying to make a location decision!\nRequest body being handled:\n' + str(message) + '\n'
+            self.logger.warning(line)
 
+    #Method for sending the decision about the device to the server api
+    def sendDeviceDecision(self, decision, message):
+	try: 	
+		serverConn = httplib.HTTPConnection(deviceBase)
+		data = json.dumps({"deviceID": message['deviceID'], "houseID": message['houseID'], "roomID": message['roomID'], "Decision": decision})
+		requestPath = 'POST', 'api/decision/device'
+		serverConn.request = ('POST', 'api/decision/device', data)
+		serverResponse = serverConn.getresponse()
+		print serverResponse.status
+		print serverResponse.read()
+		line = "Location Decision:\n" + "Data sent to persistent storage: " + str(data) + "\nRequest Path: " + str(requestPath) + "\nRequest Response: " + str(serverResponse.status) + "\n"
+		self.logger.debug(line)
+	except:
+		line = 'Error when trying to make a location decision!\nRequest body being handled:\n' + str(message) + '\n'
+		self.logger.warning(line)
+			
 #Utility function: takes a room blob from persistent storage, and checks if the coordinates
 #are within it.
 def isInRoom(roomBlob, lat, lon, alt):
