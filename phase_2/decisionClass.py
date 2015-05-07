@@ -49,7 +49,7 @@ class decisionMaking():
         self.timeDecisionCount = 1
         self.commandCount = 1
         self.logger = logger
-        self.UserPrevLocation = None 
+        self.UserPrevLocation = {'DummyUser':(0,0)} 
         
 
     #message should be a parsed JSON dictionary
@@ -86,36 +86,44 @@ class decisionMaking():
         try:    
 			#map user to a house and room
 			#the current location should be stored in persistent storage
-            CurrentLocation = findMatchingRoom(message['userID'], message['lat'],message['lon'],message['alt'])
+            CurrentLocation = self.findMatchingRoom(message['userID'], message['lat'],message['lon'],message['alt'])
+            print str(message['userID'])
             PreviousLocation = self.UserPrevLocation.get(str(message['userID']),None)
             #save new location if user location is not available in   UserPrevLocation
             if ((PreviousLocation is None) and (CurrentLocation is not None)):
+                print "no prev location"
+                print self.UserPrevLocation.get(str(message['userID']), None)
                 self.UserPrevLocation[str(message['userID'])] = (CurrentLocation[0],CurrentLocation[1])
+                print self.UserPrevLocation.get(str(message['userID']), None)
 				#make no decisions, as the previous room data for user was not logged
+            if ((PreviousLocation is not None) and (CurrentLocation is not None) and (PreviousLocation == CurrentLocation)):
+                print "no room change"		
             if ((PreviousLocation is not None) and (CurrentLocation is not None) and (PreviousLocation != CurrentLocation)):
+                print "user room change"			
                 #make and log a snapshot of the previous room
 				#currently assuminga a dummy device api location
                 devInterface = devapi.Interfaces(System.Uri("http://dummy.devapi.not"))
                 previousRoomSnapshot = deviceAPIUtils.makeSnapshot(devInterface, PreviousLocation[0], PreviousLocation[1])
                 #add call to log the snapshot in persistent storage  
-                requestPath = 'PATCH', 'A/' + message['userID'] + '/' + message["time"] + '/' + localUserHouse
-                conn.request('PATCH', 'A/' + message['userID'] + '/' + message["time"] + '/' + localUserHouse, previousRoomSnapshot)
+                conn = httplib.HTTPConnection(self.storageAddress[0],self.storageAddress[1])
+                requestPath = 'PATCH', 'A/' + message['userID'] + '/' + message["time"] + '/' + str(PreviousLocation[0])
+                conn.request('PATCH', 'A/' + message['userID'] + '/' + message["time"] + '/' + str(PreviousLocation[0]), previousRoomSnapshot)
 				#update the self.UserPrevLocation key value pair with current location
                 self.UserPrevLocation[str(message['userID'])] = (CurrentLocation[0],CurrentLocation[1])
 				# make a call to the decision algo : Jigar 
                 #restoreRoomState(self, userid, roomID, houseID, message)
-                restoreRoomState(str(message['userID']), CurrentLocation[1], CurrentLocation[0],message)
+                self.restoreRoomState(str(message['userID']), CurrentLocation[1], CurrentLocation[0],message)
 				# make a call to the server api : Braedon
-                sendUserMessage("Location Changed: Devices Being Set", "information")
+                self.sendUserMessage("Location Changed: Devices Being Set", "information")
             #change the format to the format required by persistent storage     
             #Set up connection to persistent storage
             conn = httplib.HTTPConnection(self.storageAddress[0],self.storageAddress[1])
             #Pass the JSON string to persistent storage
             payload = json.dumps({"action-type":"location-update","action-data":message})
-            if (CurrentHouse is None):
+            if (CurrentLocation is None):
                 localUserHouse = "NotInAnyHouse"
             else:
-                localUserHouse = CurrentHouse
+                localUserHouse = str(CurrentLocation[0])
             requestPath = 'PATCH', 'A/' + message['userID'] + '/' + message["time"] + '/' + localUserHouse
             conn.request('PATCH', 'A/' + message['userID'] + '/' + message["time"] + '/' + localUserHouse, payload)
             response = conn.getresponse()
@@ -125,6 +133,7 @@ class decisionMaking():
             self.locationDecisionCount += 1
             self.logger.debug(line) 
         except:
+            traceback.print_exc()
             line = 'Error when trying to make a location decision!\nRequest body being handled:\n' + str(message) + '\n'
             self.logger.warning(line)
 
@@ -229,7 +238,7 @@ class decisionMaking():
     
     def restoreRoomState(self, userid, roomID, houseID, message):
         conn = httplib.HTTPConnection(self.storageAddress[0], self.storageAddress[1])
-
+        print "restore room"
         #change time to one week prior to get the snapshot of the state of devices in the room.
         #COMMENTED BLOCK: get the snapshot blob from persistent storage.
         """
@@ -377,7 +386,7 @@ class decisionMaking():
 					
 					
     #Method for sending general information or errors to the user				
-    def sendUserMessage(message, msgType):
+    def sendUserMessage(self,message, msgType):
         #Set up JSON message
         if (msgType == "error"):
             msg = { "Type":"error", "Error": message }	

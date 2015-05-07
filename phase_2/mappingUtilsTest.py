@@ -3,6 +3,29 @@ from decisionClass import decisionMaking
 import unittest
 import logging
 import json
+ 
+ACTUAL_USER_ID = 'bsaget'
+ACTUAL_HOUSE_LAT = 37.229854
+ACTUAL_HOUSE_LON = -80.417724
+ACTUAL_HOUSE_LON_CHANGE = -80.417754
+ACTUAL_HOUSE_ALT = 2085
+ACTUAL_COMMAND_STRING = 'brightenNearMe'
+EXAMPLE_TIME_STAMP = '2015-04-19T12:59:23Z'
+
+good_location_message = {'userID': ACTUAL_USER_ID,
+                        'lat': ACTUAL_HOUSE_LAT,
+                        'lon': ACTUAL_HOUSE_LON,
+                        'alt': ACTUAL_HOUSE_ALT,
+                        'command-string':ACTUAL_COMMAND_STRING,
+                        'time': EXAMPLE_TIME_STAMP}
+                        
+change_location_message = {'userID': ACTUAL_USER_ID,
+                        'lat': 37.229854,
+                        'lon': -80.417666,
+                        'alt': ACTUAL_HOUSE_ALT,
+                        'command-string':ACTUAL_COMMAND_STRING,
+                        'time': EXAMPLE_TIME_STAMP}
+                        
 
 class testIsInRoom(unittest.TestCase):
         
@@ -85,6 +108,26 @@ class testFindMatchingRoom(unittest.TestCase):
         testLogger.addHandler(logging.FileHandler(TEST_LOG_FILE, mode='w'))
         dmaking = decisionMaking(testLogger, ['localhost', 8080], 'http://localhost:8082')
         self.assertEquals(dmaking.findMatchingRoom('bsaget', 38.229854, -81.417724, 2085), None)
+
+TEST_LOG_FILE = 'testLocationUpdate.log'
+testLogger = logging.getLogger('locations')
+testHandler = logging.FileHandler(TEST_LOG_FILE, mode='w')
+testHandler.setFormatter(logging.Formatter('%(message)'))
+testLogger.addHandler(logging.FileHandler(TEST_LOG_FILE, mode='w'))
+mydmaking = decisionMaking(testLogger, ['localhost', 8080], 'http://localhost:8082')        
         
+class testLocationUpdates(unittest.TestCase):
+    def testNoPreviousRoom(self):
+        mydmaking.locationDecision(good_location_message)
+        print('1')
+		
+    def testPrevEntryNoChange(self):
+        mydmaking.locationDecision(good_location_message)
+        print('2')	
+		
+    def testPrevEntryRoomChange(self):
+        mydmaking.locationDecision(change_location_message)
+        print('3')
+	
 if __name__ == '__main__':
     unittest.main()
