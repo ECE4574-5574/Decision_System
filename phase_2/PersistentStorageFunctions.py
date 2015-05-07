@@ -234,6 +234,51 @@ class PersistentStorageFunctions():
         except:
             print "Error with request"    
 
+    def postUser(self, userID, data):	
+        try:    
+            path = "U/" + str(userID) + "/"
+
+            self.logger.debug(path)
+            self.conn.request("POST", path)
+            response = self.conn.getresponse()
+            parsed = json.loads(response.read())
+            return parsed
+        except:
+            print "Error with request" 
+
+    def postHouse(self, data):	
+        try:    
+            path = "H"
+            self.logger.debug(path)
+            self.conn.request("POST", path)
+            response = self.conn.getresponse()
+            parsed = json.loads(response.read())
+            return parsed
+        except:
+            print "Error with request"
+
+    def postNewRoom(self, houseID, data):	
+        try:    
+            path = "R/" + str(houseID) + '/'
+            self.logger.debug(path)
+            self.conn.request("POST", path)
+            response = self.conn.getresponse()
+            parsed = json.loads(response.read())
+            return parsed
+        except:
+            print "Error with request"
+
+    def postDevice(self, houseID, roomID, deviceType, data):	
+        try:    
+            path = "R/" + str(houseID) + '/' + str(roomID) + '/' + str(deviceType) + '/'
+            self.logger.debug(path)
+            self.conn.request("POST", path)
+            response = self.conn.getresponse()
+            parsed = json.loads(response.read())
+            return parsed
+        except:
+            print "Error with request"			
+			
     def postDevice(self, houseID, version, roomID, deviceID):
         self.conn.request(FUNCTION_TYPES['post'], 'D/' + houseID +\
             '/' + version + '/' + roomID + '/' + deviceID + '/')
@@ -247,6 +292,5 @@ class PersistentStorageFunctions():
         self.conn.request(FUNCTION_TYPES['post'], 'H/' + houseID + '/')
         return self.conn.getresponse()
 		
-    def postUser(self, userID):
-        self.conn.request(FUNCTION_TYPES['post'], 'U/' + userID + '/')
-        return self.conn.getresponse()
+
+		

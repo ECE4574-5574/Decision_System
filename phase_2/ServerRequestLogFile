@@ -1,0 +1,40 @@
+2015-05-06 20:43:48,862 INFO POST: Received Device State Update
+2015-05-06 20:43:48,882 INFO POST: Received Device State Update: Return 200
+2015-05-06 20:43:51,950 INFO POST: Received Location Change Update
+2015-05-06 20:43:51,964 INFO POST: Received Location Change Update: Return 200
+2015-05-06 20:43:54,992 INFO POST: Received Command From App
+2015-05-06 20:43:55,002 INFO POST: Received Command From App: Return 200
+2015-05-06 20:43:58,025 INFO POST: Received Command From App
+2015-05-06 20:43:58,033 INFO POST: Received Command From App: Return 200
+2015-05-06 20:43:59,048 INFO POST: Received Local Time
+2015-05-06 20:43:59,055 INFO POST: Received Local Time: Return 200
+2015-05-06 20:44:02,102 INFO POST: Received Weather Update
+2015-05-06 20:44:02,111 INFO POST: Received Weather Update: Return 200
+2015-05-06 21:37:09,623 INFO POST: Received Command From App
+2015-05-06 21:37:09,643 INFO POST: Received Command From App: Return 200
+2015-05-06 21:37:50,217 INFO POST: Received Command From App
+2015-05-06 21:37:50,235 INFO POST: Received Command From App: Return 200
+2015-05-06 21:37:56,716 INFO POST: Received Command From App
+2015-05-06 21:37:56,729 INFO POST: Received Command From App: Return 200
+2015-05-06 21:39:49,150 INFO POST: Received Command From App
+2015-05-06 21:39:49,171 INFO POST: Received Command From App: Return 200
+2015-05-06 21:39:52,341 INFO POST: Received Command From App
+2015-05-06 21:39:52,344 INFO POST: Received Command From App: Return 200
+2015-05-06 21:39:53,949 INFO POST: Received Command From App
+2015-05-06 21:39:53,952 INFO POST: Received Command From App: Return 200
+2015-05-06 21:44:09,838 INFO POST: Received Command From App
+2015-05-06 21:44:09,860 INFO POST: Received Command From App: Return 200
+2015-05-06 21:44:12,532 INFO POST: Received Command From App
+2015-05-06 21:44:12,540 INFO POST: Received Command From App: Return 200
+2015-05-06 21:44:14,209 INFO POST: Received Command From App
+2015-05-06 21:44:14,217 INFO POST: Received Command From App: Return 200
+2015-05-06 21:44:16,460 INFO POST: Received Location Change Update
+2015-05-06 21:44:16,473 INFO POST: Received Location Change Update: Return 200
+2015-05-06 22:09:37,413 INFO POST: Received Command From App
+2015-05-06 22:09:37,433 INFO POST: Received Command From App: Return 200
+2015-05-06 22:09:38,908 INFO POST: Received Command From App
+2015-05-06 22:09:38,915 INFO POST: Received Command From App: Return 200
+2015-05-06 22:09:40,289 INFO POST: Received Command From App
+2015-05-06 22:09:40,297 INFO POST: Received Command From App: Return 200
+2015-05-06 22:09:42,694 INFO POST: Received Location Change Update
+2015-05-06 22:09:42,702 INFO POST: Received Location Change Update: Return 200

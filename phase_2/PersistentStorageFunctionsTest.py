@@ -10,6 +10,7 @@ from time import sleep
 
 open('getRequests.log', 'w').close()
 
+# -t ec2-52-11-96-207.us-west-2.compute.amazonaws.com -p 8080
 argparser = argparse.ArgumentParser()
 argparser.add_argument('-t', '--storage', type=str)
 argparser.add_argument('-p', '--port', type=int)
@@ -35,6 +36,7 @@ DUT.getComputerActions(21, "2015-04-06T18:05:05Z", 12345, 54321)
 DUT.getComputerActionsDeviceType(21, "2015-04-06T18:05:05Z", 'light', 12345, 54321)
 DUT.getComputerActionsDeviceID(21, "2015-04-06T18:05:05Z", 67890, 12345, 54321)
 
+print "This is the postUser: " + str(DUT.postUser(12))
 
 
 log = open('getRequests.log', 'r')

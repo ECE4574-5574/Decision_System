@@ -1,0 +1,15 @@
+Command Decision 1:
+nonexistent user
+
+Command Decision 2:
+no matching room
+
+Location Decision 1:
+Data sent to persistent storage: {"action-type": "location-update", "action-data": {"time": "2015-04-19T12:59:23Z", "command-string": "brightenNearMe", "alt": 2085, "userID": "21", "lon": -80.417724, "lat": 37.229854}}
+Request Path: A/21/2015-04-19T12:59:23Z/33/20/0/0
+Request Response: 200
+
+Command Decision 3:
+matched room (33, 20)
+requesting devices
+
