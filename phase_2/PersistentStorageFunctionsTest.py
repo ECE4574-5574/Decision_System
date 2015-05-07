@@ -21,6 +21,10 @@ try:
 except:
    print "\n"
 try: 
+    DUT.getRoomsInHouse(54321)
+except:
+    print "\n"
+try: 
     DUT.getDevicesInHouse(54321)
 except:
     print "\n"
@@ -70,6 +74,12 @@ except:
     print "\n"
 
 log = open('getRequests.log', 'r')
+print "getRoomsInHouse()"
+line = log.readline()
+if line == "/HD/54321/\n":
+    print "PASS\n"
+else:
+    print "FAIL"
 print "getDevicesInHouse()"
 line = log.readline()
 if line == "/HD/54321/\n":
@@ -142,6 +152,6 @@ if line == "/CL/21/2015-04-06T18:05:05Z/2015-04-06T18:05:05Z/12345/54321/0/0/\n"
     print "PASS\n"
 else:
     print "FAIL"
-    
+
 
 

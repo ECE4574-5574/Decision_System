@@ -19,7 +19,20 @@ class PersistentStorageFunctions():
         # create file handler which logs even debug messages
         fh = logging.FileHandler('getRequests.log', mode='w')
         fh.setLevel(logging.DEBUG) 
-        self.logger.addHandler(fh) 
+        self.logger.addHandler(fh)
+
+    def getRoomsInHouse(self, houseID=123):
+        try:
+            path = "/HR/" + str(houseID) + "/" 
+            self.logger.debug(path)   
+            self.conn.request("GET", path)
+            response = self.conn.getresponse()
+            print response.status
+            parsed = json.loads(response.read())
+            return parsed
+        except:
+            print "Error with getRoomsInHouse request"
+            raise
         
     def getDevicesInHouse(self, houseID=123):
         try:
