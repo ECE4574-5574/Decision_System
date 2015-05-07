@@ -20,6 +20,7 @@ commandsfromApp = {'userID': 'nouser',
                         'alt': 100,
                         'command-string':'brightenNearMe',
                         'time': '2015-04-19T12:59:23Z'}
+houseUpdate = {"userID":"user1","command-string":"manualChange","time":"2015-04-06T18:05:05Z","device-blob":"THEBLOBBBBB"}
 #Test device state change response.
 log = open('decisions.log', 'r')
 print 'Testing response to device state change'
@@ -76,10 +77,16 @@ res = connection.getresponse()
 sleep(2)
 log.readlines(2)
 line1 = log.readline()
-line2 = log.readline()
-check = "req localhost:8080 GET BU/nouser\n"
-check1 = "response 404\n"
-if (res.status == 200 and line1 == check and line2 == check1):
+check = "nonexistent user\n"
+if (res.status == 200 and line1 == check):
+    print 'PASS'
+else:
+    print 'FAIL'
+
+print "Testing response to houseUpdate"
+connection.request('POST', '/CommandsFromApp', json.dumps(houseUpdate))
+res = connection.getresponse()
+if (res.status == 200):
     print 'PASS'
 else:
     print 'FAIL'

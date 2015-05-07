@@ -63,8 +63,7 @@ class decisionMaking():
             self.logger.warning(line)
 
     def deviceStateDecision(self, message):
-        try:
-            
+        try:    
             #Logging the device state changes in the persistent storage 
             #Set up connection to persistent storage
             conn = httplib.HTTPConnection(self.storageAddress[0], self.storageAddress[1])
@@ -165,59 +164,26 @@ class decisionMaking():
                 self.locationDecisionCount += 1
                 self.logger.debug(line) 
             else:
-                conn = httplib.HTTPConnection(self.storageAddress[0], self.storageAddress[1])
-                reqMethod = 'GET'
-                reqPath = 'BU/' + message['userID']
+                matchRoom = None
+                try:
+                    matchRoom = self.findMatchingRoom(message['userID'], message['lat'], message['lon'], message['alt'])
+                except KeyError as ke:
+                    if ke.args[0] == 'That userID does not exist.':
+                        output.write('nonexistent user\n')
+                        self.logger.warning(output.getvalue())
+                        return
+                    else:
+                        raise
                 
-                #First, try to get the user information.
-                output.write('req ' + self.storageAddress[0] + ':' + str(self.storageAddress[1]) + ' ' + reqMethod + ' ' + reqPath + '\n')
-                conn.request(reqMethod, reqPath)
-                resp = conn.getresponse()
-                output.write('response ' + str(resp.status) + '\n')
-                body = resp.read()
-                if (not resp.status == 200):
+                if matchRoom is None:
+                    output.write('no matching room\n')
                     self.logger.warning(output.getvalue())
                     return
-                body = json.loads(body)
-            
-                print 'Debug: '
-                print body
-                
-                #Next, try to find a matching house.
-                matchingHouse = None
-                for houseID in body['houseIDs']:
-                    reqMethod = 'GET'
-                    reqPath = 'BH/' + str(houseID)
-                    output.write('req ' + self.storageAddress[0] + ':' + str(self.storageAddress[1]) + ' ' + reqMethod + ' ' + reqPath + '\n')
-                    conn.request(reqMethod, reqPath)
-                    resp = conn.getresponse()
-                    output.write('response ' + str(resp.status) + '\n')
-                    try:
-                        blob = resp.read()
-                        blob = json.loads(blob)
-                        if abs(blob['lat']-message['lat']) <= 0.01 and \
-                           abs(blob['lon']-message['lon']) <= 0.01 and \
-                           abs(blob['alt']-message['alt']) <= 1:
-                            matchingHouse = houseID
-                            break
-                    except ValueError:
-                        output.write('ValueError reading blob for house ' + str(houseID) + '. Blob is likely corrupt.\n')
-                    except TypeError:
-                        output.write('TypeError reading coordinates for house ' + str(houseID) + '. Blob is likely corrupt.\n')
-                    except KeyError as ke:
-                        output.write('KeyError reading coordinates for house ' + str(houseID) + 
-                        ' . Blob is missing field: ' + ke.args[0] + '\n')
-                else:
-                    output.write('Could not find a matching house for that user and coordinates.\n')
-                    self.logger.warning(output.getvalue())
-                    return
-                assert(not matchingHouse is None)
-                output.write('match house ' + str(matchingHouse) + '\n')
-            
                 #Now, request all devices in that house.
+                output.write('matched room ' + str(matchRoom) + '\n')
                 output.write('requesting devices\n')
                 devinterface = devapi.Interfaces(System.Uri(self.deviceBaseAdd))
-                devices = devinterface.getDevices(matchingHouse)
+                devices = devinterface.getDevices(matchRoom[0], matchRoom[1])
             
                 print 'Debug:'
                 print devices
@@ -235,7 +201,12 @@ class decisionMaking():
             output.write(str(message) + '\n')
             traceback.print_exc(None, output)
             self.logger.error(output.getvalue())
-    
+              
+    def houseUpdate(self, message):
+        #PUT THE THING IN PERSISTENT STORAGE HERE
+        #DO WHATEVER JIGAR WANTS TO DO WITH IT
+        print "Do the decision stuff"
+	
     def restoreRoomState(self, userid, roomID, houseID, message):
         conn = httplib.HTTPConnection(self.storageAddress[0], self.storageAddress[1])
         print "restore room"
