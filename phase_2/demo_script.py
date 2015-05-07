@@ -26,6 +26,19 @@ good_request_should_work = {'userID': ACTUAL_USER_ID,
                         'alt': ACTUAL_HOUSE_ALT,
                         'command-string':ACTUAL_COMMAND_STRING,
                         'time': EXAMPLE_TIME_STAMP}
+						
+good_location_message = {'userID': ACTUAL_USER_ID,
+                        'lat': ACTUAL_HOUSE_LAT,
+                        'lon': ACTUAL_HOUSE_LON,
+                        'alt': ACTUAL_HOUSE_ALT,
+                        'command-string':ACTUAL_COMMAND_STRING,
+                        'time': EXAMPLE_TIME_STAMP}
+change_location_message = {'userID': ACTUAL_USER_ID,
+                        'lat': 37.229854,
+                        'lon': -80.417666,
+                        'alt': ACTUAL_HOUSE_ALT,
+                        'command-string':ACTUAL_COMMAND_STRING,
+                        'time': EXAMPLE_TIME_STAMP}
 
 conn = httplib.HTTPConnection('localhost', 8085)
 print 'Demo: User ID does not exist.'                        
@@ -42,8 +55,15 @@ print 'PAUSE'
 raw_input()
 print ''
 
-print 'Demo: Command executes the whole way through.'
+print 'Demo: Make it brighter near me command executes the whole way through.'
 conn.request('POST', '/CommandsFromApp', json.dumps(good_request_should_work))
+print 'Response:' + str(conn.getresponse().status)
+print 'PAUSE'
+raw_input()
+print ''
+
+print 'Demo: Location change, stage one.'
+conn.request('POST', '/LocationChange', json.dumps(good_request_should_work))
 print 'Response:' + str(conn.getresponse().status)
 print 'PAUSE'
 raw_input()

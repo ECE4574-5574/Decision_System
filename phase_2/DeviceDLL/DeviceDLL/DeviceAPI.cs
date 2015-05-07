@@ -115,7 +115,41 @@ public class Interfaces
 	 */
 	public List<Device> getDevices(UInt64 houseID, UInt64 roomID)
 	{
-		var devices = new List<Device>();
+        var devices = new List<Device>();
+        //TODO: Query all devices in a given house.
+        LightSwitch switch1 = new LightSwitch(null, null);
+        LightSwitch switch2 = new LightSwitch(null, null);
+        LightSwitch switch3 = new LightSwitch(null, null);
+        LightSwitch switch4 = new LightSwitch(null, null);
+        Thermostat thermostat1 = new Thermostat(null, null);
+        Thermostat thermostat2 = new Thermostat(null, null);
+        Thermostat thermostat3 = new Thermostat(null, null);
+        Thermostat thermostat4 = new Thermostat(null, null);
+        CeilingFan ceiliFan1 = new CeilingFan(null, null);
+        CeilingFan ceiliFan2 = new CeilingFan(null, null);
+        CeilingFan ceiliFan3 = new CeilingFan(null, null);
+        CeilingFan ceiliFan4 = new CeilingFan(null, null);
+        GarageDoor garage1 = new GarageDoor(null, null);
+        GarageDoor garage2 = new GarageDoor(null, null);
+        GarageDoor garage3 = new GarageDoor(null, null);
+        GarageDoor garage4 = new GarageDoor(null, null);
+        devices.Add(switch1);
+        devices.Add(switch2);
+        devices.Add(switch3);
+        devices.Add(switch4);
+        devices.Add(thermostat1);
+        devices.Add(thermostat2);
+        devices.Add(thermostat3);
+        devices.Add(thermostat4);
+        devices.Add(ceiliFan1);
+        devices.Add(ceiliFan2);
+        devices.Add(ceiliFan3);
+        devices.Add(ceiliFan4);
+        devices.Add(garage1);
+        devices.Add(garage2);
+        devices.Add(garage3);
+        devices.Add(garage4);
+        return devices;
 		return devices;
 	}
 
